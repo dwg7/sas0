@@ -1,0 +1,84 @@
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: #0d1117;
+  color: #dce6f1;
+}
+
+#app {
+  height: 100%;
+}
+
+.sas0-console {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  background: #0b1017;
+}
+
+.sas0-panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #243247;
+  background: #111a26;
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.sas0-panel h2 {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid #243247;
+  background: #121f2e;
+}
+
+.sas0-panel-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.sas0-weather-image,
+.sas0-spiccato-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 70vh;
+  border: 0;
+  object-fit: contain;
+  background: #0a131f;
+}
+
+.sas0-caption {
+  margin: 0;
+  padding: 8px 12px 10px;
+  font-size: 12px;
+  color: #95a8be;
+  border-top: 1px solid #243247;
+}
+
+@media (max-width: 1100px) {
+  .sas0-console {
+    grid-template-columns: 1fr;
+  }
+
+  .sas0-weather-image,
+  .sas0-spiccato-frame {
+    min-height: 50vh;
+  }
+}
