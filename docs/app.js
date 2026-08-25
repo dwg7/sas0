@@ -37,7 +37,7 @@
 
   function getSafeSandbox(value) {
     const defaultTokens = ['allow-scripts', 'allow-forms'];
-    const allowedTokens = new Set(['allow-scripts', 'allow-forms']);
+    const allowedTokens = new Set(defaultTokens);
     const inputTokens = typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
     const safeTokens = inputTokens.filter((token) => allowedTokens.has(token));
 
@@ -46,7 +46,7 @@
 
   const openmctScript = document.querySelector('script[src*="openmct"]');
   if (openmctScript) {
-    openmct.setAssetPath(openmctScript.src.replace(/openmct\\.js(?:\\?.*)?$/, ''));
+    openmct.setAssetPath(openmctScript.src.replace(/openmct\.js(?:\?.*)?$/, ''));
   }
   openmct.install(openmct.plugins.LocalStorage());
 
