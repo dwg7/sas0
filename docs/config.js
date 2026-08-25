@@ -1,10 +1,15 @@
 window.SAS0_CONFIG = {
   weather: {
     title: "Today's Weather Chart",
-    imageAlt: 'Daily synoptic weather chart placeholder image',
-    allowedHosts: ['upload.wikimedia.org'],
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a4/2018-04-30_Surface_Weather_Map_NOAA.png",
-    sourceLabel: "Placeholder chart image"
+    imageAlt: 'Latest surface weather chart from the Japan Meteorological Agency',
+    allowedHosts: ['www.jma.go.jp'],
+    // JMA publishes no stable "latest.png" — listUrl is a JSON index of
+    // current filenames, refreshed every few hours; the app fetches it and
+    // builds the image URL from the last entry in near.now. See DECISIONS.md D8.
+    listUrl: 'https://www.jma.go.jp/bosai/weather_map/data/list.json',
+    imageBaseUrl: 'https://www.jma.go.jp/bosai/weather_map/data/png/',
+    sourceLabel: '出典：気象庁ホームページ（https://www.jma.go.jp/bosai/weather_map/）',
+    sourceUrl: 'https://www.jma.go.jp/bosai/weather_map/'
   },
   spiccato: {
     title: 'Spiccato',

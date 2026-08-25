@@ -8,7 +8,7 @@ sas0 is a zero-build static site (`docs/` served as-is by GitHub Pages), and the
 
 ## D2: The Open MCT version is pinned to an exact, verified-to-exist release
 
-The version that first shipped in PR #1 (`openmct@3.3.0`) does not exist on npm/unpkg — the CDN URL 404'd, so nothing loaded at all. `docs/index.html` now pins `openmct@4.2.0`, the latest non-RC release at the time this was fixed.
+The version that first shipped in PR #1 (`openmct@3.3.0`) does not exist on npm/unpkg — the CDN URL 404'd, so nothing loaded at all. `docs/index.html` currently pins `openmct@4.3.0-rc1` (bumped from the initial fix's `4.2.0` once the RC was confirmed to work end-to-end — see D8).
 
 **Before bumping this version**, verify both of these resolve (a 404 on either means a silent blank page, since `docs/app.js` doesn't surface CDN load failures beyond a generic "Open MCT failed to load" throw):
 
@@ -35,7 +35,7 @@ This is the CDN-loading equivalent of iOS's own constraint — Open MCT already 
 
 With D3's fallback active, Open MCT logs one console error at startup — `Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'key')` — from somewhere inside the local-search indexing path. It fires exactly once per page load (confirmed by watching the console for several seconds after start), doesn't recur, and doesn't block rendering, tree navigation, or the inspector panel.
 
-This looks like a latent edge case in Open MCT 4.2.0's own local-search fallback (plausibly triggered by indexing the single custom `sas0.console` root object, which lacks fields a normal composed object would have) rather than something sas0's code does wrong. It's left as a known, harmless console error rather than chased further; revisit if a future Open MCT upgrade surfaces something worse from the same code path.
+This looks like a latent edge case in Open MCT's own local-search fallback (plausibly triggered by indexing the single custom `sas0.console` root object, which lacks fields a normal composed object would have) rather than something sas0's code does wrong. It's left as a known, harmless console error rather than chased further; confirmed still present, unchanged, after the 4.2.0 → 4.3.0-rc1 bump (D8), so it isn't specific to one Open MCT version.
 
 ## D5: Open MCT starts in its standard (non-headless) mode, with a router redirect
 
@@ -52,10 +52,24 @@ openmct.on('start', () => {
 
 This means Open MCT's own browse bar, left-hand tree, and inspector panel are visible around the two custom panels — a real deviation from "calm two-panel mission console, not GIS/admin dashboard." That's a known, accepted tradeoff for now: it's the code path Open MCT actually supports, versus more headless-mode debugging with no guarantee of success. If a chrome-free console remains a goal, the next step is probably CSS to hide/collapse Open MCT's own UI regions rather than bypassing its startup sequence.
 
-## D6: The weather placeholder image is a specific, verified-live URL
+## D6: The weather chart is live JMA data, fetched client-side, not a static placeholder
 
-The placeholder URL shipped in PR #1 (`.../thumb/6/6f/Synoptic_weather_map.png/1280px-Synoptic_weather_map.png`) 404'd. It's replaced with a working Wikimedia Commons file (`2018-04-30 Surface Weather Map NOAA.png`). Any future placeholder swap should `curl -sI` the URL first — Wikimedia Commons URLs are easy to get subtly wrong (wrong thumb size, moved/renamed file) and `docs/app.js`'s host-allowlist check (D7) fails closed to a broken `<img>` with no visible error either way.
+The placeholder URL shipped in PR #1 (`.../thumb/6/6f/Synoptic_weather_map.png/1280px-Synoptic_weather_map.png`) 404'd; it was briefly replaced with a working but still-static Wikimedia Commons file, then replaced again with the Japan Meteorological Agency's actual surface weather chart (天気図) — matching the "designed for future daily integration" intent from the original v0 scope instead of deferring it.
+
+JMA does not publish a stable `latest.png`. `https://www.jma.go.jp/bosai/weather_map/data/list.json` is a JSON index of currently-available chart filenames (refreshed every few hours, oldest-first); the actual chart image lives at `https://www.jma.go.jp/bosai/weather_map/data/png/<filename>`. Both endpoints send `Access-Control-Allow-Origin: *`, so `docs/app.js`'s `loadLatestWeatherChart()` can `fetch()` the list client-side and set `<img src>` to `imageBaseUrl + timeline[timeline.length - 1]` (the last, i.e. most recent, entry in `near.now`) — no backend, no build step, no hardcoded filename to go stale.
+
+If that fetch fails (offline, JMA outage, CORS policy change) it fails silently to an empty `<img>` — no fallback image, since JMA is now the only intended source. `weather.imageBaseUrl`/`weather.listUrl` in `docs/config.js` still go through the same `getSafeUrl()` host-allowlist check as any other instrument source (D7).
+
+**Attribution**: JMA content is licensed under Japan's "公共データ利用規約（第1.0版）" (Public Data License v1.0), which requires a specific citation format — `出典：気象庁ホームページ　（当該ページのURL）`. `weather.sourceLabel` in `docs/config.js` uses that exact template and is rendered as a link to `weather.sourceUrl`, deliberately in Japanese even though the rest of the UI is English, since it's a legal citation requirement, not UI copy. Don't reword it.
 
 ## D7: Instrument sources are constrained to an explicit host allowlist
 
 `docs/app.js`'s `getSafeUrl()` only assigns `weatherImage.src` / `spiccatoFrame.src` if the URL's protocol is `https:` and its hostname is in `config.js`'s `allowedHosts` for that instrument — otherwise it silently falls back to `''` / `about:blank`. This was already in place from PR #1 and is worth preserving as new instruments are added: `config.js` should never be trusted to only ever contain safe values, since it's the one file most likely to get casually hand-edited later.
+
+## D8: Open MCT is pinned to the current release candidate, and `start()` uses the selector form
+
+Once the D1–D5 fixes were confirmed working end-to-end on `openmct@4.2.0` (the latest non-RC release at the time), the pin was bumped to `openmct@4.3.0-rc1` — the newest release on npm overall — and re-verified against the same checklist (D2), including a fresh check of D3's `SharedWorker` behavior and D4's harmless indexer error, both unchanged.
+
+The bump surfaced one genuine API improvement worth adopting: `openmct.start()` on 4.3 accepts a CSS selector string, not just an `Element`, and defers its own bootstrap until `DOMContentLoaded` if called while the document is still loading. `docs/app.js` now calls `openmct.start('#app')` instead of `openmct.start(document.getElementById('app'))` — one less DOM lookup to keep in sync with `docs/index.html`'s markup, and it degrades to a clear thrown error (rather than a silent no-op) if `#app` is ever removed from `docs/index.html`.
+
+Being on an RC means the next Open MCT release could change or remove that selector-string support before it's finalized — if a future version bump ever throws on `openmct.start('#app')`, that's the first thing to check.

@@ -7,7 +7,7 @@
   const config = window.SAS0_CONFIG || {};
   const weather = config.weather || {};
   const spiccato = config.spiccato || {};
-  const defaultWeatherHosts = ['upload.wikimedia.org'];
+  const defaultWeatherHosts = ['www.jma.go.jp'];
   const defaultSpiccatoHosts = ['dwg7.github.io'];
 
   const NAMESPACE = 'sas0';
@@ -47,6 +47,37 @@
     const safeTokens = inputTokens.filter((token) => allowedTokens.has(token));
 
     return (safeTokens.length > 0 ? safeTokens : defaultTokens).join(' ');
+  }
+
+  function loadLatestWeatherChart(imgEl) {
+    const listUrl = getSafeUrl(weather.listUrl, {
+      allowedProtocols: ['https:'],
+      allowedHosts: weather.allowedHosts || defaultWeatherHosts
+    });
+
+    if (!listUrl) {
+      return;
+    }
+
+    fetch(listUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        const timeline = data && data.near && data.near.now;
+        const latestFilename =
+          Array.isArray(timeline) && timeline.length > 0 ? timeline[timeline.length - 1] : '';
+
+        if (!latestFilename || typeof weather.imageBaseUrl !== 'string') {
+          return;
+        }
+
+        imgEl.src = getSafeUrl(weather.imageBaseUrl + latestFilename, {
+          allowedProtocols: ['https:'],
+          allowedHosts: weather.allowedHosts || defaultWeatherHosts
+        });
+      })
+      .catch(() => {
+        // Leave the chart panel image-less if JMA's feed is unreachable.
+      });
   }
 
   const openmctScript = document.querySelector('script[src*="openmct"]');
@@ -105,19 +136,29 @@
 
           const weatherImage = document.createElement('img');
           weatherImage.className = 'sas0-weather-image';
-          weatherImage.src = getSafeUrl(weather.imageUrl, {
-            allowedProtocols: ['https:'],
-            allowedHosts: weather.allowedHosts || defaultWeatherHosts
-          });
           weatherImage.alt =
-            weather.imageAlt || 'Daily synoptic weather chart placeholder image';
+            weather.imageAlt || 'Latest surface weather chart';
           weatherImage.referrerPolicy = 'no-referrer';
+          loadLatestWeatherChart(weatherImage);
 
           weatherBody.appendChild(weatherImage);
 
           const weatherCaption = document.createElement('p');
           weatherCaption.className = 'sas0-caption';
-          weatherCaption.textContent = weather.sourceLabel || '';
+          const weatherSourceUrl = getSafeUrl(weather.sourceUrl, {
+            allowedProtocols: ['https:'],
+            allowedHosts: weather.allowedHosts || defaultWeatherHosts
+          });
+          if (weather.sourceLabel && weatherSourceUrl) {
+            const weatherSourceLink = document.createElement('a');
+            weatherSourceLink.href = weatherSourceUrl;
+            weatherSourceLink.target = '_blank';
+            weatherSourceLink.rel = 'noopener noreferrer';
+            weatherSourceLink.textContent = weather.sourceLabel;
+            weatherCaption.appendChild(weatherSourceLink);
+          } else {
+            weatherCaption.textContent = weather.sourceLabel || '';
+          }
 
           weatherPanel.appendChild(weatherTitle);
           weatherPanel.appendChild(weatherBody);
@@ -167,5 +208,5 @@
   openmct.on('start', () => {
     openmct.router.setPath(`/browse/${NAMESPACE}:${CONSOLE_IDENTIFIER.key}`);
   });
-  openmct.start(document.getElementById('app'));
+  openmct.start('#app');
 })();

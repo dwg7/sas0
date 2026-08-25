@@ -18,7 +18,7 @@ It asks a narrow question: can publicly available instruments be assembled into 
 
 For this concept validation phase, sas0 intentionally stays minimal and displays exactly two instruments:
 
-1. **Today's Weather Chart** (placeholder image-backed for now, designed for future daily integration)
+1. **Today's Weather Chart** — the latest surface weather chart (天気図) published by the [Japan Meteorological Agency](https://www.jma.go.jp/bosai/weather_map/), fetched live
 2. **[Spiccato](https://dwg7.github.io/spiccato/)** (embedded, unmodified, from its existing deployment)
 
 ## What is not sas0?
