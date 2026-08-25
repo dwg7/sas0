@@ -62,7 +62,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 
 - `docs/index.html` — loads Open MCT from a pinned CDN version, then `config.js` and `app.js`
 - `docs/app.js` — registers the `sas0.console` object type/view and starts Open MCT
-- `docs/config.js` — instrument titles, URLs, and host allowlists
+- `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
 - `docs/style.css` — layout and theme for the two-panel view
 
 Open MCT has a few integration quirks specific to loading it from a CDN into a static site (a wrong CDN pin will silently render a blank page) — see [DECISIONS.md](DECISIONS.md) before changing `docs/index.html` or `docs/app.js`.

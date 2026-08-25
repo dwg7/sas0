@@ -12,6 +12,8 @@ sas0 is a project of DWG7 (UN Smart Maps Group), a Domain Working Group of the [
 - Keep the scope minimal. The founding brief for this project explicitly rules out building an EOC, command-and-control software, chat/social software, workflow engines, databases, backend services, or auth/user management — see README's "What is not sas0?" section. When in doubt, prefer not adding a feature.
 - Any new instrument source URL (image, iframe, etc.) needs a corresponding `allowedHosts` entry in `docs/config.js` and must go through `getSafeUrl()` in `docs/app.js` — don't assign to `.src` directly. See [DECISIONS.md](DECISIONS.md) D7.
 - Before committing any change to a hardcoded external URL (a CDN pin, a placeholder image, an embed target), verify it actually resolves: `curl -sI <url>`. Two of the bugs fixed in this repo's history were exactly this — a URL that looked right but 404'd.
+- If an iframe's `sandbox` needs a new token, add it to `getSafeSandbox()`'s allowlist in `docs/app.js`, not just `config.js` — the allowlist is what actually gets applied. Only add `allow-same-origin` for a source that's genuinely same-origin with sas0 in production (see [DECISIONS.md](DECISIONS.md) D9); for anything actually third-party, granting it would be a real isolation loss, not a no-op.
+- `docs/index.html` currently pins Open MCT to a release candidate (`4.3.0-rc1`, D8), not a final release. Re-run D2's `curl -sI` checklist before bumping it, and don't assume this stays a placeholder concern forever — check whether the RC has since gone final.
 
 ## Local preview
 
