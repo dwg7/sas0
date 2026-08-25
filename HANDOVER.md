@@ -13,7 +13,6 @@ Current state of sas0, for whoever (human or AI) picks this up next.
 1. **Open MCT's own chrome is visible.** The console currently renders inside Open MCT's standard browse bar / left-hand tree / inspector panel (see [DECISIONS.md](DECISIONS.md) D5), not as a bare two-panel view. The original design brief called for "not a GIS, not an admin dashboard" — closer to just the two panels. If that matters going forward, the next step is CSS to hide/collapse Open MCT's own UI regions (tree, inspector) rather than more startup-sequence changes, since the headless/no-chrome startup path was tried and hit unrelated internal Open MCT errors.
 2. **One harmless console error at startup** (`Cannot read properties of undefined (reading 'key')`), fires once, doesn't block anything. See [DECISIONS.md](DECISIONS.md) D4. Not chased further; worth re-checking if the Open MCT version is ever bumped.
 3. **Weather chart is a static placeholder**, not live data — this was always the stated intent for v0 ("designed for future daily integration," see README).
-4. **Repository homepage URL** (the GitHub repo metadata field, distinct from GitHub Pages itself) is not yet set to `https://dwg7.github.io/sas0/`. Cosmetic; someone with repo settings access can set it.
 
 ## Where to look
 
