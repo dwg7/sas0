@@ -1,6 +1,7 @@
 window.SAS0_CONFIG = {
   weather: {
     title: "Today's Weather Chart",
+    allowedHosts: ['upload.wikimedia.org'],
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Synoptic_weather_map.png/1280px-Synoptic_weather_map.png",
     sourceLabel: "Placeholder chart image"
   },

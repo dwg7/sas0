@@ -2,6 +2,7 @@
   const config = window.SAS0_CONFIG || {};
   const weather = config.weather || {};
   const spiccato = config.spiccato || {};
+  const defaultWeatherHosts = ['upload.wikimedia.org'];
   const defaultSpiccatoHosts = ['dwg7.github.io'];
 
   const NAMESPACE = 'sas0';
@@ -85,7 +86,10 @@
 
           const weatherImage = document.createElement('img');
           weatherImage.className = 'sas0-weather-image';
-          weatherImage.src = getSafeUrl(weather.imageUrl, { allowedProtocols: ['https:'] });
+          weatherImage.src = getSafeUrl(weather.imageUrl, {
+            allowedProtocols: ['https:'],
+            allowedHosts: weather.allowedHosts || defaultWeatherHosts
+          });
           weatherImage.alt = weather.title || "Today's Weather Chart";
           weatherImage.referrerPolicy = 'no-referrer';
 
@@ -118,7 +122,7 @@
           spiccatoFrame.title = spiccato.title || 'Spiccato';
           spiccatoFrame.loading = 'lazy';
           spiccatoFrame.referrerPolicy = 'no-referrer';
-          spiccatoFrame.sandbox = 'allow-scripts allow-same-origin allow-forms';
+          spiccatoFrame.sandbox = 'allow-scripts allow-forms';
 
           spiccatoBody.appendChild(spiccatoFrame);
 
