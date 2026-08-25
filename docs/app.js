@@ -35,11 +35,19 @@
     }
   }
 
+  function getSafeSandbox(value) {
+    const defaultTokens = ['allow-scripts', 'allow-forms'];
+    const allowedTokens = new Set(['allow-scripts', 'allow-forms']);
+    const inputTokens = typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
+    const safeTokens = inputTokens.filter((token) => allowedTokens.has(token));
+
+    return (safeTokens.length > 0 ? safeTokens : defaultTokens).join(' ');
+  }
+
   const openmctScript = document.querySelector('script[src*="openmct"]');
-  const openmctAssetPath = openmctScript
-    ? openmctScript.src.replace(/openmct\\.js(?:\\?.*)?$/, '')
-    : 'https://unpkg.com/openmct@3.3.0/dist/';
-  openmct.setAssetPath(openmctAssetPath);
+  if (openmctScript) {
+    openmct.setAssetPath(openmctScript.src.replace(/openmct\\.js(?:\\?.*)?$/, ''));
+  }
   openmct.install(openmct.plugins.LocalStorage());
 
   openmct.types.addType('sas0.console', {
@@ -127,7 +135,7 @@
           spiccatoFrame.title = spiccato.title || 'Spiccato';
           spiccatoFrame.loading = 'lazy';
           spiccatoFrame.referrerPolicy = 'no-referrer';
-          spiccatoFrame.sandbox = spiccato.sandbox || 'allow-scripts allow-forms';
+          spiccatoFrame.sandbox = getSafeSandbox(spiccato.sandbox);
 
           spiccatoBody.appendChild(spiccatoFrame);
 
