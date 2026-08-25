@@ -19,15 +19,18 @@ It asks a narrow question: can publicly available instruments be assembled into 
 Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigation: each instrument is a separate object, one click away, grouped into folders by organization. The current tree (driven by a small Hokkaido disaster-preparedness use case, but arbitrary to extend):
 
 ```
-sas0
-├─ 気象庁 (JMA)
-│   ├─ Today's Weather Chart   — latest 天気図, fetched live
+状況認識サービス0 (sas0)
+├─ 気象庁
+│   ├─ 天気図                    — latest JMA surface weather chart, fetched live
 │   ├─ 警報・注意報（北海道）      — active JMA advisories/warnings across Hokkaido's 8 forecast regions
 │   ├─ 地震情報（北海道関連）      — recent earthquakes affecting Hokkaido
 │   └─ 火山情報（北海道の火山）    — current alert level for Hokkaido's ~20 monitored volcanoes
-├─ 北海道                        — external link (embedding blocked by the prefecture's own site)
-├─ 国土地理院 (GSI)
-│   └─ ハザードマップポータル      — GSI's hazard map portal, embedded
+├─ 北海道                        — external link card (embedding blocked by the prefecture's own site)
+├─ 国土地理院
+│   └─ ハザードマップポータル      — external link card (this app doesn't tolerate iframe sandboxing — D14)
+├─ 市町村                        — grouped by 振興局 (subprefecture); starting with 札幌市, 釧路市
+├─ 火山                          — one link per volcano with an established 火山防災協議会 (a
+│                                   narrower, differently-organized set than 気象庁's alert list above)
 └─ [Spiccato](https://dwg7.github.io/spiccato/) — embedded, unmodified, from its existing deployment
 ```
 
@@ -80,8 +83,8 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 
 - `docs/index.html` — loads Open MCT from a pinned CDN version, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` and the shared `getSafeUrl()`/`getSafeSandbox()`/`renderIframe()`/`renderLinkCard()` helpers
-- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院) that instruments attach to
-- `docs/instruments/*.js` — one file per instrument (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido-link), each calling `SAS0.registerInstrument()`
+- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 市町村 and its 振興局 subfolders, 火山) that instruments attach to
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido-link, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (the last two loop over a `config.js` array to register several at once)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link cards, etc.)
