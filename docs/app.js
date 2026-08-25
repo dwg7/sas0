@@ -1,4 +1,9 @@
 (function () {
+  if (!window.openmct) {
+    throw new Error('Open MCT failed to load');
+  }
+
+  const openmct = window.openmct;
   const config = window.SAS0_CONFIG || {};
   const weather = config.weather || {};
   const spiccato = config.spiccato || {};
