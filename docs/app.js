@@ -35,7 +35,11 @@
     }
   }
 
-  openmct.setAssetPath('https://unpkg.com/openmct@3.3.0/dist/');
+  const openmctScript = document.querySelector('script[src*="openmct"]');
+  const openmctAssetPath = openmctScript
+    ? openmctScript.src.replace(/openmct\\.js(?:\\?.*)?$/, '')
+    : 'https://unpkg.com/openmct@3.3.0/dist/';
+  openmct.setAssetPath(openmctAssetPath);
   openmct.install(openmct.plugins.LocalStorage());
 
   openmct.types.addType('sas0.console', {
@@ -90,7 +94,8 @@
             allowedProtocols: ['https:'],
             allowedHosts: weather.allowedHosts || defaultWeatherHosts
           });
-          weatherImage.alt = weather.title || "Today's Weather Chart";
+          weatherImage.alt =
+            weather.imageAlt || 'Daily synoptic weather chart placeholder image';
           weatherImage.referrerPolicy = 'no-referrer';
 
           weatherBody.appendChild(weatherImage);
@@ -122,7 +127,7 @@
           spiccatoFrame.title = spiccato.title || 'Spiccato';
           spiccatoFrame.loading = 'lazy';
           spiccatoFrame.referrerPolicy = 'no-referrer';
-          spiccatoFrame.sandbox = 'allow-scripts allow-forms';
+          spiccatoFrame.sandbox = spiccato.sandbox || 'allow-scripts allow-forms';
 
           spiccatoBody.appendChild(spiccatoFrame);
 
