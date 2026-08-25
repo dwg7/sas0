@@ -28,9 +28,11 @@ Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigati
 ├─ 北海道                        — external link card (embedding blocked by the prefecture's own site)
 ├─ 国土地理院
 │   └─ ハザードマップポータル      — external link card (this app doesn't tolerate iframe sandboxing — D14)
-├─ 市町村                        — grouped by 振興局 (subprefecture); starting with 札幌市, 釧路市
-├─ 火山                          — one link per volcano with an established 火山防災協議会 (a
-│                                   narrower, differently-organized set than 気象庁's alert list above)
+├─ 市町村                        — grouped by 振興局 (subprefecture); one representative city/town
+│                                   per subprefecture so far (14 of 179 municipalities)
+├─ 火山                          — one link per volcano with an established 火山防災協議会, to that
+│                                   council's own evacuation-plan material (a narrower, differently-
+│                                   organized set than 気象庁's alert list above)
 └─ [Spiccato](https://dwg7.github.io/spiccato/) — embedded, unmodified, from its existing deployment
 ```
 

@@ -18,12 +18,14 @@ Current state of sas0, for whoever (human or AI) picks this up next.
   ├─ 北海道                        — external link card (pref site blocks framing)
   ├─ 国土地理院
   │   └─ ハザードマップポータル      — external link card (D14 — embedding breaks it)
-  ├─ 市町村
+  ├─ 市町村                        — 14 of Hokkaido's 179 municipalities, one per 振興局 (D15, D18)
   │   ├─ 石狩振興局 → 札幌市        — external link card to the city's own hazard map
-  │   └─ 釧路総合振興局 → 釧路市     — same
+  │   ├─ 渡島総合振興局 → 函館市     — same, plus 11 more subprefectures each with one city/town
+  │   └─ …                          (see docs/config.js `municipalities` for the full list)
   ├─ 火山                          — 9 link cards, one per volcano with an established
-  │                                   火山防災協議会 (D15) — a different grouping from
-  │                                   気象庁's alert-level list above
+  │                                   火山防災協議会 (D15), each now linking to that council's
+  │                                   own evacuation-plan material rather than JMA's summary (D18)
+  │                                   — a different grouping from 気象庁's alert-level list above
   └─ Spiccato                     — embedded map, still a placeholder (see below)
   ```
 
@@ -35,6 +37,8 @@ Current state of sas0, for whoever (human or AI) picks this up next.
 ## Resolved since last handover
 
 - **GSI hazard map iframe** — confirmed broken on the actual production deployment, not just local test tooling. Root cause isolated precisely: the `sandbox` attribute alone (even `allow-scripts allow-forms` with nothing else) breaks this specific old jQuery/Leaflet app, independent of `loading="lazy"` or `referrerpolicy`. Fixed by switching to an external link card rather than weakening the sandbox for third-party content. Full writeup: [DECISIONS.md](DECISIONS.md) D14.
+- **火山's 9 council links now point at each council's own evacuation-plan material**, not JMA's summary page — closes open item #4 below. See [DECISIONS.md](DECISIONS.md) D18 for the per-volcano source notes (two use a PDF authored by the council since no council portal page exists; 恵山's link goes to 函館市 since its council was folded into the city's disaster-prevention council after municipal mergers).
+- **市町村 extended from 2 to 14 municipalities**, one per 振興局 — every subprefecture now has at least one entry. Still far from all 179; see open item #3 below, now updated. [DECISIONS.md](DECISIONS.md) D18.
 
 ## Open design thread: mappable vs. non-mappable data
 
@@ -46,8 +50,8 @@ Spiccato currently occupies the "the mappable stuff goes here" slot, but it was 
 
 1. **Spiccato is a placeholder**, not yet serving this dashboard's actual mapping needs (see "mappable vs. non-mappable" above / D13).
 2. **北海道開発局 doesn't have a folder/instrument yet.** Its top-level site doesn't send blocking framing headers, but the specific disaster-relevant page to link hasn't been identified.
-3. **市町村 has only 2 of Hokkaido's 179 municipalities** (札幌市, 釧路市 — D15). The folder-per-振興局 structure is in place to scale; adding the next city is one `config.js` array entry (`docs/instruments/municipalities.js`).
-4. **火山's 9 council links point at JMA's own summary page for each volcano**, not necessarily each council's own published evacuation-plan document — finding and linking the actual deliverables per volcano (D15) is a further refinement.
+3. **市町村 has only 14 of Hokkaido's 179 municipalities** (one per 振興局 — D15, D18). The folder-per-振興局 structure is in place to scale further; adding the next city is one `config.js` array entry (`docs/instruments/municipalities.js`). Two of the current 14 (倶知安町, 旭川市) fall back to a general 防災 page rather than a single hazard-map portal, since their own sites don't publish one (D18) — worth revisiting if a better single page turns up later.
+4. ~~火山's 9 council links point at JMA's own summary page~~ — resolved, see D18.
 5. **One harmless console error at startup** (`Cannot read properties of undefined (reading 'key')`), fires once, doesn't block anything. See [DECISIONS.md](DECISIONS.md) D4. Confirmed present, unchanged, across every Open MCT version used so far.
 6. **Open MCT is pinned to a release candidate** (`4.3.0-rc1`, D8). If a future bump throws on `openmct.start('#app')`, check whether selector-string support changed.
 

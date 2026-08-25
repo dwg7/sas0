@@ -57,55 +57,161 @@ window.SAS0_CONFIG = {
       title: '釧路市',
       description: '釧路市のハザードマップ（津波・洪水・土砂災害・火山）を新しいタブで開きます。',
       url: 'https://www.city.kushiro.lg.jp/kurashi/bousai/1003697/index.html'
+    },
+    {
+      folderKey: 'shien-oshima',
+      key: 'hakodate',
+      title: '函館市',
+      description: '函館市のハザードマップ（津波・高潮・洪水・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.city.hakodate.hokkaido.jp/docs/2017092500033/'
+    },
+    {
+      folderKey: 'shien-hiyama',
+      key: 'esashi',
+      title: '江差町',
+      description: '江差町のハザードマップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.hokkaido-esashi.jp/webmap_esashi/'
+    },
+    {
+      // 倶知安町は単一のハザードマップ統合ページを持たず、洪水浸水想定図・土砂災害警戒
+      // システム・火山情報へのリンクが防災情報ページに分散している。次善としてその
+      // 防災情報ページ自体を案内する。
+      folderKey: 'shien-shiribeshi',
+      key: 'kutchan',
+      title: '倶知安町',
+      description: '倶知安町の防災情報ページ（洪水・土砂災害・火山防災の関連リンク）を新しいタブで開きます。',
+      url: 'https://www.town.kutchan.hokkaido.jp/Living_Information/bouhan-bousai-syobo/bousai_info/'
+    },
+    {
+      folderKey: 'shien-sorachi',
+      key: 'iwamizawa',
+      title: '岩見沢市',
+      description: '岩見沢市のハザードマップ（洪水・内水氾濫）を新しいタブで開きます。',
+      url: 'https://www.city.iwamizawa.hokkaido.jp/soshiki/bosaitaisakushitsu/anshin_anzen/1/1/2671.html'
+    },
+    {
+      // 旭川市も洪水・土砂災害マップが別ページに分かれているため、全ハザードへの
+      // 導線としてより適切な総合防災ガイド「これ一冊まとまっぷ」のページを案内する。
+      folderKey: 'shien-kamikawa',
+      key: 'asahikawa',
+      title: '旭川市',
+      description: '旭川市の防災ガイド「これ一冊まとまっぷ」（洪水・内水氾濫・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.city.asahikawa.hokkaido.jp/kurashi/320/kouzui/d065806.html'
+    },
+    {
+      folderKey: 'shien-rumoi',
+      key: 'rumoi',
+      title: '留萌市',
+      description: '留萌市のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.e-rumoi.jp/bosai/cat_00097.html'
+    },
+    {
+      folderKey: 'shien-soya',
+      key: 'wakkanai',
+      title: '稚内市',
+      description: '稚内市のハザードマップ（洪水・津波）を新しいタブで開きます。',
+      url: 'https://www.city.wakkanai.hokkaido.jp/kurashi/bosaibohankotsuanzen/bosai/sonaeru/hazardmap/'
+    },
+    {
+      folderKey: 'shien-okhotsk',
+      key: 'kitami',
+      title: '北見市',
+      description: '北見市のWEBハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.city.kitami.lg.jp/administration/disaster/detail.php?content=11476'
+    },
+    {
+      folderKey: 'shien-iburi',
+      key: 'muroran',
+      title: '室蘭市',
+      description: '室蘭市の防災ハザードマップ（津波・土砂災害・洪水・内水）を新しいタブで開きます。',
+      url: 'https://www.city.muroran.lg.jp/prevention/?content=2392'
+    },
+    {
+      folderKey: 'shien-hidaka',
+      key: 'urakawa',
+      title: '浦河町',
+      description: '浦河町のハザードマップ（津波・洪水・内水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.urakawa.hokkaido.jp/gyosei/prevention/?content=227'
+    },
+    {
+      folderKey: 'shien-tokachi',
+      key: 'obihiro',
+      title: '帯広市',
+      description: '帯広市のWEBハザードマップ（洪水・内水氾濫・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.city.obihiro.hokkaido.jp/kurashi/bousai/1007329/1014402.html'
+    },
+    {
+      folderKey: 'shien-nemuro',
+      key: 'nemuro',
+      title: '根室市',
+      description: '根室市の防災ハザードマップ（津波・土砂災害・高潮・洪水）を新しいタブで開きます。',
+      url: 'https://www.city.nemuro.hokkaido.jp/lifeinfo/kakuka/soumubu/kikikanri/kiki_SONAE/10244.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
-  // 気象庁「○○の火山防災協議会など」ページへのリンク。See DECISIONS.md D15.
+  // 各協議会・事務局自治体が公表する火山防災計画／避難計画そのものへのリンク
+  // （気象庁の協議会概要ページではない）。See DECISIONS.md D15.
   volcanoCouncils: [
     {
       key: 'atosanupuri',
       title: 'アトサヌプリ',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/104_Atosanupri/104_bousai.html'
+      description: 'アトサヌプリ火山防災協議会の火山防災計画を新しいタブで開きます。',
+      url: 'https://www.town.teshikaga.hokkaido.jp/kurashi/soshikiichiran/somuka/10/2/5915.html'
     },
     {
       key: 'meakandake',
       title: '雌阿寒岳',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/105_Meakan/105_bousai.html'
+      description: '雌阿寒岳火山防災協議会の火山防災計画を新しいタブで開きます。',
+      url: 'https://www.town.ashoro.hokkaido.jp/kurashi/bousai/meakandake/'
     },
     {
+      // 協議会自体のポータルは見つからず、現時点で最良の公式資料は北海道が
+      // 公開する避難計画PDF（協議会名義で作成）。
       key: 'taisetsuzan',
       title: '大雪山',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/107_Taisetusan/107_bousai.html'
+      description: '大雪山火山防災協議会の火山避難計画（PDF）を新しいタブで開きます。',
+      url: 'https://www.pref.hokkaido.lg.jp/fs/8/9/8/4/9/3/7/_/%E5%A4%A7%E9%9B%AA%E5%B1%B1%E7%81%AB%E5%B1%B1%E9%81%BF%E9%9B%A3%E8%A8%88%E7%94%BB.pdf',
     },
     {
+      // 同様に協議会ポータルはなく、事務局自治体（上富良野町）が公開する
+      // 避難計画PDFが現時点で最良の公式資料。
       key: 'tokachidake',
       title: '十勝岳',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/108_Tokachi/108_bousai.html'
+      description: '十勝岳火山防災協議会の火山避難計画（PDF）を新しいタブで開きます。',
+      url: 'https://www.town.kamifurano.hokkaido.jp/contents/01soumu/0110soumu/bosai/hinankankoku/tokatidakekazanhinankeikaku-2024.06.pdf'
     },
     {
       key: 'tarumaesan',
       title: '樽前山',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/109_Tarumae/109_bousai.html'
+      description: '樽前山火山防災協議会のページを新しいタブで開きます。',
+      url: 'https://www.city.tomakomai.hokkaido.jp/kurashi/bosai/jishin/volcano/kaigikyogikai.html'
     },
     {
       key: 'kuttara',
       title: '倶多楽',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/111_Kuttara/111_bousai.html'
+      description: '倶多楽火山防災協議会の火山避難計画を新しいタブで開きます。',
+      url: 'https://www.city.noboribetsu.lg.jp/article/2018082200032/'
     },
     {
       key: 'usuzan',
       title: '有珠山',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/112_Usu/112_bousai.html'
+      description: '有珠山火山防災協議会の火山防災マップを新しいタブで開きます。',
+      url: 'https://www.city.date.hokkaido.jp/hotnews/detail/00000764.html'
     },
     {
       key: 'hokkaido-komagatake',
       title: '北海道駒ヶ岳',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/113_Komagatake/113_bousai.html'
+      description: '北海道駒ヶ岳火山防災協議会の火山避難計画を新しいタブで開きます。',
+      url: 'https://www.town.nanae.hokkaido.jp/hotnews/detail/00007295.html'
     },
     {
+      // 恵山を担当していた協議会は市町村合併により函館市防災会議に統合済み。
+      // 現存する独立協議会サイトはないため、避難計画を含む函館市の恵山
+      // 火山災害対策ページを案内する。
       key: 'esan',
       title: '恵山',
-      url: 'https://www.data.jma.go.jp/vois/data/sapporo/114_Esan/114_bousai.html'
+      description: '恵山の火山災害対策（避難計画等）のページを新しいタブで開きます。',
+      url: 'https://www.city.hakodate.hokkaido.jp/docs/2014022700907/'
     }
   ]
 };
