@@ -6,6 +6,7 @@ window.SAS0_CONFIG = {
   },
   spiccato: {
     title: 'Spiccato',
+    allowedHosts: ['dwg7.github.io'],
     url: 'https://dwg7.github.io/spiccato/#q=catalog=https%3A%2F%2Fhfu.github.io%2Flayers-martin%2Fcatalog.json&req=blank%7C%E7%99%BD%E5%9C%B0%E5%9B%B3'
   }
 };

@@ -2,12 +2,37 @@
   const config = window.SAS0_CONFIG || {};
   const weather = config.weather || {};
   const spiccato = config.spiccato || {};
+  const defaultSpiccatoHosts = ['dwg7.github.io'];
 
   const NAMESPACE = 'sas0';
   const CONSOLE_IDENTIFIER = {
     namespace: NAMESPACE,
     key: 'console'
   };
+
+  function getSafeUrl(value, options) {
+    if (!value) {
+      return '';
+    }
+
+    try {
+      const parsed = new URL(value, window.location.href);
+      const allowedProtocols = (options && options.allowedProtocols) || ['https:'];
+      const allowedHosts = (options && options.allowedHosts) || [];
+
+      if (!allowedProtocols.includes(parsed.protocol)) {
+        return '';
+      }
+
+      if (allowedHosts.length > 0 && !allowedHosts.includes(parsed.hostname)) {
+        return '';
+      }
+
+      return parsed.toString();
+    } catch (error) {
+      return '';
+    }
+  }
 
   openmct.setAssetPath('https://unpkg.com/openmct@3.3.0/dist/');
   openmct.install(openmct.plugins.LocalStorage());
@@ -60,7 +85,7 @@
 
           const weatherImage = document.createElement('img');
           weatherImage.className = 'sas0-weather-image';
-          weatherImage.src = weather.imageUrl || '';
+          weatherImage.src = getSafeUrl(weather.imageUrl, { allowedProtocols: ['https:'] });
           weatherImage.alt = weather.title || "Today's Weather Chart";
           weatherImage.referrerPolicy = 'no-referrer';
 
@@ -85,9 +110,15 @@
 
           const spiccatoFrame = document.createElement('iframe');
           spiccatoFrame.className = 'sas0-spiccato-frame';
-          spiccatoFrame.src = spiccato.url || '';
+          spiccatoFrame.src =
+            getSafeUrl(spiccato.url, {
+              allowedProtocols: ['https:'],
+              allowedHosts: spiccato.allowedHosts || defaultSpiccatoHosts
+            }) || 'about:blank';
           spiccatoFrame.title = spiccato.title || 'Spiccato';
           spiccatoFrame.loading = 'lazy';
+          spiccatoFrame.referrerPolicy = 'no-referrer';
+          spiccatoFrame.sandbox = 'allow-scripts allow-same-origin allow-forms';
 
           spiccatoBody.appendChild(spiccatoFrame);
 
