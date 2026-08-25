@@ -9,7 +9,7 @@
     key: 'console'
   };
 
-  openmct.setAssetPath('https://unpkg.com/openmct/dist/');
+  openmct.setAssetPath('https://unpkg.com/openmct@3.3.0/dist/');
   openmct.install(openmct.plugins.LocalStorage());
 
   openmct.types.addType('sas0.console', {
@@ -24,7 +24,7 @@
     type: 'sas0.console'
   };
 
-  openmct.objects.addRoot(consoleObject);
+  openmct.objects.addRoot(CONSOLE_IDENTIFIER);
   openmct.objects.addProvider(NAMESPACE, {
     get(identifier) {
       if (identifier.key === CONSOLE_IDENTIFIER.key) {
@@ -51,32 +51,48 @@
 
           const weatherPanel = document.createElement('section');
           weatherPanel.className = 'sas0-panel';
-          weatherPanel.innerHTML = `
-            <h2>${weather.title || "Today's Weather Chart"}</h2>
-            <div class="sas0-panel-body">
-              <img
-                class="sas0-weather-image"
-                src="${weather.imageUrl || ''}"
-                alt="${weather.title || "Today's Weather Chart"}"
-                referrerpolicy="no-referrer"
-              />
-            </div>
-            <p class="sas0-caption">${weather.sourceLabel || ''}</p>
-          `;
+
+          const weatherTitle = document.createElement('h2');
+          weatherTitle.textContent = weather.title || "Today's Weather Chart";
+
+          const weatherBody = document.createElement('div');
+          weatherBody.className = 'sas0-panel-body';
+
+          const weatherImage = document.createElement('img');
+          weatherImage.className = 'sas0-weather-image';
+          weatherImage.src = weather.imageUrl || '';
+          weatherImage.alt = weather.title || "Today's Weather Chart";
+          weatherImage.referrerPolicy = 'no-referrer';
+
+          weatherBody.appendChild(weatherImage);
+
+          const weatherCaption = document.createElement('p');
+          weatherCaption.className = 'sas0-caption';
+          weatherCaption.textContent = weather.sourceLabel || '';
+
+          weatherPanel.appendChild(weatherTitle);
+          weatherPanel.appendChild(weatherBody);
+          weatherPanel.appendChild(weatherCaption);
 
           const spiccatoPanel = document.createElement('section');
           spiccatoPanel.className = 'sas0-panel';
-          spiccatoPanel.innerHTML = `
-            <h2>${spiccato.title || 'Spiccato'}</h2>
-            <div class="sas0-panel-body">
-              <iframe
-                class="sas0-spiccato-frame"
-                src="${spiccato.url || ''}"
-                title="${spiccato.title || 'Spiccato'}"
-                loading="lazy"
-              ></iframe>
-            </div>
-          `;
+
+          const spiccatoTitle = document.createElement('h2');
+          spiccatoTitle.textContent = spiccato.title || 'Spiccato';
+
+          const spiccatoBody = document.createElement('div');
+          spiccatoBody.className = 'sas0-panel-body';
+
+          const spiccatoFrame = document.createElement('iframe');
+          spiccatoFrame.className = 'sas0-spiccato-frame';
+          spiccatoFrame.src = spiccato.url || '';
+          spiccatoFrame.title = spiccato.title || 'Spiccato';
+          spiccatoFrame.loading = 'lazy';
+
+          spiccatoBody.appendChild(spiccatoFrame);
+
+          spiccatoPanel.appendChild(spiccatoTitle);
+          spiccatoPanel.appendChild(spiccatoBody);
 
           root.appendChild(weatherPanel);
           root.appendChild(spiccatoPanel);
