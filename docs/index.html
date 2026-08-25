@@ -4,11 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sas0 | Situational Awareness as a Service Console</title>
-    <link rel="stylesheet" href="https://unpkg.com/openmct@3.3.0/dist/openmct.css" />
+    <link rel="stylesheet" href="https://unpkg.com/openmct@4.2.0/dist/espressoTheme.css" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <script src="https://unpkg.com/openmct@3.3.0/dist/openmct.js"></script>
+    <script>
+      // Open MCT's built-in search indexer starts a SharedWorker from the
+      // script's own origin. Since Open MCT is loaded from a CDN here, that
+      // worker load is cross-origin and browsers block it. Disabling
+      // SharedWorker makes Open MCT fall back to its synchronous in-page
+      // search implementation instead.
+      window.SharedWorker = undefined;
+    </script>
+    <script src="https://unpkg.com/openmct@4.2.0/dist/openmct.js"></script>
+    <div id="app"></div>
     <script src="./config.js"></script>
     <script src="./app.js"></script>
   </body>

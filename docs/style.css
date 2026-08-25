@@ -2,11 +2,20 @@
   color-scheme: dark;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   background: #0d1117;
   color: #dce6f1;
+}
+
+#app {
+  height: 100%;
 }
 
 .sas0-console {

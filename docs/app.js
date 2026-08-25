@@ -54,6 +54,8 @@
     openmct.setAssetPath(openmctScript.src.replace(/openmct\.js(?:\?.*)?$/, ''));
   }
   openmct.install(openmct.plugins.LocalStorage());
+  openmct.install(openmct.plugins.UTCTimeSystem());
+  openmct.install(openmct.plugins.Espresso());
 
   openmct.types.addType('sas0.console', {
     name: 'SAS0 Console',
@@ -78,7 +80,7 @@
     }
   });
 
-  openmct.objectViews.addProvider({
+  const consoleViewProvider = {
     key: 'sas0.console.view',
     name: 'SAS0 Console',
     canView(domainObject) {
@@ -158,7 +160,12 @@
         }
       };
     }
-  });
+  };
 
-  openmct.start();
+  openmct.objectViews.addProvider(consoleViewProvider);
+
+  openmct.on('start', () => {
+    openmct.router.setPath(`/browse/${NAMESPACE}:${CONSOLE_IDENTIFIER.key}`);
+  });
+  openmct.start(document.getElementById('app'));
 })();

@@ -3,7 +3,7 @@ window.SAS0_CONFIG = {
     title: "Today's Weather Chart",
     imageAlt: 'Daily synoptic weather chart placeholder image',
     allowedHosts: ['upload.wikimedia.org'],
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Synoptic_weather_map.png/1280px-Synoptic_weather_map.png",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a4/2018-04-30_Surface_Weather_Map_NOAA.png",
     sourceLabel: "Placeholder chart image"
   },
   spiccato: {
