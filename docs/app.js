@@ -42,7 +42,7 @@
 
   function getSafeSandbox(value) {
     const defaultTokens = ['allow-scripts', 'allow-forms'];
-    const allowedTokens = new Set(defaultTokens);
+    const allowedTokens = new Set([...defaultTokens, 'allow-same-origin']);
     const inputTokens = typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
     const safeTokens = inputTokens.filter((token) => allowedTokens.has(token));
 
