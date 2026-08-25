@@ -45,11 +45,17 @@ sas0 is explicitly not:
 
 It also does not include backend services, databases, authentication, workflows, or user management.
 
+## Why open data only?
+
+Every instrument in sas0 pulls from data that's already genuinely public — national and local government sources, published as-is. That's a deliberate boundary, not a gap to close later: sas0 respects the protected, operational systems that real disaster response actually runs on, and doesn't try to stand in for them or blur the line by reaching into non-public information. See [DECISIONS.md](DECISIONS.md) D17.
+
+Working entirely from open data, with no backend (this whole site is static — see [Deployment](#deployment) below), is also the point of the exercise: it's a demonstration that a click-through, mission-console-style architecture can be built from public sources alone. If an organization later needs to integrate its own non-public situational data internally, that's properly a separate, access-controlled service — this project's contribution is making sure the underlying pattern already works.
+
 ## Inspiration
 
 sas0 is inspired by ideas and ecosystems around:
 
-- [Open MCT](https://nasa.github.io/openmct/) (NASA's mission control framework)
+- [Open MCT](https://nasa.github.io/openmct/) — NASA's own mission-control framework, open-sourced. Using it here, unmodified at its core, for open civilian disaster data is itself a small demonstration of "keep web maps open for a better world": the same object/composition/view model that runs spacecraft ground systems works, as-is, for a regional government's public awareness dashboard.
 - [DWG7 / UN Smart Maps](https://github.com/dwg7)
 - [UN Open GIS Initiative](https://unopengis.org/)
 

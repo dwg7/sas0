@@ -8,12 +8,10 @@
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';
-      SAS0.renderIframe(container, {
-        src: config.url,
-        title: config.title || 'ハザードマップポータル',
-        sandbox: config.sandbox,
-        allowedHosts: config.allowedHosts,
-        className: 'sas0-hazard-frame'
+      SAS0.renderLinkCard(container, {
+        title: config.title,
+        description: config.description,
+        url: config.url
       });
     }
   });

@@ -6,6 +6,13 @@ Working notes for AI coding assistants in this repo. See [README.md](README.md) 
 
 sas0 is a project of DWG7 (UN Smart Maps Group), a Domain Working Group of the [UN Open GIS Initiative](https://unopengis.org/). It is a static, zero-build GitHub Pages site — everything served lives under `docs/`, deployed straight from `main`, no bundler, no `package.json`, no CI.
 
+## Project philosophy — read before adding a data source
+
+- **Open data only, as a hard boundary, not a TODO.** Every instrument here (D11, D15) pulls from data that's already genuinely public — JMA's feeds, GSI's portal, municipalities' own published pages. Never add an authenticated, internal, or otherwise non-public data source to sas0, even if a future maintainer happens to have access to one. This isn't an oversight to eventually fix — see [DECISIONS.md](DECISIONS.md) D17 for why: the open-only scope is itself the point (proving the architecture works from public data, no backend), and a future *internal* service integrating protected data would be a separate, properly access-controlled project, not a mode of this one.
+- **Respect for protected information and the missions that handle it.** sas0 deliberately stays out of the way of real EOC/command-and-control/incident-management systems (README's "What is not sas0?"). When writing anything user-facing — an instrument description, a doc, a commit message — don't imply this project has, needs, or should have access to operational/restricted systems, and don't understate what's actually at stake for the real missions it deliberately doesn't touch.
+- **Why Open MCT specifically** is not incidental — see [DECISIONS.md](DECISIONS.md) D16. Keep that framing (NASA's own mission-control engine, reused unmodified for open civilian data) in mind when it's relevant, rather than treating Open MCT as an interchangeable dashboard library.
+- **User-facing text is Japanese**, including instrument names, descriptions, and UI copy — this project's primary audience reads Japanese, and mixing languages in the running UI reads as unfinished. Proper nouns that are genuinely names (e.g. "Spiccato") stay as-is. This repo's own docs (README/DECISIONS/HANDOVER/CLAUDE) stay in English by prior decision — the language split is by audience (docs = maintainers, UI = end users), not inconsistency.
+
 ## Before making changes
 
 - **Read [DECISIONS.md](DECISIONS.md) before touching `docs/index.html` or `docs/core.js`.** The Open MCT bootstrap has several non-obvious constraints (CDN version pinning, `SharedWorker` disabling, the standard vs. headless start path) that silently produce a blank page if violated. This isn't hypothetical — the PR that introduced this code shipped broken in exactly these ways.

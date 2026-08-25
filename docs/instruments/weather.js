@@ -29,7 +29,7 @@
 
     const image = document.createElement('img');
     image.className = 'sas0-weather-image';
-    image.alt = config.imageAlt || 'Latest surface weather chart';
+    image.alt = config.imageAlt || '最新の天気図';
     image.referrerPolicy = 'no-referrer';
     image.src = imageUrl;
     container.appendChild(image);
@@ -52,7 +52,7 @@
 
   SAS0.registerInstrument({
     key: 'weather',
-    name: config.title || "Today's Weather Chart",
+    name: config.title || '天気図',
     parentKey: 'jma',
     render
   });

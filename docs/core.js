@@ -174,12 +174,12 @@ window.SAS0 = (function () {
   openmct.install(openmct.plugins.Espresso());
 
   openmct.types.addType('sas0.instrument', {
-    name: 'SAS0 Instrument',
-    description: 'A single situational-awareness instrument',
+    name: '計器',
+    description: '状況認識サービス0の単体表示項目',
     creatable: false
   });
 
-  registerFolder({ key: 'root', name: 'sas0' });
+  registerFolder({ key: 'root', name: '状況認識サービス0' });
 
   openmct.objects.addRoot({ namespace: NAMESPACE, key: 'root' });
   openmct.objects.addProvider(NAMESPACE, {
