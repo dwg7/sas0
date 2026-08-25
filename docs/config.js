@@ -20,5 +20,19 @@ window.SAS0_CONFIG = {
     // breaking MapLibre's vector-tile rendering. See DECISIONS.md D9.
     sandbox: 'allow-scripts allow-forms allow-same-origin',
     url: 'https://dwg7.github.io/spiccato/#q=catalog=https%3A%2F%2Fhfu.github.io%2Flayers-martin%2Fcatalog.json&req=blank%7C%E7%99%BD%E5%9C%B0%E5%9B%B3'
+  },
+  gsiHazard: {
+    title: 'ハザードマップポータル',
+    allowedHosts: ['disaportal.gsi.go.jp'],
+    // disaportal.gsi.go.jp is genuinely third-party (not dwg7.github.io),
+    // so unlike Spiccato (D9) we do NOT grant allow-same-origin here.
+    sandbox: 'allow-scripts allow-forms',
+    url: 'https://disaportal.gsi.go.jp/maps/'
+  },
+  hokkaidoLink: {
+    title: '北海道 防災情報',
+    description:
+      '北海道庁のウェブサイトは X-Frame-Options: SAMEORIGIN を送出しており、このサイトへの埋め込みができません。新しいタブで開いてご覧ください。',
+    url: 'https://www.pref.hokkaido.lg.jp/'
   }
 };
