@@ -41,6 +41,37 @@ window.SAS0_CONFIG = {
       '北海道庁のウェブサイトは X-Frame-Options: SAMEORIGIN を送出しており、このサイトへの埋め込みができません。新しいタブで開いてご覧ください。',
     url: 'https://www.pref.hokkaido.lg.jp/'
   },
+  // 北海道（総務部危機対策課）が運営する防災専用ポータル。179市町村分の避難情報・
+  // 気象警報・河川水位・土砂災害危険度・火山情報を一つの地図でまとめて確認できる、
+  // hokkaidoLink（道庁トップページ）より災害対応に特化した情報源。X-Frame-Options:
+  // SAMEORIGIN を送出しており埋め込み不可のため、同じくリンクカードで案内する。
+  // See DECISIONS.md D19, GitHub issue #2.
+  hokkaidoBousaiPortal: {
+    title: '北海道防災ポータル',
+    description:
+      '北海道内179市町村の避難情報・気象警報・河川水位・土砂災害危険度・火山情報を地図と一覧表で確認できる北海道の防災ポータルを新しいタブで開きます。',
+    url: 'https://www.bousai-hokkaido.jp/?l=15-0%2C96-0&ll=43.58749799999999%2C142.74732300000002&z=7'
+  },
+  // 北海道運輸局が運営する、道内交通機関（航空・フェリー・鉄道・バス・道路）の
+  // 運行状況と気象情報をまとめた多言語対応サイト。旅行者・出張者向けだが、荒天時の
+  // 交通障害情報は北海道の実地調査業務にも有用。See DECISIONS.md D19, issue #2.
+  hokkaidoSafeTravel: {
+    title: '北海道 旅の安全情報',
+    description:
+      '北海道運輸局による、道内交通機関（航空・フェリー・鉄道・バス・道路）の運行状況と気象情報をまとめた多言語対応サイトを新しいタブで開きます。',
+    url: 'https://hokkaido-safe-travel.mlit.go.jp/'
+  },
+  // 防災科学技術研究所（防災科研）が運営する全国リアルタイム震度モニタ。
+  // このサイトはHTTPSに対応していないため（curlで443番ポートへの接続が
+  // タイムアウトすることを確認済み）、renderLinkCardにallowedProtocols: ['http:']
+  // を明示的に渡す必要がある — D7のデフォルトを緩めるのではなく、この一件だけの
+  // 例外として扱う。See DECISIONS.md D19, issue #2.
+  kmoni: {
+    title: '強震モニタ',
+    description:
+      '防災科学技術研究所「強震モニタ」で、日本全国のリアルタイム震度分布を新しいタブで確認できます。このサイトはHTTPSに対応していないため、ブラウザに保護されていない接続の警告が表示される場合があります。',
+    url: 'http://www.kmoni.bosai.go.jp/'
+  },
   // 市町村単位のハザードマップ。北海道179市町村のうち主要な市から着手（D15）。
   // 埋め込み可否は個別に未検証のため、GSI(D14)の教訓に倣いリンクカードで統一。
   municipalities: [
@@ -50,6 +81,17 @@ window.SAS0_CONFIG = {
       title: '札幌市',
       description: '札幌市の災害危険箇所図（ハザードマップ）を新しいタブで開きます。',
       url: 'https://www.city.sapporo.jp/kikikanri/higoro/hazardmap/hazardmap_index.html'
+    },
+    {
+      // 静的なハザードマップ(上記)とは別に、区ごとの避難情報・雨量・河川水位・
+      // 土砂災害危険度をリアルタイムに表示する札幌市自身の防災ポータル。
+      // See DECISIONS.md D19, issue #2.
+      folderKey: 'shien-ishikari',
+      key: 'sapporo-bousai-portal',
+      title: 'さっぽろ防災ポータル',
+      description:
+        '札幌市の防災ポータル（行政区ごとの避難情報・雨量・河川水位・土砂災害危険度をリアルタイムに表示）を新しいタブで開きます。',
+      url: 'https://bousai.city.sapporo.jp/?l=15-0%2C26-0%2C29-0%2C42-0%2C96-0&ll=43.0686606%2C141.34856659999997&z=12'
     },
     {
       folderKey: 'shien-kushiro',

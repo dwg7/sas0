@@ -1,6 +1,8 @@
 SAS0.registerFolder({ key: 'jma', name: '気象庁', parentKey: 'root' });
 SAS0.registerFolder({ key: 'hokkaido', name: '北海道', parentKey: 'root' });
 SAS0.registerFolder({ key: 'gsi', name: '国土地理院', parentKey: 'root' });
+SAS0.registerFolder({ key: 'nied', name: '防災科学技術研究所', parentKey: 'root' });
+SAS0.registerFolder({ key: 'unyukyoku', name: '北海道運輸局', parentKey: 'root' });
 
 // 市町村: grouped by 振興局 (Hokkaido's 14 subprefectures), not a flat list —
 // Hokkaido has 179 municipalities, so only add a subprefecture folder once

@@ -54,7 +54,7 @@ window.SAS0 = (function () {
     container.appendChild(frame);
   }
 
-  function renderLinkCard(container, { title, description, url }) {
+  function renderLinkCard(container, { title, description, url, allowedProtocols }) {
     const card = document.createElement('div');
     card.className = 'sas0-link-card';
 
@@ -68,7 +68,10 @@ window.SAS0 = (function () {
       card.appendChild(paragraph);
     }
 
-    const safeUrl = getSafeUrl(url, { allowedProtocols: ['https:'] });
+    // Defaults to https-only (D7). A caller may pass an explicit narrower
+    // allowlist (e.g. ['http:']) for a source with no HTTPS at all — see
+    // kmoni.js / DECISIONS.md D19. Never widen this by default.
+    const safeUrl = getSafeUrl(url, { allowedProtocols: allowedProtocols || ['https:'] });
     const link = document.createElement('a');
     link.className = 'sas0-link-card-button';
     link.href = safeUrl || '#';
