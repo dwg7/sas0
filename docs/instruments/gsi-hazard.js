@@ -8,10 +8,8 @@
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';
-      SAS0.renderLinkCard(container, {
-        title: config.title,
-        description: config.description,
-        url: config.url
+      SAS0.renderLinkList(container, {
+        groups: [{ items: [{ title: config.title, description: config.description, url: config.url }] }]
       });
     }
   });

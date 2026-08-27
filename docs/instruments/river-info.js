@@ -1,10 +1,10 @@
 (function () {
-  const config = (window.SAS0_CONFIG && window.SAS0_CONFIG.hokkaidoSafeTravel) || {};
+  const config = (window.SAS0_CONFIG && window.SAS0_CONFIG.riverInfo) || {};
 
   SAS0.registerInstrument({
-    key: 'hokkaido-safe-travel',
-    name: config.title || '北海道 旅の安全情報',
-    parentKey: 'unyukyoku',
+    key: 'river-info',
+    name: config.title || '川の防災情報',
+    parentKey: 'mlit',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

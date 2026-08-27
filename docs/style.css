@@ -130,46 +130,70 @@ body {
   font-weight: 700;
 }
 
-.sas0-link-card {
-  margin: auto;
-  max-width: 480px;
-  text-align: center;
+.sas0-link-list-heading {
+  margin: 20px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #95a8be;
+  letter-spacing: 0.02em;
+}
+
+.sas0-link-list-heading:first-child {
+  margin-top: 0;
+}
+
+.sas0-link-list {
   border: 1px solid #243247;
   background: #111a26;
-  border-radius: 10px;
-  padding: 36px 28px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  /* .sas0-instrument is a flex column; overflow != visible makes a flex
+     item's auto min-height resolve to 0, so without this it gets crushed
+     to near-nothing whenever total content exceeds the viewport instead
+     of just scrolling (which .sas0-instrument's own overflow:auto already
+     provides). */
+  flex-shrink: 0;
 }
 
-.sas0-link-card h2 {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 700;
+.sas0-link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #1a2432;
 }
 
-.sas0-link-card p {
-  color: #95a8be;
-  font-size: 13px;
-  line-height: 1.6;
-  margin: 0 0 22px;
+.sas0-link-row:last-child {
+  border-bottom: 0;
 }
 
-.sas0-link-card-button {
-  display: inline-block;
-  padding: 10px 22px;
-  border-radius: 6px;
-  background: #2f6feb;
-  color: #ffffff;
-  text-decoration: none;
+.sas0-link-row-title {
+  font-size: 14px;
   font-weight: 600;
-  transition: background-color 0.15s ease;
 }
 
-.sas0-link-card-button:hover {
-  background: #4c85f0;
+.sas0-link-row-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #95a8be;
+  line-height: 1.5;
 }
 
-.sas0-link-card-button[aria-disabled='true'] {
-  background: #3a4657;
+.sas0-link-row-action {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7ba7e0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sas0-link-row-action:hover {
+  color: #a6c6ef;
+}
+
+.sas0-link-row-action[aria-disabled='true'] {
+  color: #3a4657;
   pointer-events: none;
 }

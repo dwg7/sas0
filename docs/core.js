@@ -54,36 +54,65 @@ window.SAS0 = (function () {
     container.appendChild(frame);
   }
 
-  function renderLinkCard(container, { title, description, url, allowedProtocols }) {
-    const card = document.createElement('div');
-    card.className = 'sas0-link-card';
+  function renderLinkRow({ title, description, url, allowedProtocols }) {
+    const row = document.createElement('div');
+    row.className = 'sas0-link-row';
 
-    const heading = document.createElement('h2');
+    const text = document.createElement('div');
+    text.className = 'sas0-link-row-text';
+
+    const heading = document.createElement('div');
+    heading.className = 'sas0-link-row-title';
     heading.textContent = title || '';
-    card.appendChild(heading);
+    text.appendChild(heading);
 
     if (description) {
-      const paragraph = document.createElement('p');
+      const paragraph = document.createElement('div');
+      paragraph.className = 'sas0-link-row-desc';
       paragraph.textContent = description;
-      card.appendChild(paragraph);
+      text.appendChild(paragraph);
     }
+
+    row.appendChild(text);
 
     // Defaults to https-only (D7). A caller may pass an explicit narrower
     // allowlist (e.g. ['http:']) for a source with no HTTPS at all — see
     // kmoni.js / DECISIONS.md D19. Never widen this by default.
     const safeUrl = getSafeUrl(url, { allowedProtocols: allowedProtocols || ['https:'] });
     const link = document.createElement('a');
-    link.className = 'sas0-link-card-button';
+    link.className = 'sas0-link-row-action';
     link.href = safeUrl || '#';
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.textContent = '新しいタブで開く';
+    link.textContent = '開く ↗';
     if (!safeUrl) {
       link.setAttribute('aria-disabled', 'true');
     }
-    card.appendChild(link);
+    row.appendChild(link);
 
-    container.appendChild(card);
+    return row;
+  }
+
+  // groups: [{ heading?: string, items: [{ title, description, url, allowedProtocols? }] }]
+  // A dense list of link rows, grouped under optional headings — the
+  // space-efficient replacement for the old single-card-per-link layout
+  // (DECISIONS.md D20). Used for every "occasional reference" instrument,
+  // from a single external link (one group, one item) up to the full
+  // grouped 市町村 list.
+  function renderLinkList(container, { groups }) {
+    (groups || []).forEach((group) => {
+      if (group.heading) {
+        const heading = document.createElement('h3');
+        heading.className = 'sas0-link-list-heading';
+        heading.textContent = group.heading;
+        container.appendChild(heading);
+      }
+
+      const list = document.createElement('div');
+      list.className = 'sas0-link-list';
+      (group.items || []).forEach((item) => list.appendChild(renderLinkRow(item)));
+      container.appendChild(list);
+    });
   }
 
   function ensureChildBucket(key) {
@@ -208,7 +237,7 @@ window.SAS0 = (function () {
     getSafeUrl,
     getSafeSandbox,
     renderIframe,
-    renderLinkCard,
+    renderLinkList,
     start() {
       openmct.on('start', () => {
         openmct.router.setPath(`/browse/${NAMESPACE}:root`);

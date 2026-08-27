@@ -26,26 +26,28 @@ Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigati
 │   ├─ 地震情報（北海道関連）      — recent earthquakes affecting Hokkaido
 │   └─ 火山情報（北海道の火山）    — current alert level for Hokkaido's ~20 monitored volcanoes
 ├─ 北海道
-│   ├─ 北海道 防災情報            — external link card (embedding blocked by the prefecture's own site)
-│   └─ 北海道防災ポータル          — external link card; 179-municipality live evacuation/warning/river/
-│                                   landslide/volcano status, on one map
+│   └─ 防災情報                   — a compact link list: the prefecture's homepage (embedding blocked)
+│                                   and 北海道防災ポータル (179-municipality live evacuation/warning/
+│                                   river/landslide/volcano status, on one map)
 ├─ 国土地理院
-│   └─ ハザードマップポータル      — external link card (this app doesn't tolerate iframe sandboxing — D14)
+│   └─ ハザードマップポータル      — link (this app doesn't tolerate iframe sandboxing — D14)
 ├─ 防災科学技術研究所
-│   └─ 強震モニタ                 — external link card; nationwide realtime seismic-intensity map
-│                                   (this source has no HTTPS at all — D19)
+│   └─ 強震モニタ                 — link; nationwide realtime seismic-intensity map (this source has
+│                                   no HTTPS at all — D19)
 ├─ 北海道運輸局
-│   └─ 北海道 旅の安全情報         — external link card; multilingual transport-disruption/weather status
-├─ 市町村                        — grouped by 振興局 (subprefecture); one representative city/town
-│                                   per subprefecture so far (14 of 179 municipalities), plus a live
-│                                   city-run disaster portal for 札幌市 alongside its hazard map
-├─ 火山                          — one link per volcano with an established 火山防災協議会, to that
-│                                   council's own evacuation-plan material (a narrower, differently-
-│                                   organized set than 気象庁's alert list above)
+│   └─ 北海道 旅の安全情報         — link; multilingual transport-disruption/weather status
+├─ 国土交通省
+│   └─ 川の防災情報               — link; national river water-level/flood-forecast portal (D20)
+├─ 市町村                        — a single grouped link list (by 振興局/subprefecture), not a folder
+│                                   tree; one representative city/town per subprefecture so far (14 of
+│                                   179 municipalities), plus a live city-run disaster portal for 札幌市
+├─ 火山                          — a single link list, one row per volcano with an established
+│                                   火山防災協議会, to that council's own evacuation-plan material
+│                                   (a narrower, differently-organized set than 気象庁's alert list above)
 └─ [Spiccato](https://dwg7.github.io/spiccato/) — embedded, unmodified, from its existing deployment
 ```
 
-Each instrument is a single full-screen view — click it in the left-hand tree, look, click the next one. See [DECISIONS.md](DECISIONS.md) D10 for why this replaced the original fixed two-panel layout, and how to add another instrument or organization.
+Each instrument is a single full-screen view — click it in the left-hand tree, look, click the next one. See [DECISIONS.md](DECISIONS.md) D10 for why this replaced the original fixed two-panel layout, and how to add another instrument or organization. Occasional-reference sources (anything above rendered as a link) use the compact `renderLinkList` row format rather than a folder tree per item — see D20 for why, and D20 also covers why the two live prefecture/city disaster portals above stayed links instead of becoming digested instruments (no CORS on their data).
 
 ## What is not sas0?
 
@@ -93,12 +95,12 @@ Where:
 This repository is GitHub Pages oriented and static-only: `main`'s `docs/` directory is served directly, with no build step.
 
 - `docs/index.html` — loads Open MCT from a pinned CDN version, then the scripts below, in order
-- `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` and the shared `getSafeUrl()`/`getSafeSandbox()`/`renderIframe()`/`renderLinkCard()` helpers
-- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 防災科学技術研究所, 北海道運輸局, 市町村 and its 振興局 subfolders, 火山) that instruments attach to
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido-link, hokkaido-portal, hokkaido-safe-travel, kmoni, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array to register several at once)
+- `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` and the shared `getSafeUrl()`/`getSafeSandbox()`/`renderIframe()`/`renderLinkList()` helpers
+- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 防災科学技術研究所, 北海道運輸局, 国土交通省) that instruments attach to. 市町村 and 火山 are *not* folders — each is a single root-level instrument (D20)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido, hokkaido-safe-travel, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
-- `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link cards, etc.)
+- `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)
 
 Open MCT has a few integration quirks specific to loading it from a CDN into a static site (a wrong CDN pin will silently render a blank page) — see [DECISIONS.md](DECISIONS.md) before changing `docs/index.html` or `docs/core.js`.
 

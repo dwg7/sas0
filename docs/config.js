@@ -44,8 +44,9 @@ window.SAS0_CONFIG = {
   // 北海道（総務部危機対策課）が運営する防災専用ポータル。179市町村分の避難情報・
   // 気象警報・河川水位・土砂災害危険度・火山情報を一つの地図でまとめて確認できる、
   // hokkaidoLink（道庁トップページ）より災害対応に特化した情報源。X-Frame-Options:
-  // SAMEORIGIN を送出しており埋め込み不可のため、同じくリンクカードで案内する。
-  // See DECISIONS.md D19, GitHub issue #2.
+  // SAMEORIGIN を送出しており埋め込み不可。裏付けのJSON（data/top/topdata.json等）
+  // もAccess-Control-Allow-Originを送出せずCORS非対応のため計器化もできず、
+  // リンクとして案内する。See DECISIONS.md D19, D20, GitHub issue #2.
   hokkaidoBousaiPortal: {
     title: '北海道防災ポータル',
     description:
@@ -63,20 +64,31 @@ window.SAS0_CONFIG = {
   },
   // 防災科学技術研究所（防災科研）が運営する全国リアルタイム震度モニタ。
   // このサイトはHTTPSに対応していないため（curlで443番ポートへの接続が
-  // タイムアウトすることを確認済み）、renderLinkCardにallowedProtocols: ['http:']
-  // を明示的に渡す必要がある — D7のデフォルトを緩めるのではなく、この一件だけの
-  // 例外として扱う。See DECISIONS.md D19, issue #2.
+  // タイムアウトすることを確認済み）、renderLinkListの各項目にallowedProtocols:
+  // ['http:']を明示的に渡す必要がある — D7のデフォルトを緩めるのではなく、この
+  // 一件だけの例外として扱う。See DECISIONS.md D19, issue #2.
   kmoni: {
     title: '強震モニタ',
     description:
       '防災科学技術研究所「強震モニタ」で、日本全国のリアルタイム震度分布を新しいタブで確認できます。このサイトはHTTPSに対応していないため、ブラウザに保護されていない接続の警告が表示される場合があります。',
     url: 'http://www.kmoni.bosai.go.jp/'
   },
+  // 国土交通省「川の防災情報」。北海道内河川の水位・洪水予報の一次情報源。
+  // 気象庁の警報・注意報（区域単位の大まかな洪水/土砂災害警報のみ、D11）を
+  // 補完する。CORS非対応のため計器化はできず、リンクとして案内する。
+  // See DECISIONS.md D20.
+  riverInfo: {
+    title: '川の防災情報',
+    description:
+      '国土交通省「川の防災情報」で、全国の河川水位・洪水予報（北海道内の観測所を含む）を新しいタブで確認できます。',
+    url: 'https://www.river.go.jp/'
+  },
   // 市町村単位のハザードマップ。北海道179市町村のうち主要な市から着手（D15）。
-  // 埋め込み可否は個別に未検証のため、GSI(D14)の教訓に倣いリンクカードで統一。
+  // regionKey は表示上のグルーピングキー（docs/instruments/municipalities.js
+  // 内の振興局名マップに対応）であり、D20以降はOpen MCT上のフォルダではない。
   municipalities: [
     {
-      folderKey: 'shien-ishikari',
+      regionKey: 'shien-ishikari',
       key: 'sapporo',
       title: '札幌市',
       description: '札幌市の災害危険箇所図（ハザードマップ）を新しいタブで開きます。',
@@ -85,8 +97,8 @@ window.SAS0_CONFIG = {
     {
       // 静的なハザードマップ(上記)とは別に、区ごとの避難情報・雨量・河川水位・
       // 土砂災害危険度をリアルタイムに表示する札幌市自身の防災ポータル。
-      // See DECISIONS.md D19, issue #2.
-      folderKey: 'shien-ishikari',
+      // CORS非対応のため計器化はできず、リンクとして案内する（D19, D20, issue #2）。
+      regionKey: 'shien-ishikari',
       key: 'sapporo-bousai-portal',
       title: 'さっぽろ防災ポータル',
       description:
@@ -94,21 +106,21 @@ window.SAS0_CONFIG = {
       url: 'https://bousai.city.sapporo.jp/?l=15-0%2C26-0%2C29-0%2C42-0%2C96-0&ll=43.0686606%2C141.34856659999997&z=12'
     },
     {
-      folderKey: 'shien-kushiro',
+      regionKey: 'shien-kushiro',
       key: 'kushiro',
       title: '釧路市',
       description: '釧路市のハザードマップ（津波・洪水・土砂災害・火山）を新しいタブで開きます。',
       url: 'https://www.city.kushiro.lg.jp/kurashi/bousai/1003697/index.html'
     },
     {
-      folderKey: 'shien-oshima',
+      regionKey: 'shien-oshima',
       key: 'hakodate',
       title: '函館市',
       description: '函館市のハザードマップ（津波・高潮・洪水・土砂災害・地震）を新しいタブで開きます。',
       url: 'https://www.city.hakodate.hokkaido.jp/docs/2017092500033/'
     },
     {
-      folderKey: 'shien-hiyama',
+      regionKey: 'shien-hiyama',
       key: 'esashi',
       title: '江差町',
       description: '江差町のハザードマップ（洪水・津波・土砂災害）を新しいタブで開きます。',
@@ -118,14 +130,14 @@ window.SAS0_CONFIG = {
       // 倶知安町は単一のハザードマップ統合ページを持たず、洪水浸水想定図・土砂災害警戒
       // システム・火山情報へのリンクが防災情報ページに分散している。次善としてその
       // 防災情報ページ自体を案内する。
-      folderKey: 'shien-shiribeshi',
+      regionKey: 'shien-shiribeshi',
       key: 'kutchan',
       title: '倶知安町',
       description: '倶知安町の防災情報ページ（洪水・土砂災害・火山防災の関連リンク）を新しいタブで開きます。',
       url: 'https://www.town.kutchan.hokkaido.jp/Living_Information/bouhan-bousai-syobo/bousai_info/'
     },
     {
-      folderKey: 'shien-sorachi',
+      regionKey: 'shien-sorachi',
       key: 'iwamizawa',
       title: '岩見沢市',
       description: '岩見沢市のハザードマップ（洪水・内水氾濫）を新しいタブで開きます。',
@@ -134,56 +146,56 @@ window.SAS0_CONFIG = {
     {
       // 旭川市も洪水・土砂災害マップが別ページに分かれているため、全ハザードへの
       // 導線としてより適切な総合防災ガイド「これ一冊まとまっぷ」のページを案内する。
-      folderKey: 'shien-kamikawa',
+      regionKey: 'shien-kamikawa',
       key: 'asahikawa',
       title: '旭川市',
       description: '旭川市の防災ガイド「これ一冊まとまっぷ」（洪水・内水氾濫・土砂災害等）を新しいタブで開きます。',
       url: 'https://www.city.asahikawa.hokkaido.jp/kurashi/320/kouzui/d065806.html'
     },
     {
-      folderKey: 'shien-rumoi',
+      regionKey: 'shien-rumoi',
       key: 'rumoi',
       title: '留萌市',
       description: '留萌市のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
       url: 'https://www.e-rumoi.jp/bosai/cat_00097.html'
     },
     {
-      folderKey: 'shien-soya',
+      regionKey: 'shien-soya',
       key: 'wakkanai',
       title: '稚内市',
       description: '稚内市のハザードマップ（洪水・津波）を新しいタブで開きます。',
       url: 'https://www.city.wakkanai.hokkaido.jp/kurashi/bosaibohankotsuanzen/bosai/sonaeru/hazardmap/'
     },
     {
-      folderKey: 'shien-okhotsk',
+      regionKey: 'shien-okhotsk',
       key: 'kitami',
       title: '北見市',
       description: '北見市のWEBハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
       url: 'https://www.city.kitami.lg.jp/administration/disaster/detail.php?content=11476'
     },
     {
-      folderKey: 'shien-iburi',
+      regionKey: 'shien-iburi',
       key: 'muroran',
       title: '室蘭市',
       description: '室蘭市の防災ハザードマップ（津波・土砂災害・洪水・内水）を新しいタブで開きます。',
       url: 'https://www.city.muroran.lg.jp/prevention/?content=2392'
     },
     {
-      folderKey: 'shien-hidaka',
+      regionKey: 'shien-hidaka',
       key: 'urakawa',
       title: '浦河町',
       description: '浦河町のハザードマップ（津波・洪水・内水・土砂災害）を新しいタブで開きます。',
       url: 'https://www.town.urakawa.hokkaido.jp/gyosei/prevention/?content=227'
     },
     {
-      folderKey: 'shien-tokachi',
+      regionKey: 'shien-tokachi',
       key: 'obihiro',
       title: '帯広市',
       description: '帯広市のWEBハザードマップ（洪水・内水氾濫・土砂災害）を新しいタブで開きます。',
       url: 'https://www.city.obihiro.hokkaido.jp/kurashi/bousai/1007329/1014402.html'
     },
     {
-      folderKey: 'shien-nemuro',
+      regionKey: 'shien-nemuro',
       key: 'nemuro',
       title: '根室市',
       description: '根室市の防災ハザードマップ（津波・土砂災害・高潮・洪水）を新しいタブで開きます。',
