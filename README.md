@@ -43,8 +43,8 @@ Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigati
 │                                   quake/volcano status), distinct from both 北海道運輸局 and
 │                                   国土交通省 above (D21)
 ├─ 市町村                        — a single grouped link list (by 振興局/subprefecture), not a folder
-│                                   tree; 30 of 179 municipalities so far, extended in repeatable
-│                                   ~8-city batches (D23, D24), every subprefecture has at least one
+│                                   tree; 38 of 179 municipalities so far, extended in repeatable
+│                                   ~8-city batches (D23–D25), every subprefecture has at least 2
 │                                   and larger population centers have more, plus a live city-run
 │                                   disaster portal for 札幌市
 ├─ 火山                          — a single link list, one row per volcano with an established

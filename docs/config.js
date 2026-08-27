@@ -342,6 +342,69 @@ window.SAS0_CONFIG = {
       title: '深川市',
       description: '深川市のハザードマップ（石狩川・雨竜川流域の洪水浸水想定）を新しいタブで開きます。',
       url: 'https://www.city.fukagawa.lg.jp/cms/section/soumu/uo2pli000000ck2a.html'
+    },
+    // バッチ4（8件）: 残っていた1件のみの4振興局（釧路・檜山・留萌・宗谷）を2件以上に、
+    // 加えて未収録の人口規模の大きい市町を追加。See DECISIONS.md D25.
+    {
+      // 釧路町の公式サイトはHTTPSのSNIが一致せずTLSハンドシェイクに失敗する
+      // （名寄市 D23と同一の失敗モード。しかも同一IPアドレス 45.60.112.77 で、
+      // 同じホスティング基盤の設定不備の可能性が高い）。kmoni/名寄市と同じ
+      // allowedProtocols: ['http:'] 例外が必要。See DECISIONS.md D25.
+      regionKey: 'shien-kushiro',
+      key: 'kushirocho',
+      title: '釧路町',
+      description: '釧路町のハザードマップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'http://www.town.kushiro.lg.jp/disaster/keikaku/hazard.html',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-hiyama',
+      key: 'setana',
+      title: 'せたな町',
+      description: 'せたな町防災マップWEB版（土砂災害・津波）を新しいタブで開きます。',
+      url: 'https://www.town.setana.lg.jp/kurashi/bousai/bousaimapweb.html'
+    },
+    {
+      regionKey: 'shien-rumoi',
+      key: 'haboro',
+      title: '羽幌町',
+      description: '羽幌町のハザードマップ（津波・土砂災害・洪水）を新しいタブで開きます。',
+      url: 'https://www.town.haboro.lg.jp/kurashi/bousai-bouhan/bousai_map/hazardmap/'
+    },
+    {
+      regionKey: 'shien-soya',
+      key: 'esashi-cho',
+      title: '枝幸町',
+      description: '枝幸町の防災マップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.esashi.jp/disaster/hazardmap.html'
+    },
+    {
+      regionKey: 'shien-ishikari',
+      key: 'kitahiroshima',
+      title: '北広島市',
+      description: '北広島市防災マップ（ハザードマップ）（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.city.kitahiroshima.hokkaido.jp/hotnews/detail/00150372.html'
+    },
+    {
+      regionKey: 'shien-iburi',
+      key: 'noboribetsu',
+      title: '登別市',
+      description: '登別市防災マップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.city.noboribetsu.lg.jp/bousaimap/'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'makubetsu',
+      title: '幕別町',
+      description: '幕別町の防災のしおり・ハザードマップ（洪水・土砂災害・津波・高潮）を新しいタブで開きます。',
+      url: 'https://www.town.makubetsu.lg.jp/shobo_bosai/bosai/bosaimap/1659.html'
+    },
+    {
+      regionKey: 'shien-nemuro',
+      key: 'betsukai',
+      title: '別海町',
+      description: '別海町防災ハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://betsukai.jp/anzen/bosai/betsukai_hazardmap/'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
