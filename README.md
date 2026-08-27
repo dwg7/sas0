@@ -38,9 +38,15 @@ Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigati
 │   └─ 北海道 旅の安全情報         — link; multilingual transport-disruption/weather status
 ├─ 国土交通省
 │   └─ 川の防災情報               — link; national river water-level/flood-forecast portal (D20)
+├─ 北海道開発局
+│   └─ 防災情報ポータルサイト      — link; the bureau's own curated portal (river/road/port/weather/
+│                                   quake/volcano status), distinct from both 北海道運輸局 and
+│                                   国土交通省 above (D21)
 ├─ 市町村                        — a single grouped link list (by 振興局/subprefecture), not a folder
-│                                   tree; one representative city/town per subprefecture so far (14 of
-│                                   179 municipalities), plus a live city-run disaster portal for 札幌市
+│                                   tree; 30 of 179 municipalities so far, extended in repeatable
+│                                   ~8-city batches (D23, D24), every subprefecture has at least one
+│                                   and larger population centers have more, plus a live city-run
+│                                   disaster portal for 札幌市
 ├─ 火山                          — a single link list, one row per volcano with an established
 │                                   火山防災協議会, to that council's own evacuation-plan material
 │                                   (a narrower, differently-organized set than 気象庁's alert list above)
@@ -96,11 +102,12 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 
 - `docs/index.html` — loads Open MCT from a pinned CDN version, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` and the shared `getSafeUrl()`/`getSafeSandbox()`/`renderIframe()`/`renderLinkList()` helpers
-- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 防災科学技術研究所, 北海道運輸局, 国土交通省) that instruments attach to. 市町村 and 火山 are *not* folders — each is a single root-level instrument (D20)
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido, hokkaido-safe-travel, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`)
+- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 防災科学技術研究所, 北海道運輸局, 国土交通省, 北海道開発局) that instruments attach to. 市町村 and 火山 are *not* folders — each is a single root-level instrument (D20)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)
+- `scripts/check-links.sh` — manual (not CI, D22) tool to re-verify every outbound URL in `docs/config.js`/`docs/instruments/*.js` still resolves
 
 Open MCT has a few integration quirks specific to loading it from a CDN into a static site (a wrong CDN pin will silently render a blank page) — see [DECISIONS.md](DECISIONS.md) before changing `docs/index.html` or `docs/core.js`.
 

@@ -4,7 +4,7 @@ Working notes for AI coding assistants in this repo. See [README.md](README.md) 
 
 ## What this repo is
 
-sas0 is a project of DWG7 (UN Smart Maps Group), a Domain Working Group of the [UN Open GIS Initiative](https://unopengis.org/). It is a static, zero-build GitHub Pages site — everything served lives under `docs/`, deployed straight from `main`, no bundler, no `package.json`, no CI.
+sas0 is a project of DWG7 (UN Smart Maps Group), a Domain Working Group of the [UN Open GIS Initiative](https://unopengis.org/). It is a static, zero-build GitHub Pages site — everything served lives under `docs/`, deployed straight from `main`, no bundler, no `package.json`, no CI. `scripts/check-links.sh` (D22) is a manual maintenance tool run by hand, not an exception to this — nothing in the repo invokes it automatically.
 
 ## Project philosophy — read before adding a data source
 
@@ -22,6 +22,7 @@ sas0 is a project of DWG7 (UN Smart Maps Group), a Domain Working Group of the [
 - **Data that can be drawn on a map should go on the (eventual) shared map, not become its own tree instrument.** The tree/folder structure (D10) is for what can't be overlaid — warnings lists, quake logs, volcano tables. See [DECISIONS.md](DECISIONS.md) D13.
 - Any new instrument source URL (image, iframe, etc.) needs a corresponding `allowedHosts` entry in `docs/config.js` and must go through `SAS0.getSafeUrl()` — don't assign to `.src` directly. See [DECISIONS.md](DECISIONS.md) D7.
 - Before committing any change to a hardcoded external URL (a CDN pin, a placeholder image, an embed target), verify it actually resolves: `curl -sI <url>`. Several of the bugs fixed in this repo's history were exactly this — a URL that looked right but 404'd.
+- **When picking up this repo after a gap, or after adding several new outbound links in one session, run `./scripts/check-links.sh`** to re-verify every URL in `docs/config.js`/`docs/instruments/*.js` still resolves — links added correctly can still go stale later (a page moves, a site restructures). This is a manual tool, not CI (see below) — it doesn't run itself, so re-running it periodically is the only thing that makes it useful. A `FAIL` isn't automatically real: check `warnings.js`'s JMA URL template and `weather.js`'s `imageBaseUrl` are expected permanent false positives (base URLs for runtime concatenation, not fetchable pages), and some sites bot-block plain `curl` even when fine in a real browser (D20's river.go.jp). See [DECISIONS.md](DECISIONS.md) D22 for the full reasoning, including why client-side/automatic detection isn't used instead.
 - If an iframe's `sandbox` needs a new token, add it to `getSafeSandbox()`'s allowlist in `docs/core.js`, not just `config.js` — the allowlist is what actually gets applied. Only add `allow-same-origin` for a source that's genuinely same-origin with sas0 in production (see [DECISIONS.md](DECISIONS.md) D9); for anything actually third-party (D12), granting it would be a real isolation loss, not a no-op.
 - `docs/index.html` currently pins Open MCT to a release candidate (`4.3.0-rc1`, D8), not a final release. Re-run D2's `curl -sI` checklist before bumping it, and don't assume this stays a placeholder concern forever — check whether the RC has since gone final.
 

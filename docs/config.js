@@ -83,6 +83,17 @@ window.SAS0_CONFIG = {
       '国土交通省「川の防災情報」で、全国の河川水位・洪水予報（北海道内の観測所を含む）を新しいタブで確認できます。',
     url: 'https://www.river.go.jp/'
   },
+  // 北海道開発局が運営する防災情報ポータルサイト。河川・土砂災害・道路・港湾・
+  // 気象・地震津波・火山・各開発建設部の災害情報までを網羅した、開発局自身が
+  // 編集するリンク集で、開発局の管理する国道・河川に関する固有情報（河川
+  // リアルタイム情報等）への入口としてはriverInfoより網羅的。
+  // See DECISIONS.md D21, HANDOVER.md open item #2.
+  hokkaidoDevelopmentBureau: {
+    title: '防災情報ポータルサイト',
+    description:
+      '北海道開発局の防災情報ポータルサイト（河川・土砂災害・道路・港湾・気象・地震津波・火山・各開発建設部の災害情報を集約）を新しいタブで開きます。',
+    url: 'https://www.hkd.mlit.go.jp/ky/saigai/splaat0000001sq7.html'
+  },
   // 市町村単位のハザードマップ。北海道179市町村のうち主要な市から着手（D15）。
   // regionKey は表示上のグルーピングキー（docs/instruments/municipalities.js
   // 内の振興局名マップに対応）であり、D20以降はOpen MCT上のフォルダではない。
@@ -200,6 +211,137 @@ window.SAS0_CONFIG = {
       title: '根室市',
       description: '根室市の防災ハザードマップ（津波・土砂災害・高潮・洪水）を新しいタブで開きます。',
       url: 'https://www.city.nemuro.hokkaido.jp/lifeinfo/kakuka/soumubu/kikikanri/kiki_SONAE/10244.html'
+    },
+    // 以下8件は既に1市町村を持つ振興局への2件目以降（人口規模の大きい市を優先）。
+    // See DECISIONS.md D23.
+    {
+      regionKey: 'shien-iburi',
+      key: 'tomakomai',
+      title: '苫小牧市',
+      description: '苫小牧市のまちごとハザードマップ（地震・津波・風水害・土砂災害・火山）を新しいタブで開きます。',
+      url: 'https://www.city.tomakomai.hokkaido.jp/kurashi/bosai/jishin/hazardmap/'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'otaru',
+      title: '小樽市',
+      description: '小樽市のハザードマップ（洪水・土砂災害・津波）を新しいタブで開きます。',
+      url: 'https://www.city.otaru.lg.jp/categories/bunya/ansin_anzen/bousai/hazardmap/'
+    },
+    {
+      // 単体のハザードマップページは樽前山の火山マップを含まないため、旭川市と
+      // 同様、両方へ導線のある防災情報ページを案内する。
+      regionKey: 'shien-ishikari',
+      key: 'chitose',
+      title: '千歳市',
+      description: '千歳市の防災情報ページ（洪水・土砂災害・樽前山火山のハザードマップ）を新しいタブで開きます。',
+      url: 'https://www.city.chitose.lg.jp/c50/1002703/1002706/1004864.html'
+    },
+    {
+      regionKey: 'shien-ishikari',
+      key: 'ebetsu',
+      title: '江別市',
+      description: '江別市の防災あんしんマップ（洪水ハザードマップ・避難所）を新しいタブで開きます。',
+      url: 'https://www.city.ebetsu.hokkaido.jp/site/bousai/272.html'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'abashiri',
+      title: '網走市',
+      description: '網走市のWeb版ハザードマップ（浸水想定区域・土砂災害警戒区域）を新しいタブで開きます。',
+      url: 'https://www.city.abashiri.hokkaido.jp/site/bousai/20164.html'
+    },
+    {
+      // 倶知安町・千歳市と同様、単一のハザードマップ統合ページがないため、
+      // 津波・洪水・土砂災害・有珠山火山の各マップへの導線がある
+      // 「災害への備え」カテゴリページを案内する。
+      regionKey: 'shien-iburi',
+      key: 'date',
+      title: '伊達市',
+      description: '伊達市の「災害への備え」ページ（津波・洪水・土砂災害・有珠山火山のハザードマップ）を新しいタブで開きます。',
+      url: 'https://www.city.date.hokkaido.jp/hotnews/category/219.html'
+    },
+    {
+      // 名寄市の公式サイトはこのページをHTTPSで提供していない（TLSハンドシェイクが
+      // SNI不一致で失敗することを確認済み）。kmoni（D19）と同じ理由で
+      // allowedProtocols: ['http:'] が必要 — D7のデフォルトを緩めるのではなく、
+      // この一件だけの例外として扱う。See DECISIONS.md D23.
+      regionKey: 'shien-kamikawa',
+      key: 'nayoro',
+      title: '名寄市',
+      description: '名寄市の防災・災害・ハザードマップページ（洪水・土砂災害・ため池）を新しいタブで開きます。',
+      url: 'http://www.city.nayoro.lg.jp/life/cat3/vdh2d1000000boqc.html',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'takikawa',
+      title: '滝川市',
+      description: '滝川市の防災ハザードマップ（洪水・ため池）を新しいタブで開きます。',
+      url: 'https://www.city.takikawa.lg.jp/site/bousai/1110.html'
+    },
+    // バッチ3（8件）: まだ1〜2市町村しかない振興局への追加、人口規模で優先。
+    // See DECISIONS.md D24.
+    {
+      regionKey: 'shien-tokachi',
+      key: 'otofuke',
+      title: '音更町',
+      description: '音更町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.otofuke.hokkaido.jp/bosai/hinanjo/'
+    },
+    {
+      regionKey: 'shien-oshima',
+      key: 'hokuto',
+      title: '北斗市',
+      description: '北斗市のハザードマップ（津波・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.city.hokuto.hokkaido.jp/anshin/bosai/hazardmap/'
+    },
+    {
+      regionKey: 'shien-ishikari',
+      key: 'eniwa',
+      title: '恵庭市',
+      description: '恵庭市のWeb版ハザードマップ（浸水想定区域・土砂災害警戒区域）を新しいタブで開きます。',
+      url: 'https://www.city.eniwa.hokkaido.jp/soshikikarasagasu/soumubu/kichi_bosaika/bosai_saigai/20701.html'
+    },
+    {
+      // 倶知安町・千歳市・伊達市と同様、単一のハザードマップ統合ページがないため、
+      // 「防災計画・ハザードマップ等」カテゴリページを案内する。
+      regionKey: 'shien-kamikawa',
+      key: 'furano',
+      title: '富良野市',
+      description: '富良野市の「防災計画・ハザードマップ等」ページ（洪水・土砂災害・地震のハザードマップ）を新しいタブで開きます。',
+      url: 'https://www.city.furano.hokkaido.jp/life/bosaigai/saigainisonaete/bousaikeikaku/'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'mombetsu',
+      title: '紋別市',
+      description: '紋別市のハザードマップ（洪水・津波）を新しいタブで開きます。',
+      url: 'https://mombetsu.jp/prevention/?content=956'
+    },
+    {
+      regionKey: 'shien-nemuro',
+      key: 'nakashibetsu',
+      title: '中標津町',
+      description: '中標津町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.nakashibetsu.jp/kurashi/bohanbosai/HM/'
+    },
+    {
+      regionKey: 'shien-hidaka',
+      key: 'shinhidaka',
+      title: '新ひだか町',
+      description: '新ひだか町のハザードマップ（津波・洪水）を新しいタブで開きます。',
+      url: 'https://www.shinhidaka-hokkaido.jp/bousai/'
+    },
+    {
+      // 検索結果に出るURL（.../uo2pli000000cjuz.html）は既にstaleで、部署一覧ページへ
+      // 301リダイレクトされる。現行の正しいページ（.../uo2pli000000ck2a.html）に
+      // 差し替え済み。See DECISIONS.md D24.
+      regionKey: 'shien-sorachi',
+      key: 'fukagawa',
+      title: '深川市',
+      description: '深川市のハザードマップ（石狩川・雨竜川流域の洪水浸水想定）を新しいタブで開きます。',
+      url: 'https://www.city.fukagawa.lg.jp/cms/section/soumu/uo2pli000000ck2a.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
