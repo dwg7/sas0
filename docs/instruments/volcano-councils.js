@@ -4,7 +4,7 @@
   SAS0.registerInstrument({
     key: 'volcano-councils',
     name: '火山',
-    parentKey: 'root',
+    parentKey: 'reference',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

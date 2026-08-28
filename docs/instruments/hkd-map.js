@@ -113,6 +113,13 @@
   }
 
   function buildFillColorExpression(byAreaCode) {
+    // MapLibre's 'match' expression requires at least one label/output pair
+    // before the fallback (4 args minimum) — with zero active warnings
+    // anywhere in Hokkaido, the loop below never runs and a bare fallback
+    // color must be returned directly instead of an ['match', ...] wrapper.
+    if (byAreaCode.size === 0) {
+      return NO_WARNING_COLOR;
+    }
     const expr = ['match', ['get', 'code']];
     byAreaCode.forEach((activeWarnings, areaCode) => {
       expr.push(areaCode, SEVERITY_COLOR[bestSeverity(activeWarnings)]);
@@ -142,11 +149,46 @@
     return municipalities.find((m) => m.title === name) || null;
   }
 
+  const INFO_PLACEHOLDER_HTML =
+    '<div class="sas0-map-info-placeholder">地図上にカーソルを合わせると、市町村・警報の状況が表示されます。</div>';
+
+  // Docked info pane, updated continuously on hover — Open MCT's own
+  // Inspector uses the same "fixed pane, not a floating tooltip" idiom for
+  // showing details of whatever's under the cursor/selection. This is a
+  // native re-implementation of that visual language, not an integration
+  // with Open MCT's actual Inspector plugin (which is coupled to its object
+  // selection model, not raw MapLibre hover events). See DECISIONS.md D29.
+  function renderInfoPanel(panel, { municipalityName, areaName, activeWarnings }) {
+    if (!municipalityName && !areaName) {
+      panel.innerHTML = INFO_PLACEHOLDER_HTML;
+      return;
+    }
+    const titleText = municipalityName || areaName;
+    const warningText =
+      activeWarnings && activeWarnings.length > 0
+        ? activeWarnings.map((warning) => warning.name).join('、')
+        : '現在、発表されている警報・注意報はありません。';
+    const areaLine =
+      areaName && areaName !== titleText
+        ? `<div class="sas0-map-info-area">${escapeHtml(areaName)}</div>`
+        : '';
+    panel.innerHTML = `<div class="sas0-map-info-title">${escapeHtml(titleText)}</div>${areaLine}<div class="sas0-map-info-warning">${escapeHtml(warningText)}</div>`;
+  }
+
   async function render(container) {
     container.innerHTML = '';
+    const mapWrap = document.createElement('div');
+    mapWrap.className = 'sas0-map-wrap';
+    container.appendChild(mapWrap);
+
     const mapDiv = document.createElement('div');
     mapDiv.className = 'sas0-map';
-    container.appendChild(mapDiv);
+    mapWrap.appendChild(mapDiv);
+
+    const infoPanel = document.createElement('div');
+    infoPanel.className = 'sas0-map-info';
+    infoPanel.innerHTML = INFO_PLACEHOLDER_HTML;
+    mapWrap.appendChild(infoPanel);
 
     const styleUrl = SAS0.getSafeUrl(config.basemapStyleUrl, { allowedHosts: ALLOWED_HOSTS });
     const jmaSourceUrl = SAS0.getSafeUrl(config.jmaSourceUrl, { allowedHosts: ALLOWED_HOSTS });
@@ -237,33 +279,43 @@
       map.getCanvas().style.cursor = '';
     });
 
+    // Hover updates the docked info panel (ambient, non-blocking) with both
+    // layers at once; click opens a popup with a link, from ksj-n03-fill
+    // only. Splitting it this way (rather than a click handler per layer)
+    // is deliberate — both fill layers cover the same ground, so two
+    // independent click handlers used to both fire on one click and stack
+    // two overlapping popups. See DECISIONS.md D29.
+    map.on('mousemove', (event) => {
+      const features = map.queryRenderedFeatures(event.point, {
+        layers: ['ksj-n03-fill', 'jma-warning-fill']
+      });
+      if (features.length === 0) {
+        renderInfoPanel(infoPanel, {});
+        return;
+      }
+      const muniFeature = features.find((feature) => feature.layer.id === 'ksj-n03-fill');
+      const warnFeature = features.find((feature) => feature.layer.id === 'jma-warning-fill');
+      renderInfoPanel(infoPanel, {
+        municipalityName: muniFeature ? muniFeature.properties.municipality : null,
+        areaName: warnFeature ? warnFeature.properties.name : null,
+        activeWarnings: warnFeature ? warningsByAreaCode.get(warnFeature.properties.code) || [] : []
+      });
+    });
+    mapDiv.addEventListener('mouseleave', () => renderInfoPanel(infoPanel, {}));
+
     map.on('click', 'ksj-n03-fill', (event) => {
       const feature = event.features && event.features[0];
       if (!feature) {
         return;
       }
+      // No popup for a municipality with no registered link (nothing to
+      // click through to) — the hover panel already told the user its name
+      // and warning status; a click implies wanting to open something.
       const match = findMunicipalityLink(feature.properties);
-      const html = match
-        ? linkRowHtml(match)
-        : linkRowHtml({
-            title: feature.properties.municipality,
-            description: 'この市町村はまだリンク未登録です（sas0の市町村一覧を参照）。'
-          });
-      new maplibregl.Popup().setLngLat(event.lngLat).setHTML(html).addTo(map);
-    });
-
-    map.on('click', 'jma-warning-fill', (event) => {
-      const feature = event.features && event.features[0];
-      if (!feature) {
+      if (!match) {
         return;
       }
-      const active = warningsByAreaCode.get(feature.properties.code) || [];
-      const description =
-        active.length > 0 ? active.map((warning) => warning.name).join('、') : '現在、発表されている警報・注意報はありません。';
-      new maplibregl.Popup()
-        .setLngLat(event.lngLat)
-        .setHTML(linkRowHtml({ title: feature.properties.name, description }))
-        .addTo(map);
+      new maplibregl.Popup().setLngLat(event.lngLat).setHTML(linkRowHtml(match)).addTo(map);
     });
 
     return () => {
@@ -276,6 +328,7 @@
     name: config.title || '地図',
     parentKey: 'root',
     autoRefresh: false,
+    order: 2,
     render
   });
 })();

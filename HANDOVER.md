@@ -2,51 +2,58 @@
 
 Current state of sas0, for whoever (human or AI) picks this up next.
 
-## Status as of 2026-08-28
+## Status as of 2026-08-29
 
 - **v0 shipped and live**: [PR #1](https://github.com/dwg7/sas0/pull/1) merged to `main`, GitHub Pages serving at <https://dwg7.github.io/sas0/>. It originally shipped broken (four compounding Open MCT/CDN bugs — [DECISIONS.md](DECISIONS.md) D1–D6), fixed before/shortly after merge.
 - **Open MCT pinned to `4.3.0-rc1`**, using the current selector-string `start('#app')` form ([DECISIONS.md](DECISIONS.md) D8).
 - **Architecture is Open MCT's own browse tree** (D10), following a UX consulting pass for a concrete daily-use case: a Hokkaido regional survey department director who wants to check a handful of disaster-related sources by clicking through a list, not stare at a fixed grid. Every instrument is a single full-screen view, one click away. Current shape:
 
+  Root order is deliberate, not just registration order (`order` field added to `core.js`, D28): 気象庁 and 地図 pinned first for daily use, then 建制順 / 省庁→都道府県→市町村, occasional-reference sources bucketed into リンク集 last.
+
   ```
   状況認識サービス0 (sas0)
-  ├─ 気象庁
+  ├─ 気象庁                        — pinned first, daily use
   │   ├─ 天気図                    — live JMA surface weather chart
   │   ├─ 警報・注意報（北海道）      — active advisories/warnings, 8 forecast regions
   │   ├─ 地震情報（北海道関連）      — recent Hokkaido-relevant earthquakes
-  │   └─ 火山情報（北海道の火山）    — current alert level, ~20 monitored volcanoes
-  ├─ 北海道
-  │   └─ 防災情報                   — one compact link list: pref homepage (framing blocked) +
-  │                                     北海道防災ポータル (live 179-municipality evacuation/warning/
-  │                                     river/landslide/volcano status on one map, D19)
-  ├─ 国土地理院
-  │   └─ ハザードマップポータル      — link (D14 — embedding breaks it)
+  │   └─ 火山情報（北海道の火山）    — current alert level, the 9 continuously-monitored volcanoes
+  │                                     only (filtered from a wider 20-volcano range, D28)
+  ├─ 地図                          — pinned second, daily use; native MapLibre GL JS map, no iframe
+  │                                     (D27); replaces Spiccato, whose one job (proving a complex
+  │                                     CDN-loaded MapLibre site could run embedded in Open MCT — D9)
+  │                                     was already done. JMA forecast polygons colored live by
+  │                                     warning severity; municipality polygons clickable through to
+  │                                     their 市町村 link when one exists (D26/D27). Hover shows a
+  │                                     docked info panel, click opens a link-only popup (D29)
   ├─ 防災科学技術研究所
   │   └─ 強震モニタ                 — link; nationwide realtime seismic intensity; this source is
   │                                     HTTP-only, no HTTPS at all (D19)
-  ├─ 北海道運輸局
-  │   └─ 北海道 旅の安全情報         — link; multilingual transport-disruption/weather status (D19)
   ├─ 国土交通省
   │   └─ 川の防災情報               — link; national river water-level/flood-forecast portal (D20)
   ├─ 北海道開発局
   │   └─ 防災情報ポータルサイト      — link; the bureau's own curated portal (河川/土砂災害/道路/港湾/
   │                                     気象/地震津波/火山), a third distinct MLIT-family org
   │                                     alongside 北海道運輸局 and 国土交通省 above (D21)
-  ├─ 市町村                        — single grouped link list (NOT a folder tree — flattened in D20),
-  │                                   38 of Hokkaido's 179 municipalities, one row per subprefecture
-  │                                   heading; every subprefecture has 2+ entries now, larger ones up
-  │                                   to 5 (D23–D25 — extended in repeatable ~8-city batches);
-  │                                   石狩振興局 has both 札幌市's static hazard map and さっぽろ
-  │                                   防災ポータル's live per-ward dashboard (D19)
-  ├─ 火山                          — single link list (flattened in D20), 9 rows, one per volcano
-  │                                   with an established 火山防災協議会 (D15), each linking to that
-  │                                   council's own evacuation-plan material rather than JMA's
-  │                                   summary (D18) — a different grouping from 気象庁's list above
-  └─ 地図                          — native MapLibre GL JS map, no iframe (D27); replaces Spiccato,
-                                      whose one job (proving a complex CDN-loaded MapLibre site could
-                                      run embedded in Open MCT — D9) was already done. JMA forecast
-                                      polygons colored live by warning severity; municipality polygons
-                                      clickable through to their 市町村 link when one exists (D26/D27)
+  ├─ 北海道
+  │   └─ 防災情報                   — one compact link list: pref homepage (framing blocked) +
+  │                                     北海道防災ポータル (live 179-municipality evacuation/warning/
+  │                                     river/landslide/volcano status on one map, D19)
+  └─ リンク集                      — occasional-reference sources, not live status (D28)
+      ├─ 国土地理院
+      │   └─ ハザードマップポータル  — link (D14 — embedding breaks it)
+      ├─ 北海道運輸局
+      │   └─ 北海道 旅の安全情報     — link; multilingual transport-disruption/weather status (D19)
+      ├─ 市町村                    — single grouped link list (NOT a folder tree — flattened in D20),
+      │                               38 of Hokkaido's 179 municipalities, one row per subprefecture
+      │                               heading; every subprefecture has 2+ entries now, larger ones up
+      │                               to 5 (D23–D25 — extended in repeatable ~8-city batches);
+      │                               石狩振興局 has both 札幌市's static hazard map and さっぽろ
+      │                               防災ポータル's live per-ward dashboard (D19)
+      └─ 火山                      — single link list (flattened in D20), 9 rows, one per volcano
+                                      with an established 火山防災協議会 (D15), each linking to that
+                                      council's own evacuation-plan material rather than JMA's
+                                      summary (D18) — same 9 volcanoes as 気象庁's list above, but
+                                      complementary information (D28)
   ```
 
   All four 気象庁 instruments were verified against live data while building this (including two Hokkaido volcanoes that happened to be at an elevated alert level at the time — レベル２, correctly rendered).
@@ -56,6 +63,7 @@ Current state of sas0, for whoever (human or AI) picks this up next.
 
 ## Resolved since last handover
 
+- **Root folder reorganized around daily-use vs. occasional-reference; 火山情報 filtered to the 9 continuously-monitored volcanoes; 地図's overlapping-popup bug fixed.** `docs/core.js`'s `registerFolder`/`registerInstrument` gained an optional `order` field so display order no longer depends on `<script>` tag sequence — 気象庁 and 地図 are now pinned first (daily use), the rest follow 建制順/省庁→都道府県→市町村, and a new リンク集 folder collects sources that are genuinely one-time reference material (国土地理院 ハザードマップポータル, 北海道運輸局 旅の安全情報, 市町村, 火山) rather than live status. 火山情報（北海道の火山）now shows exactly the 9 volcanoes JMA continuously monitors, not all 20 in its code range — the 11 dropped never had a 噴火警戒レベル to show in the first place, and the 9 kept now match リンク集＞火山's council list exactly. Along the way, verifying 地図 surfaced and fixed a pre-existing bug: two independent click handlers on overlapping map layers produced two stacked popups; redesigned as hover → docked info panel (both layers combined) / click → link-only popup (one layer only), styled after Open MCT's own Inspector idiom. See [DECISIONS.md](DECISIONS.md) D28, D29.
 - **Spiccato retired, replaced by 地図 — a native MapLibre GL JS instrument, no iframe.** Closes open item #1 below. `docs/instruments/hkd-map.js` renders MapLibre directly into its own container div; `renderIframe`/`getSafeSandbox` (only ever used by Spiccato) were deleted from `docs/core.js` along with the dead iframe CSS. `registerInstrument` gained one small addition: `render()` may now return a teardown callback (used here to call `map.remove()`, avoiding a WebGL-context leak on repeated visits). Basemap is `stars.optgeo.org/style/bvmap-dark` (GSI's optimized vector tiles, dark theme, fetched live); the two D26 polygon layers get merged in as ordinary vector sources. JMA forecast regions are colored by live warning severity (verified against real active warnings at test time — 十勝 advisory-yellow, 釧路/根室 warning-orange, matching 警報・注意報 exactly); municipality polygons are clickable, looking up `window.SAS0_CONFIG.municipalities` directly (same page, no fetch) and popping up the matching hazard-map link. Named 地図 rather than 北海道地図 — the obvious name collides with an existing company name. See [DECISIONS.md](DECISIONS.md) D27.
 - **北海道開発局 folder added** — closes open item #2 below. Its own `防災・災害情報` page links to several of the bureau's own systems (a river/dam real-time monitor distinct from D20's river.go.jp, a road-closure system, and its own curated `防災情報ポータルサイト`); linked the portal page, the bureau's single best entry point, same reasoning as why 北海道運輸局's own portal was chosen over its individual sub-feeds (D19). See [DECISIONS.md](DECISIONS.md) D21.
 - **Stale-link detection considered** — as outbound links grew past ~40, worth a deliberate answer for *noticing* staleness later, not just verifying at add-time. Client-side detection (`fetch(..., {mode:'no-cors'})`) was ruled out as too weak (opaque responses can't distinguish a 404 from a 200, the most common real-world case). Built `scripts/check-links.sh` instead — a manual, dependency-free bash tool (not CI) that greps every outbound URL out of `docs/config.js`/`docs/instruments/*.js` and curls each. Left open: whether a *scheduled* GitHub Actions check would be worth crossing this repo's stated "no CI" line for — a real scope decision, not made here. See [DECISIONS.md](DECISIONS.md) D22.
@@ -89,7 +97,7 @@ A guiding principle surfaced during this work ([DECISIONS.md](DECISIONS.md) D13)
 ## Where to look
 
 - [README.md](README.md) — what sas0 is/isn't, why it's open-data-only, current instrument tree, roadmap, live site
-- [DECISIONS.md](DECISIONS.md) — why things are built the way they are; D10–D17 cover the tree/instrument-registry architecture, the Hokkaido data sources, and the project's guiding philosophy; D18–D19 cover the municipality/volcano-council expansion and the issue #2 sources; D20 covers the `renderLinkList` redesign, the 市町村/火山 flattening, and the CORS investigation into daily-monitoring digestion; D21 covers 北海道開発局; D22 covers `scripts/check-links.sh` and the stale-link detection design; D23–D25 cover the 14→22→30→38 municipality batches, the repeatable-batch process itself, and the two recurring failure modes (HTTPS/SNI, stale search results) found along the way; D26 covers the two Hokkaido-only vector-tile layers built on `~/stars`; D27 covers 地図, the native MapLibre instrument that replaced Spiccato
+- [DECISIONS.md](DECISIONS.md) — why things are built the way they are; D10–D17 cover the tree/instrument-registry architecture, the Hokkaido data sources, and the project's guiding philosophy; D18–D19 cover the municipality/volcano-council expansion and the issue #2 sources; D20 covers the `renderLinkList` redesign, the 市町村/火山 flattening, and the CORS investigation into daily-monitoring digestion; D21 covers 北海道開発局; D22 covers `scripts/check-links.sh` and the stale-link detection design; D23–D25 cover the 14→22→30→38 municipality batches, the repeatable-batch process itself, and the two recurring failure modes (HTTPS/SNI, stale search results) found along the way; D26 covers the two Hokkaido-only vector-tile layers built on `~/stars`; D27 covers 地図, the native MapLibre instrument that replaced Spiccato; D28 covers the root folder reorganization (`order` field, リンク集, the 火山情報 volcano filter); D29 covers 地図's hover-panel/click-popup UX redesign
 - [CLAUDE.md](CLAUDE.md) — working notes for AI coding assistants in this repo, including how to add a new instrument or organization folder, and the philosophy section to read first
 
 ## Roadmap reminder

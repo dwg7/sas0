@@ -23,7 +23,7 @@
   SAS0.registerInstrument({
     key: 'municipalities',
     name: '市町村',
-    parentKey: 'root',
+    parentKey: 'reference',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

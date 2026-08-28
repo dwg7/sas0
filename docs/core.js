@@ -9,6 +9,7 @@ window.SAS0 = (function () {
 
   const objectsByKey = new Map();
   const childrenByKey = new Map();
+  let autoOrder = 0;
 
   function getSafeUrl(value, options) {
     if (!value) {
@@ -102,12 +103,21 @@ window.SAS0 = (function () {
     return childrenByKey.get(key);
   }
 
-  function registerFolder({ key, name, parentKey }) {
+  // Children display in `order` ascending (ties broken by registration
+  // order). Most callers omit `order` and simply get script-load order,
+  // same as before this existed; a small number of root-level items pin an
+  // explicit order so the tree doesn't depend on <script> tag sequence —
+  // see DECISIONS.md D28.
+  function pushChild(parentKey, identifier, order) {
+    ensureChildBucket(parentKey).push({ identifier, order: order != null ? order : ++autoOrder });
+  }
+
+  function registerFolder({ key, name, parentKey, order }) {
     const identifier = { namespace: NAMESPACE, key };
     objectsByKey.set(key, { identifier, name, type: 'folder' });
     ensureChildBucket(key);
     if (parentKey) {
-      ensureChildBucket(parentKey).push(identifier);
+      pushChild(parentKey, identifier, order);
     }
     return key;
   }
@@ -133,11 +143,11 @@ window.SAS0 = (function () {
     };
   }
 
-  function registerInstrument({ key, name, parentKey, render, autoRefresh = true }) {
+  function registerInstrument({ key, name, parentKey, render, autoRefresh = true, order }) {
     const identifier = { namespace: NAMESPACE, key };
     objectsByKey.set(key, { identifier, name, type: 'sas0.instrument' });
     if (parentKey) {
-      ensureChildBucket(parentKey).push(identifier);
+      pushChild(parentKey, identifier, order);
     }
 
     openmct.objectViews.addProvider({
@@ -228,7 +238,13 @@ window.SAS0 = (function () {
       );
     },
     load(domainObject) {
-      return Promise.resolve(childrenByKey.get(domainObject.identifier.key) || []);
+      const children = childrenByKey.get(domainObject.identifier.key) || [];
+      return Promise.resolve(
+        children
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((child) => child.identifier)
+      );
     }
   });
 

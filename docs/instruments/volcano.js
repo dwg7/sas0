@@ -3,10 +3,16 @@
   const LIST_URL = 'https://www.jma.go.jp/bosai/volcano/const/volcano_list.json';
   const WARNING_URL = 'https://www.jma.go.jp/bosai/volcano/data/warning.json';
 
-  // Hokkaido mainland volcano codes only (知床硫黄山 101 〜 雄阿寒岳 120);
-  // the Kuril/Chishima chain (151+) is intentionally out of scope.
-  const HOKKAIDO_MIN_CODE = 101;
-  const HOKKAIDO_MAX_CODE = 120;
+  // The 9 volcanoes JMA designates as "常時観測火山" (continuously
+  // monitored) within Hokkaido mainland's full 20-volcano range (知床硫黄山
+  // 101 〜 雄阿寒岳 120; the Kuril/Chishima chain 151+ is intentionally out
+  // of scope). Only these 9 have 噴火警戒レベル actually in operation — the
+  // other 11 in that code range aren't under continuous watch and mixing
+  // them in here made this list read as "current alert level" for
+  // volcanoes that don't really have one. This is exactly the 9-volcano
+  // set docs/instruments/volcano-councils.js already covers (each has an
+  // established 火山防災協議会). See DECISIONS.md D28.
+  const HOKKAIDO_MONITORED_CODES = ['104', '105', '107', '108', '109', '111', '112', '113', '114'];
 
   function extractLevelName(warningEntry) {
     const infos = warningEntry.volcanoInfos || [];
@@ -27,10 +33,7 @@
       )
     ]);
 
-    const hokkaidoVolcanoes = volcanoes.filter((volcano) => {
-      const code = Number(volcano.code);
-      return code >= HOKKAIDO_MIN_CODE && code <= HOKKAIDO_MAX_CODE;
-    });
+    const hokkaidoVolcanoes = volcanoes.filter((volcano) => HOKKAIDO_MONITORED_CODES.includes(String(volcano.code)));
 
     const warningByCode = new Map(warnings.map((warning) => [String(warning.eventId), warning]));
 
