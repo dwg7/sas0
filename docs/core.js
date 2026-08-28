@@ -34,26 +34,6 @@ window.SAS0 = (function () {
     }
   }
 
-  function getSafeSandbox(value) {
-    const defaultTokens = ['allow-scripts', 'allow-forms'];
-    const allowedTokens = new Set([...defaultTokens, 'allow-same-origin']);
-    const inputTokens = typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
-    const safeTokens = inputTokens.filter((token) => allowedTokens.has(token));
-
-    return (safeTokens.length > 0 ? safeTokens : defaultTokens).join(' ');
-  }
-
-  function renderIframe(container, { src, title, sandbox, allowedHosts, className }) {
-    const frame = document.createElement('iframe');
-    frame.className = className || 'sas0-iframe';
-    frame.src = getSafeUrl(src, { allowedProtocols: ['https:'], allowedHosts }) || 'about:blank';
-    frame.title = title || '';
-    frame.loading = 'lazy';
-    frame.referrerPolicy = 'no-referrer';
-    frame.sandbox = getSafeSandbox(sandbox);
-    container.appendChild(frame);
-  }
-
   function renderLinkRow({ title, description, url, allowedProtocols }) {
     const row = document.createElement('div');
     row.className = 'sas0-link-row';
@@ -171,6 +151,7 @@ window.SAS0 = (function () {
       view() {
         let root;
         let stopRefresh;
+        let cleanup;
 
         return {
           show(element) {
@@ -181,12 +162,32 @@ window.SAS0 = (function () {
             if (autoRefresh) {
               stopRefresh = startAutoRefresh(root, render);
             } else {
-              Promise.resolve(render(root)).catch(() => {});
+              // If render() returns a function, treat it as a teardown
+              // callback and run it from destroy() below — needed for
+              // stateful instruments (e.g. a MapLibre map) that hold
+              // resources (WebGL contexts, timers) render() itself can't
+              // release just by being garbage-collected. Existing
+              // instruments return nothing, so this is additive.
+              Promise.resolve(render(root))
+                .then((result) => {
+                  if (typeof result === 'function') {
+                    cleanup = result;
+                  }
+                })
+                .catch(() => {});
             }
           },
           destroy() {
             if (stopRefresh) {
               stopRefresh();
+            }
+            if (typeof cleanup === 'function') {
+              try {
+                cleanup();
+              } catch (error) {
+                // Best-effort teardown; a failing cleanup shouldn't block
+                // the view from being removed.
+              }
             }
             if (root && root.parentNode) {
               root.parentNode.removeChild(root);
@@ -235,8 +236,6 @@ window.SAS0 = (function () {
     registerFolder,
     registerInstrument,
     getSafeUrl,
-    getSafeSandbox,
-    renderIframe,
     renderLinkList,
     start() {
       openmct.on('start', () => {

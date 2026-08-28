@@ -50,7 +50,11 @@ Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigati
 ├─ 火山                          — a single link list, one row per volcano with an established
 │                                   火山防災協議会, to that council's own evacuation-plan material
 │                                   (a narrower, differently-organized set than 気象庁's alert list above)
-└─ [Spiccato](https://dwg7.github.io/spiccato/) — embedded, unmodified, from its existing deployment
+└─ 地図                          — native MapLibre GL JS map (no iframe — D27), replaces the old
+                                    Spiccato placeholder (D9); JMA forecast-region polygons colored
+                                    live by warning severity, municipality polygons clickable through
+                                    to their 市町村 hazard-map link when one exists (D26's polygons
+                                    used as a linking anchor, not information in themselves)
 ```
 
 Each instrument is a single full-screen view — click it in the left-hand tree, look, click the next one. See [DECISIONS.md](DECISIONS.md) D10 for why this replaced the original fixed two-panel layout, and how to add another instrument or organization. Occasional-reference sources (anything above rendered as a link) use the compact `renderLinkList` row format rather than a folder tree per item — see D20 for why, and D20 also covers why the two live prefecture/city disaster portals above stayed links instead of becoming digested instruments (no CORS on their data).
@@ -100,10 +104,10 @@ Where:
 
 This repository is GitHub Pages oriented and static-only: `main`'s `docs/` directory is served directly, with no build step.
 
-- `docs/index.html` — loads Open MCT from a pinned CDN version, then the scripts below, in order
-- `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` and the shared `getSafeUrl()`/`getSafeSandbox()`/`renderIframe()`/`renderLinkList()` helpers
-- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 防災科学技術研究所, 北海道運輸局, 国土交通省, 北海道開発局) that instruments attach to. 市町村 and 火山 are *not* folders — each is a single root-level instrument (D20)
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, spiccato, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`)
+- `docs/index.html` — loads Open MCT and MapLibre GL JS from pinned CDN versions, then the scripts below, in order
+- `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` and the shared `getSafeUrl()`/`renderLinkList()` helpers
+- `docs/folders.js` — declares the organization folders (気象庁, 北海道, 国土地理院, 防災科学技術研究所, 北海道運輸局, 国土交通省, 北海道開発局) that instruments attach to. 市町村, 火山, and 地図 are *not* folders — each is a single root-level instrument (D20, D27)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, hkd-map, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus two vector-tile sources hosted on `stars.optgeo.org`, D26/D27)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>状況認識サービス0（sas0）</title>
     <link rel="stylesheet" href="https://unpkg.com/openmct@4.3.0-rc1/dist/espressoTheme.css" />
+    <!-- MapLibre GL JS pinned to the latest v5 release, not the newer v6:
+         v6 dropped the plain-<script>/window.maplibregl UMD bundle in favor
+         of ES modules only (verified: unpkg.com/maplibre-gl@6.6.0/dist/
+         maplibre-gl.js 404s), and v5.24.0 still ships it — keeping every
+         instrument's script-tag loading pattern consistent. See D2's
+         checklist / DECISIONS.md D27. -->
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -17,12 +24,13 @@
       window.SharedWorker = undefined;
     </script>
     <script src="https://unpkg.com/openmct@4.3.0-rc1/dist/openmct.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
     <div id="app"></div>
     <script src="./core.js"></script>
     <script src="./config.js"></script>
     <script src="./folders.js"></script>
     <script src="./instruments/weather.js"></script>
-    <script src="./instruments/spiccato.js"></script>
+    <script src="./instruments/hkd-map.js"></script>
     <script src="./instruments/warnings.js"></script>
     <script src="./instruments/quake.js"></script>
     <script src="./instruments/volcano.js"></script>

@@ -11,15 +11,20 @@ window.SAS0_CONFIG = {
     sourceLabel: '出典：気象庁ホームページ（https://www.jma.go.jp/bosai/weather_map/）',
     sourceUrl: 'https://www.jma.go.jp/bosai/weather_map/'
   },
-  spiccato: {
-    title: 'Spiccato',
-    allowedHosts: ['dwg7.github.io'],
-    // allow-same-origin is safe here: Spiccato is served from the same
-    // origin as this site (dwg7.github.io). Without it, Brave treats the
-    // sandboxed-but-first-party iframe as untrusted and restricts WebGL,
-    // breaking MapLibre's vector-tile rendering. See DECISIONS.md D9.
-    sandbox: 'allow-scripts allow-forms allow-same-origin',
-    url: 'https://dwg7.github.io/spiccato/#q=catalog=https%3A%2F%2Fhfu.github.io%2Flayers-martin%2Fcatalog.json&req=blank%7C%E7%99%BD%E5%9C%B0%E5%9B%B3'
+  // Native MapLibre GL JS map — replaces the Spiccato iframe (which only
+  // ever existed to prove a complex CDN-loaded MapLibre site could run
+  // embedded in Open MCT at all, D9; that question is answered). No iframe
+  // this time: rendered directly into the instrument's own container, so
+  // none of D9/D12's sandbox/allow-same-origin questions apply here.
+  // Basemap + both Hokkaido-only overlay layers (D26) are served from
+  // stars.optgeo.org. See DECISIONS.md D27.
+  hkdMap: {
+    title: '地図',
+    description: '北海道の気象警報区域・市町村界を表示します。',
+    allowedHosts: ['stars.optgeo.org', 'gsi-cyberjapan.github.io', 'www.jma.go.jp'],
+    basemapStyleUrl: 'https://stars.optgeo.org/style/bvmap-dark',
+    jmaSourceUrl: 'https://stars.optgeo.org/pmtiles_jma_1saibun_hkd',
+    n03SourceUrl: 'https://stars.optgeo.org/pmtiles_ksj_n03_hkd'
   },
   gsiHazard: {
     title: 'ハザードマップポータル',
