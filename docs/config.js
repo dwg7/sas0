@@ -94,7 +94,7 @@ window.SAS0_CONFIG = {
   // リアルタイム情報等）への入口としてはriverInfoより網羅的。
   // See DECISIONS.md D21, HANDOVER.md open item #2.
   hokkaidoDevelopmentBureau: {
-    title: '防災情報ポータルサイト',
+    title: '北海道開発局 防災情報ポータルサイト',
     description:
       '北海道開発局の防災情報ポータルサイト（河川・土砂災害・道路・港湾・気象・地震津波・火山・各開発建設部の災害情報を集約）を新しいタブで開きます。',
     url: 'https://www.hkd.mlit.go.jp/ky/saigai/splaat0000001sq7.html'

@@ -4,7 +4,7 @@
   SAS0.registerInstrument({
     key: 'hokkaido-safe-travel',
     name: config.title || '北海道 旅の安全情報',
-    parentKey: 'unyukyoku',
+    parentKey: 'reference',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

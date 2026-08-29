@@ -18,11 +18,12 @@ It asks a narrow question: can publicly available instruments be assembled into 
 
 Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigation: each instrument is a separate object, one click away, grouped into folders by organization. The current tree (driven by a small Hokkaido disaster-preparedness use case, but arbitrary to extend):
 
-Root order follows daily-use priority first, then 建制順 / 省庁→都道府県→市町村 convention, with occasional-reference sources bucketed at the end (D28):
+Root order follows daily-use priority first, then 建制順 / 省庁→都道府県→市町村 convention, with occasional-reference sources bucketed at the end (D28). Folders exist only where they group 2+ instruments — 気象庁 and リンク集 are the only two; everything else is a single instrument sitting directly at its position, one click away (D43):
 
 ```
 状況認識サービス0 (sas0)
-├─ 気象庁                        — pinned first: daily-use, most-refined instruments
+├─ 気象庁                        — pinned first: daily-use, most-refined instruments (4 instruments,
+│                                   the only root-level folder besides リンク集 — D43)
 │   ├─ 天気図                    — latest JMA surface weather chart, fetched live
 │   ├─ 警報・注意報（北海道）      — active JMA advisories/warnings across Hokkaido's 8 forecast regions
 │   ├─ 地震情報（北海道関連）      — recent earthquakes affecting Hokkaido
@@ -34,24 +35,19 @@ Root order follows daily-use priority first, then 建制順 / 省庁→都道府
 │                                   clickable through to their 市町村 hazard-map link when one exists
 │                                   (D26's polygons used as a linking anchor); hover shows a docked
 │                                   info panel, click opens a link-only popup (D29)
-├─ 防災科学技術研究所
-│   └─ 強震モニタ                 — link; nationwide realtime seismic-intensity map (this source has
+├─ 強震モニタ                    — link; nationwide realtime seismic-intensity map (this source has
 │                                   no HTTPS at all — D19)
-├─ 国土交通省
-│   └─ 川の防災情報               — link; national river water-level/flood-forecast portal (D20)
-├─ 北海道開発局
-│   └─ 防災情報ポータルサイト      — link; the bureau's own curated portal (river/road/port/weather/
+├─ 川の防災情報                  — link; national river water-level/flood-forecast portal (D20)
+├─ 北海道開発局 防災情報ポータルサイト — link; the bureau's own curated portal (river/road/port/weather/
 │                                   quake/volcano status), distinct from both 北海道運輸局 and
-│                                   国土交通省 above (D21)
-├─ 北海道
-│   └─ 防災情報                   — a compact link list: the prefecture's homepage (embedding blocked)
+│                                   国土交通省 (D21)
+├─ 北海道 防災情報                — a compact link list: the prefecture's homepage (embedding blocked)
 │                                   and 北海道防災ポータル (179-municipality live evacuation/warning/
 │                                   river/landslide/volcano status, on one map)
-└─ リンク集                      — occasional-reference sources, not live status (D28)
-    ├─ 国土地理院
-    │   └─ ハザードマップポータル  — link (this app doesn't tolerate iframe sandboxing — D14)
-    ├─ 北海道運輸局
-    │   └─ 北海道 旅の安全情報     — link; multilingual transport-disruption/weather status
+└─ リンク集                      — occasional-reference sources, not live status (D28); the only other
+                                    root-level folder besides 気象庁, holding 4 instruments (D43)
+    ├─ ハザードマップポータル      — link (this app doesn't tolerate iframe sandboxing — D14)
+    ├─ 北海道 旅の安全情報         — link; multilingual transport-disruption/weather status
     ├─ 市町村                    — a single grouped link list (by 振興局/subprefecture), not a folder
     │                               tree; all 179 of Hokkaido's municipalities (35 cities, 15
     │                               villages, 129 towns), built up over sixteen repeatable batches
@@ -112,7 +108,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 
 - `docs/index.html` — loads Open MCT and MapLibre GL JS from pinned CDN versions, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` (both take an optional `order` to control display order independent of `<script>` load order — D28) and the shared `getSafeUrl()`/`renderLinkList()` helpers
-- `docs/folders.js` — declares the organization folders (気象庁, 防災科学技術研究所, 国土交通省, 北海道開発局, 北海道, リンク集, plus 国土地理院/北海道運輸局 nested under リンク集) that instruments attach to, and the root-level `order` values that place them (D28). 市町村, 火山, and 地図 are *not* folders — each is a single instrument (地図 at root, 市町村/火山 nested under リンク集 — D20, D27, D28)
+- `docs/folders.js` — declares the two folders that exist (気象庁, リンク集) and the root-level `order` values that place root instruments (D28). A folder is only created where it groups 2+ instruments (D43) — 防災科学技術研究所/国土交通省/北海道開発局/北海道/国土地理院/北海道運輸局 used to each be a single-instrument folder and were dissolved; their instruments now register directly with `parentKey: 'root'` or `parentKey: 'reference'` and an explicit `order` where one is needed
 - `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, hkd-map, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus two vector-tile sources hosted on `stars.optgeo.org`, D26/D27)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens

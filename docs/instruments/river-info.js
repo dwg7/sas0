@@ -4,7 +4,8 @@
   SAS0.registerInstrument({
     key: 'river-info',
     name: config.title || '川の防災情報',
-    parentKey: 'mlit',
+    parentKey: 'root',
+    order: 4,
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

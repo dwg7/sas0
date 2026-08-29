@@ -4,7 +4,7 @@
   SAS0.registerInstrument({
     key: 'gsi-hazard',
     name: config.title || 'ハザードマップポータル',
-    parentKey: 'gsi',
+    parentKey: 'reference',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';
