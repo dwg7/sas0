@@ -772,6 +772,87 @@ window.SAS0_CONFIG = {
       title: '厚岸町',
       description: '厚岸町の防災ハザードマップ（津波・土砂災害・洪水）を新しいタブで開きます。',
       url: 'https://www.akkeshi-town.jp/bousai/bousaitaisaku_05/'
+    },
+    // バッチ9（10件）：人口上位10の町を追加、3巡目。See D35。
+    {
+      regionKey: 'shien-sorachi',
+      key: 'nanporo',
+      title: '南幌町',
+      description: '南幌町のハザードマップ（洪水等）を新しいタブで開きます。',
+      url: 'https://www.town.nanporo.hokkaido.jp/emergency-management/'
+    },
+    {
+      // 洞爺湖町・.hokkaido.jp/.lg.jpいずれもHTTPS/SNI不一致
+      // （名寄市・釧路町・七飯町・美幌町と同じ失敗モード）。See D35。
+      regionKey: 'shien-iburi',
+      key: 'toyako',
+      title: '洞爺湖町',
+      description: '洞爺湖町のハザードマップ（津波・土砂災害等）を新しいタブで開きます。',
+      url: 'http://www.town.toyako.hokkaido.jp/hazardmap/index.html',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'yubetsu',
+      title: '湧別町',
+      description: '湧別町の防災情報（洪水・津波・高潮ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.town.yubetsu.lg.jp/administration/life/category/?category=44'
+    },
+    {
+      regionKey: 'shien-iburi',
+      key: 'mukawa',
+      title: 'むかわ町',
+      description: 'むかわ町の防災情報（津波・洪水・土砂災害ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.town.mukawa.lg.jp/3983.htm'
+    },
+    {
+      regionKey: 'shien-iburi',
+      key: 'abira',
+      title: '安平町',
+      description: '安平町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.abira.lg.jp/kurashi/bosai/hazard-map'
+    },
+    {
+      regionKey: 'shien-kushiro',
+      key: 'shiranuka',
+      title: '白糠町',
+      description: '白糠町のハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.shiranuka.lg.jp/kurashi/bousai/'
+    },
+    {
+      // 町の観光用サイトは別ドメイン（hokkaido.shibecha.jp）。行政サイト
+      // （town.shibecha.hokkaido.jp）は「行政情報」経由でしか辿り着けない。
+      // See D35。
+      regionKey: 'shien-kushiro',
+      key: 'shibecha',
+      title: '標茶町',
+      description: '標茶町の防災情報（浸水ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://town.shibecha.hokkaido.jp/gyousei/bousai_chuui/bousai/index.html'
+    },
+    {
+      regionKey: 'shien-kushiro',
+      key: 'teshikaga',
+      title: '弟子屈町',
+      description: '弟子屈町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.teshikaga.hokkaido.jp/kurashi/soshikiichiran/somuka/10/2/3470.html'
+    },
+    {
+      // 検索結果の上位URLは既にstale（404）。町サイト自身のナビゲーションから
+      // 現行URLを特定した。See D35。
+      regionKey: 'shien-okhotsk',
+      key: 'ozora',
+      title: '大空町',
+      description: '大空町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.ozora.hokkaido.jp/izatoiutoki/2957.html'
+    },
+    {
+      // 検索結果の上位URLは既にstale（サイトのURL体系移行により404）。
+      // 町サイト自身のナビゲーションから現行URLを特定した。See D35。
+      regionKey: 'shien-kamikawa',
+      key: 'takasu',
+      title: '鷹栖町',
+      description: '鷹栖町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.takasu.hokkaido.jp/page/1263.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
