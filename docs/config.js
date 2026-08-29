@@ -500,6 +500,89 @@ window.SAS0_CONFIG = {
       title: '石狩市',
       description: '石狩市の防災等の計画ページ（地区防災ガイド・防災GIS・土砂災害ハザードマップ等）を新しいタブで開きます。',
       url: 'https://www.city.ishikari.hokkaido.jp/kurashi/bosai/1005776/1004565/'
+    },
+    // バッチ6（10件）：全35市の網羅完了後、未収録の町のうち人口上位10件を追加。
+    // See DECISIONS.md D32.
+    {
+      // 名寄市・釧路町と同じHTTPS/SNI不一致（www2.サブドメイン）。See D32.
+      regionKey: 'shien-oshima',
+      key: 'nanae',
+      title: '七飯町',
+      description: '七飯町のハザードマップ（洪水・土砂災害・火山）を新しいタブで開きます。',
+      url: 'http://www2.town.nanae.hokkaido.jp/bousai/hazardmap/',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'memuro',
+      title: '芽室町',
+      description: '芽室町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.memuro.net/administration/soshiki/soumu/bousai/'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'engaru',
+      title: '遠軽町',
+      description: '遠軽町防災ガイドマップ（洪水・土砂災害・地震等）を新しいタブで開きます。',
+      url: 'https://engaru.jp/life/page.php?id=377'
+    },
+    {
+      // 七飯町と同じHTTPS/SNI不一致（bousai.サブドメイン）。See D32.
+      regionKey: 'shien-okhotsk',
+      key: 'bihoro',
+      title: '美幌町',
+      description: '美幌町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'http://bousai.town.bihoro.hokkaido.jp/hazardmap/',
+      allowedProtocols: ['http:']
+    },
+    {
+      // 検索結果には出ず、町サイト自身の防災カテゴリページから特定した。See D32.
+      regionKey: 'shien-shiribeshi',
+      key: 'yoichi',
+      title: '余市町',
+      description: '余市町の防災ガイドマップ（洪水・土砂災害・津波等）を新しいタブで開きます。',
+      url: 'https://www.town.yoichi.hokkaido.jp/kurashi/kurashinojouhou/bousai/2018-0410-1723-1.html'
+    },
+    {
+      // 検索結果の上位URLは404（既にstale）。町サイト自身の危機対策課ページから
+      // 現行URLを特定した。See D32.
+      regionKey: 'shien-ishikari',
+      key: 'tobetsu',
+      title: '当別町',
+      description: '当別町防災マップ（洪水・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.town.tobetsu.hokkaido.jp/soshiki/kiki/2292.html'
+    },
+    {
+      regionKey: 'shien-oshima',
+      key: 'yakumo',
+      title: '八雲町',
+      description: '八雲町のハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.yakumo.lg.jp/soshiki/kikitaisaku/hazadomap2022.html'
+    },
+    {
+      regionKey: 'shien-iburi',
+      key: 'shiraoi',
+      title: '白老町',
+      description: '白老町防災マップ（地震・津波・火山・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.shiraoi.hokkaido.jp/docs/page2013091100014.html'
+    },
+    {
+      // 検索結果の上位URLは404（既にstale）。町サイト自身のナビゲーションから
+      // 現行URLを特定した。See D32.
+      regionKey: 'shien-oshima',
+      key: 'mori',
+      title: '森町',
+      description: '森町のハザードマップ・避難所（津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.hokkaido-mori.lg.jp/soshiki/bosaikotsu/3/1/index.html'
+    },
+    {
+      // 検索結果の上位URLは404（既にstale）。町サイト自身の防災・災害情報
+      // カテゴリページから現行URLを特定した。See D32.
+      regionKey: 'shien-okhotsk',
+      key: 'shari',
+      title: '斜里町',
+      description: '斜里町のハザードマップ（洪水・地震・津波・火山）を新しいタブで開きます。',
+      url: 'https://www.town.shari.hokkaido.jp/kurashinojoho/bosai_kishojoho/1109.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
