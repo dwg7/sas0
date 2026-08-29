@@ -53,11 +53,11 @@ Root order follows daily-use priority first, then 建制順 / 省庁→都道府
     ├─ 北海道運輸局
     │   └─ 北海道 旅の安全情報     — link; multilingual transport-disruption/weather status
     ├─ 市町村                    — a single grouped link list (by 振興局/subprefecture), not a folder
-    │                               tree; 102 of 179 municipalities so far (past the halfway point),
-    │                               extended in repeatable batches (D23–D25, D31–D36), including all
-    │                               35 of Hokkaido's cities (市) and all 15 villages (村); every
-    │                               subprefecture has at least 2 entries, plus a live city-run
-    │                               disaster portal for 札幌市 and two of its wards (D30)
+    │                               tree; 112 of 179 municipalities so far, extended in repeatable
+    │                               batches (D23–D25, D31–D37), including all 35 of Hokkaido's cities
+    │                               (市) and all 15 villages (村); every subprefecture has at least 2
+    │                               entries, plus a live city-run disaster portal for 札幌市 and two
+    │                               of its wards (D30)
     └─ 火山                      — a single link list, one row per volcano with an established
                                     火山防災協議会, to that council's own evacuation-plan material
                                     (the same 9 volcanoes as 気象庁's alert list above, complementary

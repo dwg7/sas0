@@ -935,6 +935,87 @@ window.SAS0_CONFIG = {
       title: '長万部町',
       description: '長万部町の防災ページ（土砂災害・津波・高潮ハザードマップ等）を新しいタブで開きます。',
       url: 'https://www.town.oshamambe.lg.jp/life/6/23/91/'
+    },
+    // バッチ11（10件）：人口上位10の町を追加、5巡目。See D37。
+    {
+      // 検索結果の上位はstale（404）。町サイト自身のナビゲーションから
+      // 現行ページを特定。ブラウザ表示URLはwwwなしに正規化されるが、
+      // 実際に解決するホストはwww付きのみ（wwwなしはDNS未解決）。See D37。
+      regionKey: 'shien-oshima',
+      key: 'matsumae',
+      title: '松前町',
+      description: '松前町のハザードマップ（洪水・土砂災害・津波等）を新しいタブで開きます。',
+      url: 'https://www.town.matsumae.hokkaido.jp/hotnews/detail/00000192.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'shintoku',
+      title: '新得町',
+      description: '新得町のハザードマップ（洪水・土砂災害・火山・雪崩等）を新しいタブで開きます。',
+      url: 'https://www.shintoku-town.jp/kurashi-tetuduki/bousai_anzen/shinsuisoutei/'
+    },
+    {
+      regionKey: 'shien-kushiro',
+      key: 'hamanaka',
+      title: '浜中町',
+      description: '浜中町のハザードマップ（津波・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.townhamanaka.jp/kurashi_kankyou/bousai/bousai_map.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'taiki',
+      title: '大樹町',
+      description: '大樹町のハザードマップ（津波・洪水等）を新しいタブで開きます。',
+      url: 'https://www.town.taiki.hokkaido.jp/soshiki/somuka/4/2/3/888.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'shikaoi',
+      title: '鹿追町',
+      description: '鹿追町の総合防災ハザードブック（地震・風水害・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.shikaoi.lg.jp/kurashi/bosai/hazardbook/'
+    },
+    {
+      regionKey: 'shien-hidaka',
+      key: 'niikappu',
+      title: '新冠町',
+      description: '新冠町のハザードマップ（洪水・津波等）を新しいタブで開きます。',
+      url: 'https://www.niikappu.jp/kurashi/bosai/'
+    },
+    {
+      // 検索結果の上位はstale（404）。町サイト自身のリンクから、防災専用の
+      // 別ドメイン（shibetsutown-bousai.jp）を特定。JS駆動サイトだが実際に
+      // ブラウザで確認するとタイトルは正しく表示される。既収録の中標津町
+      // （別自治体）と混同しないよう注意。See D37。
+      regionKey: 'shien-nemuro',
+      key: 'shibetsu',
+      title: '標津町',
+      description: '標津町のWeb版ハザードマップ（津波・洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://shibetsutown-bousai.jp/'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'naie',
+      title: '奈井江町',
+      description: '奈井江町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.naie.hokkaido.jp/bousai_info/hazardmap/'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'kamishihoro',
+      title: '上士幌町',
+      description: '上士幌町のハザードマップ（土砂災害・洪水浸水等）を新しいタブで開きます。',
+      url: 'https://www.kamishihoro.jp/page/00000323'
+    },
+    {
+      // 単一のハザードマップ統合ページはなく、防災情報カテゴリページを
+      // 案内する。サイトが「行政情報」「いまCh.」の2ポータルに分かれており、
+      // 本URLは「行政情報」側。See D37。
+      regionKey: 'shien-hiyama',
+      key: 'imakane',
+      title: '今金町',
+      description: '今金町の防災情報（土砂災害警戒区域・ため池ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.town.imakane.lg.jp/gyousei/kurashi/syoubou/post_43.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
