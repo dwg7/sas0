@@ -49,10 +49,29 @@
   };
 
   // Same colors as .sas0-severity-* in style.css, so the map and the
-  // 警報・注意報 instrument agree visually.
+  // 警報・注意報 instrument agree visually. Hue carries category (JMA's own
+  // convention: yellow → orange-red → magenta/purple as 注意報 → 警報 →
+  // 特別警報 escalate), CALM_COLOR is sas0's own addition for the zero
+  // point — JMA's data simply omits areas with nothing active, but a map
+  // needs an explicit color for every polygon, and a calm green reads as
+  // "actively monitored, currently fine" rather than the old NO_WARNING
+  // grey (`#243247`, coincidentally the same hex already used as this
+  // page's neutral UI chrome/border color elsewhere in style.css — which
+  // made "no warning" read as "this control is disabled", not a status).
+  // Fill-opacity is a second, quieter channel on the same idea: severity
+  // also raises opacity, so attention scales with actual danger instead of
+  // the whole map sitting at one uniform visual weight. See DECISIONS.md D50.
   const SEVERITY_COLOR = { advisory: '#e4c74a', warning: '#e46a4a', special: '#d24aa8' };
+  const SEVERITY_OPACITY = { advisory: 0.35, warning: 0.42, special: 0.5 };
   const SEVERITY_RANK = { advisory: 1, warning: 2, special: 3 };
-  const NO_WARNING_COLOR = '#243247';
+  const CALM_COLOR = '#5fae8c';
+  // stars.optgeo.org's "bvmap-dark" basemap is actually a light/white
+  // ground (its own style JSON's background-color is white/pale-grey,
+  // confirmed by inspection — "dark" apparently names something else about
+  // it, not the ground color) — a pale fill needs real opacity to read as
+  // deliberate green rather than fading into that white, so this sits
+  // higher than the severity tiers' own resting point would suggest.
+  const CALM_OPACITY = 0.4;
 
   function severityOf(name) {
     if (name.includes('特別警報') || name.includes('危険警報')) {
@@ -118,13 +137,25 @@
     // anywhere in Hokkaido, the loop below never runs and a bare fallback
     // color must be returned directly instead of an ['match', ...] wrapper.
     if (byAreaCode.size === 0) {
-      return NO_WARNING_COLOR;
+      return CALM_COLOR;
     }
     const expr = ['match', ['get', 'code']];
     byAreaCode.forEach((activeWarnings, areaCode) => {
       expr.push(areaCode, SEVERITY_COLOR[bestSeverity(activeWarnings)]);
     });
-    expr.push(NO_WARNING_COLOR);
+    expr.push(CALM_COLOR);
+    return expr;
+  }
+
+  function buildFillOpacityExpression(byAreaCode) {
+    if (byAreaCode.size === 0) {
+      return CALM_OPACITY;
+    }
+    const expr = ['match', ['get', 'code']];
+    byAreaCode.forEach((activeWarnings, areaCode) => {
+      expr.push(areaCode, SEVERITY_OPACITY[bestSeverity(activeWarnings)]);
+    });
+    expr.push(CALM_OPACITY);
     return expr;
   }
 
@@ -354,7 +385,7 @@
         type: 'fill',
         source: 'jma_1saibun',
         'source-layer': 'jma_1saibun',
-        paint: { 'fill-color': NO_WARNING_COLOR, 'fill-opacity': 0.35 }
+        paint: { 'fill-color': CALM_COLOR, 'fill-opacity': CALM_OPACITY }
       },
       {
         id: 'jma-warning-outline',
@@ -407,7 +438,7 @@
         source: 'volcano_points',
         paint: {
           'circle-radius': 6,
-          'circle-color': ['case', ['get', 'active'], SEVERITY_COLOR.warning, '#5c7089'],
+          'circle-color': ['case', ['get', 'active'], SEVERITY_COLOR.warning, CALM_COLOR],
           // Red outline (independent of active/平常 fill color) is the
           // at-a-glance cue distinguishing volcano points from quake points
           // — both are circles of similar size, and a color-only distinction
@@ -438,6 +469,7 @@
         .then((byAreaCode) => {
           warningsByAreaCode = byAreaCode;
           map.setPaintProperty('jma-warning-fill', 'fill-color', buildFillColorExpression(byAreaCode));
+          map.setPaintProperty('jma-warning-fill', 'fill-opacity', buildFillOpacityExpression(byAreaCode));
         })
         .catch(() => {});
       fetchQuakePoints()
