@@ -111,7 +111,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 - `docs/folders.js` — declares the two folders that exist (気象庁, リンク集) and the root-level `order` values that place root instruments (D28). A folder is only created where it groups 2+ instruments (D43) — 防災科学技術研究所/国土交通省/北海道開発局/北海道/国土地理院/北海道運輸局 used to each be a single-instrument folder and were dissolved; their instruments now register directly with `parentKey: 'root'` or `parentKey: 'reference'` and an explicit `order` where one is needed
 - `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, hkd-map, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus two vector-tile sources hosted on `stars.optgeo.org`, D26/D27)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
-- `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
+- `docs/config.js` — instrument titles, URLs, and host allowlists
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)
 - `scripts/check-links.sh` — re-verifies every outbound URL in `docs/config.js`/`docs/instruments/*.js` still resolves; runs both by hand (D22) and weekly via `.github/workflows/check-links.yml`, sas0's one CI job (D45)
 
