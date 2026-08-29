@@ -986,9 +986,11 @@ window.SAS0_CONFIG = {
       // 検索結果の上位はstale（404）。町サイト自身のリンクから、防災専用の
       // 別ドメイン（shibetsutown-bousai.jp）を特定。JS駆動サイトだが実際に
       // ブラウザで確認するとタイトルは正しく表示される。既収録の中標津町
-      // （別自治体）と混同しないよう注意。See D37。
+      // （別自治体）と混同しないよう注意。key は士別市（shien-kamikawa）
+      // と同じローマ字「shibetsu」になるため 'shibetsu-cho' に変更 —
+      // D42で発見・修正。See D37, D42。
       regionKey: 'shien-nemuro',
-      key: 'shibetsu',
+      key: 'shibetsu-cho',
       title: '標津町',
       description: '標津町のWeb版ハザードマップ（津波・洪水・土砂災害等）を新しいタブで開きます。',
       url: 'https://shibetsutown-bousai.jp/'
@@ -1364,6 +1366,201 @@ window.SAS0_CONFIG = {
       title: '天塩町',
       description: '天塩町のハザードマップ（津波・洪水・土砂災害等）を新しいタブで開きます。',
       url: 'https://www.teshiotown.hokkaido.jp/?page_id=17345'
+    },
+    // 最終バッチ（25件）：残っていた町すべてを追加し、179市町村の全網羅を
+    // 達成。See D42。
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'aibetsu',
+      title: '愛別町',
+      description: '愛別町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.aibetsu.hokkaido.jp/01/07/01/663'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'nakagawa',
+      title: '中川町',
+      description: '中川町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.nakagawa.hokkaido.jp/section/kikakuzaisei/b02d3l0000000oyw.html'
+    },
+    {
+      // 地理的には空知地方だが行政上は上川総合振興局に属する。See D42。
+      regionKey: 'shien-kamikawa',
+      key: 'horokanai',
+      title: '幌加内町',
+      description: '幌加内町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.horokanai.hokkaido.jp/kurasu/bosai-kyukyu/hazard-map'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'minamifurano',
+      title: '南富良野町',
+      description: '南富良野町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.minamifurano.hokkaido.jp/kurashi-info/防災情報/'
+    },
+    {
+      regionKey: 'shien-iburi',
+      key: 'sobetsu',
+      title: '壮瞥町',
+      description: '壮瞥町のハザードマップ（火山・土砂災害・洪水）を新しいタブで開きます。',
+      url: 'https://www.town.sobetsu.lg.jp/anzen/bosai.html'
+    },
+    {
+      // 独自ドメイン（rikubetsu.jp、town.rikubetsu.hokkaido.jpではない）。
+      // See D42。
+      regionKey: 'shien-tokachi',
+      key: 'rikubetsu',
+      title: '陸別町',
+      description: '陸別町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.rikubetsu.jp/kurashi/bousai_saigai/'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'kimobetsu',
+      title: '喜茂別町',
+      description: '喜茂別町防災ハザードマップ・防災情報（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.kimobetsu.hokkaido.jp/life/detail.php?content=104'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'shakotan',
+      title: '積丹町',
+      description: '積丹町の避難マニュアル・防災マップ（津波・土砂災害・洪水）を新しいタブで開きます。',
+      url: 'https://www.town.shakotan.lg.jp/contents/content0640.html'
+    },
+    {
+      // 名寄市・釧路町等と同一IP（45.60.112.77）上のHTTPS/SNI不一致
+      // （11件目）。ドメイン全体でHTTPSが機能せず、HTTPS代替も存在しない
+      // ためallowedProtocols: ['http:']が必要。ローマ字表記は"suttu"
+      // （"suttsu"ではない）。See D42。
+      regionKey: 'shien-shiribeshi',
+      key: 'suttu',
+      title: '寿都町',
+      description: '寿都町のハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'http://www.town.suttu.lg.jp/disaster/detail.php?id=83',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'furubira',
+      title: '古平町',
+      description: '古平町の防災ハンドブック（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.furubira.lg.jp/life/detail.php?id=20'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'oketo',
+      title: '置戸町',
+      description: '置戸町のハザードマップ（洪水・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.town.oketo.hokkaido.jp/kurashi/koutsu_bousai/hazard_map/'
+    },
+    {
+      // 検索結果の上位は不動産・観光サイトのみ。町の公式サイトから
+      // 直接特定した。See D42。
+      regionKey: 'shien-okhotsk',
+      key: 'takinoue',
+      title: '滝上町',
+      description: '滝上町地域防災計画・ハザードマップ（土砂災害等）を新しいタブで開きます。',
+      url: 'https://town.takinoue.hokkaido.jp/kurashi/kinkyu/20150602.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'urausu',
+      title: '浦臼町',
+      description: '浦臼町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.urausu.hokkaido.jp/kurashi/kurashi/bousai/'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'uryu',
+      title: '雨竜町',
+      description: '雨竜町のハザードマップを新しいタブで開きます。',
+      url: 'https://www.town.uryu.hokkaido.jp/docs/bousai-map.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'kamisunagawa',
+      title: '上砂川町',
+      description: '上砂川町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://town.kamisunagawa.hokkaido.jp/kurashi_tetsuzuki/bosai/'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'chippubetsu',
+      title: '秩父別町',
+      description: '秩父別町の防災マップ（洪水・ため池等）を新しいタブで開きます。',
+      url: 'https://www.town.chippubetsu.hokkaido.jp/category/single.html?category=life&content_category=14'
+    },
+    {
+      // 検索結果の上位URLは301後に404（既にstale）。町サイト自身の
+      // ナビゲーションから現行ページを特定した。See D42。
+      regionKey: 'shien-sorachi',
+      key: 'hokuryu',
+      title: '北竜町',
+      description: '北竜町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.hokuryu.hokkaido.jp/bosai/'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'moseushi',
+      title: '妹背牛町',
+      description: '妹背牛町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.moseushi.hokkaido.jp/bousai_bouhan/bousai/'
+    },
+    {
+      regionKey: 'shien-soya',
+      key: 'nakatombetsu',
+      title: '中頓別町',
+      description: '中頓別町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.nakatombetsu.hokkaido.jp/bunya/4713/'
+    },
+    {
+      regionKey: 'shien-soya',
+      key: 'horonobe',
+      title: '幌延町',
+      description: '幌延町のハザードマップ（洪水・津波）を新しいタブで開きます。',
+      url: 'https://www.town.horonobe.lg.jp/hazardmap/'
+    },
+    {
+      // 旧town.rishiri.hokkaido.jpは独自ドメイン（rishiri-town.jp）へ
+      // 移行済み。See D42。
+      regionKey: 'shien-soya',
+      key: 'rishiri',
+      title: '利尻町',
+      description: '利尻町のハザードマップ（津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://rishiri-town.jp/防災・天気/ハザードマップ/'
+    },
+    {
+      // JS駆動のWeb版地図（/hazardmap/）は空のシェルで不安定なため、
+      // 静的な内容を持つ親ページを採用。See D42。
+      regionKey: 'shien-soya',
+      key: 'rishirifuji',
+      title: '利尻富士町',
+      description: '利尻富士町のハザードマップ（津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.rishirifuji.hokkaido.jp/rishirifuji/1176.htm'
+    },
+    {
+      // 津波のみが地図として整備されている。See D42。
+      regionKey: 'shien-soya',
+      key: 'rebun',
+      title: '礼文町',
+      description: '礼文町の津波ハザードマップを新しいタブで開きます。',
+      url: 'https://www.town.rebun.hokkaido.jp/hotnews/detail/00003006.html'
+    },
+    {
+      // 土砂災害のみが地図として整備されている。See D42。
+      regionKey: 'shien-rumoi',
+      key: 'embetsu',
+      title: '遠別町',
+      description: '遠別町の土砂災害ハザードマップを新しいタブで開きます。',
+      url: 'https://www.town.embetsu.hokkaido.jp/docs/page2020052900026.html'
+    },
+    {
+      regionKey: 'shien-hiyama',
+      key: 'okushiri',
+      title: '奥尻町',
+      description: '奥尻町の総合防災マップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.okushiri.lg.jp/hotnews/detail/00003705.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
