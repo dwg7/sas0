@@ -583,6 +583,114 @@ window.SAS0_CONFIG = {
       title: '斜里町',
       description: '斜里町のハザードマップ（洪水・地震・津波・火山）を新しいタブで開きます。',
       url: 'https://www.town.shari.hokkaido.jp/kurashinojoho/bosai_kishojoho/1109.html'
+    },
+    // バッチ7（15件）：北海道15村すべてを追加し、村の網羅を完了。See D33.
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'akaigawa',
+      title: '赤井川村',
+      description: '赤井川村のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.akaigawa.com/kurashi/cat83/post_142.html'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'otoineppu',
+      title: '音威子府村',
+      description: '音威子府村の防災情報ページ（風水害・地震ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.vill.otoineppu.hokkaido.jp/bousai/'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'kamoenai',
+      title: '神恵内村',
+      description: '神恵内村のハザードマップ（地震・津波・風水害・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.vill.kamoenai.hokkaido.jp/hotnews/detail/00000511.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'sarabetsu',
+      title: '更別村',
+      description: '更別村のハザードマップ（防災マップ・洪水）を新しいタブで開きます。',
+      url: 'https://www.sarabetsu.jp/bosai/bousaimappu/'
+    },
+    {
+      regionKey: 'shien-soya',
+      key: 'sarufutsu',
+      title: '猿払村',
+      description: '猿払村のハザードマップ（洪水・津波）を新しいタブで開きます。',
+      url: 'https://www.vill.sarufutsu.hokkaido.jp/hotnews/detail/00003938.html'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'shimamaki',
+      title: '島牧村',
+      description: '島牧村のハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.vill.shimamaki.lg.jp/category/detail.php?category=prevention&content=21'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'shimukappu',
+      title: '占冠村',
+      description: '占冠村の防災のしおり・洪水ハザードマップを新しいタブで開きます。',
+      url: 'https://www.vill.shimukappu.lg.jp/shimukappu/section/soumu/nmudtq000004kzft.html'
+    },
+    {
+      regionKey: 'shien-rumoi',
+      key: 'shosanbetsu',
+      title: '初山別村',
+      description: '初山別村のハザードマップ（土砂災害・ため池等）を新しいタブで開きます。',
+      url: 'https://www.vill.shosanbetsu.lg.jp/kurashi/bousaianzen/hazardmap.html'
+    },
+    {
+      regionKey: 'shien-ishikari',
+      key: 'shinshinotsu',
+      title: '新篠津村',
+      description: '新篠津村の防災ガイドブック・防災マップを新しいタブで開きます。',
+      url: 'https://www.vill.shinshinotsu.hokkaido.jp/hotnews/detail/00000553.html'
+    },
+    {
+      regionKey: 'shien-kushiro',
+      key: 'tsurui',
+      title: '鶴居村',
+      description: '鶴居村のハザードマップ（地震・風水害等）を新しいタブで開きます。',
+      url: 'https://www.vill.tsurui.lg.jp/bosai_kyukyu/1059.html'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'tomari',
+      title: '泊村',
+      description: '泊村のハザードマップを新しいタブで開きます。',
+      url: 'https://www.vill.tomari.hokkaido.jp/kurashi/anzenbosai/3908.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'nakasatsunai',
+      title: '中札内村',
+      description: '中札内村の防災ページ（防災マップ・土砂災害警戒区域等）を新しいタブで開きます。',
+      url: 'https://www.vill.nakasatsunai.hokkaido.jp/bousai_bouhan/bouhan/'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'nishiokoppe',
+      title: '西興部村',
+      description: '西興部村のハザードマップを新しいタブで開きます。',
+      url: 'https://www.vill.nishiokoppe.lg.jp/section/kikaku/hhlo2b00000059e0.html'
+    },
+    {
+      // 村独自のハザードマップ統合ページはなく、避難場所一覧ページに
+      // ハザードマップPDFが置かれている。See D33.
+      regionKey: 'shien-shiribeshi',
+      key: 'makkari',
+      title: '真狩村',
+      description: '真狩村の避難場所一覧ページ（ハザードマップ・避難所情報）を新しいタブで開きます。',
+      url: 'https://www.vill.makkari.lg.jp/makkari_map/hinanbasho/'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'rusutsu',
+      title: '留寿都村',
+      description: '留寿都村のハザードマップを新しいタブで開きます。',
+      url: 'https://www.vill.rusutsu.lg.jp/hotnews/detail/00000269.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
