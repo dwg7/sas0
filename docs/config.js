@@ -121,6 +121,24 @@ window.SAS0_CONFIG = {
         '札幌市の防災ポータル（行政区ごとの避難情報・雨量・河川水位・土砂災害危険度をリアルタイムに表示）を新しいタブで開きます。',
       url: 'https://bousai.city.sapporo.jp/?l=15-0%2C26-0%2C29-0%2C42-0%2C96-0&ll=43.0686606%2C141.34856659999997&z=12'
     },
+    // 札幌市の10区のうち、区独自の（citywide 2件の再掲にとどまらない）詳細な
+    // 資料を公開しているのは豊平区・清田区の2区のみと確認した（他8区は citywide
+    // な kikikanri 資料への案内に留まる薄いページ）。低価値な10行の水増しより、
+    // 実際に価値のある2件だけを追加する。See DECISIONS.md D30.
+    {
+      regionKey: 'shien-ishikari',
+      key: 'sapporo-toyohira',
+      title: '札幌市豊平区',
+      description: '豊平区の防災ウォーキングマップ（地区別の避難所への徒歩ルート・危険箇所）を新しいタブで開きます。',
+      url: 'https://www.city.sapporo.jp/toyohira/bousai/index.html'
+    },
+    {
+      regionKey: 'shien-ishikari',
+      key: 'sapporo-kiyota',
+      title: '札幌市清田区',
+      description: '清田区の避難場所一覧（地区別・清田区防災マップ）を新しいタブで開きます。',
+      url: 'https://www.city.sapporo.jp/kiyota/chiiki-anzen/hinan/index.html'
+    },
     {
       regionKey: 'shien-kushiro',
       key: 'kushiro',
@@ -410,6 +428,78 @@ window.SAS0_CONFIG = {
       title: '別海町',
       description: '別海町防災ハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
       url: 'https://betsukai.jp/anzen/bosai/betsukai_hazardmap/'
+    },
+    // バッチ5（9件）：北海道35市のうち残っていた9市を追加し、市の網羅を完了。
+    // See DECISIONS.md D31.
+    {
+      regionKey: 'shien-sorachi',
+      key: 'yubari',
+      title: '夕張市',
+      description: '夕張市のハザードマップ（洪水・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.city.yubari.lg.jp/soshiki/19/1783.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'bibai',
+      title: '美唄市',
+      description: '美唄市防災ガイドブック（洪水・土砂災害のハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.city.bibai.hokkaido.jp/soshiki/4/189.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'ashibetsu',
+      title: '芦別市',
+      description: '芦別市の防災ハザードマップ（土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.city.ashibetsu.hokkaido.jp/docs/4712.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'akabira',
+      title: '赤平市',
+      description: '赤平市防災マップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.city.akabira.hokkaido.jp/docs/4273.html'
+    },
+    {
+      // 検索結果に出るURL（.../www/contents/1334832392813/index.html）は既に
+      // 404（ページ削除済み）。現行の正しいページに差し替え済み。See D31.
+      regionKey: 'shien-kamikawa',
+      key: 'shibetsu',
+      title: '士別市',
+      description: '士別市洪水ハザードマップ（洪水・土砂災害警戒区域）を新しいタブで開きます。',
+      url: 'https://www.city.shibetsu.lg.jp/soshikikarasagasu/somuka/gyoseikakari/1096.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'mikasa',
+      title: '三笠市',
+      description: '三笠市防災ハザードマップ（洪水・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.city.mikasa.hokkaido.jp/hotnews/detail/00001717.html'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'sunagawa',
+      title: '砂川市',
+      description: '砂川市防災ハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.city.sunagawa.hokkaido.jp/shisei/bousai_bouka/hazard-map.html'
+    },
+    {
+      // 検索エンジンには防災ポータルの汎用ページしかヒットせず、市サイト自身の
+      // 「暮らし＞防災」カテゴリページから個別ページを特定した。See D31.
+      regionKey: 'shien-sorachi',
+      key: 'utashinai',
+      title: '歌志内市',
+      description: '歌志内市防災ハザードマップ（洪水・土砂災害・地震）を新しいタブで開きます。',
+      url: 'https://www.city.utashinai.hokkaido.jp/hotnews/detail/00003232.html'
+    },
+    {
+      // 倶知安町・千歳市等と同様、単一のハザードマップ統合ページがなく
+      // （地区防災ガイド・防災GIS・3D浸水ハザードマップ・土砂災害ハザードマップが
+      // 別ページに分かれている）、それら全てへの導線がある計画ページを案内する。
+      regionKey: 'shien-ishikari',
+      key: 'ishikari',
+      title: '石狩市',
+      description: '石狩市の防災等の計画ページ（地区防災ガイド・防災GIS・土砂災害ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.city.ishikari.hokkaido.jp/kurashi/bosai/1005776/1004565/'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
