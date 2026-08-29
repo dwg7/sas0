@@ -691,6 +691,87 @@ window.SAS0_CONFIG = {
       title: '留寿都村',
       description: '留寿都村のハザードマップを新しいタブで開きます。',
       url: 'https://www.vill.rusutsu.lg.jp/hotnews/detail/00000269.html'
+    },
+    // バッチ8（10件）：全35市・全15村の完了後、人口上位10の町を追加。See D34。
+    {
+      regionKey: 'shien-sorachi',
+      key: 'kuriyama',
+      title: '栗山町',
+      description: '栗山町のハザードマップページ（洪水・風水害・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.kuriyama.hokkaido.jp/life/6/38/'
+    },
+    {
+      // 検索結果はdisaportal.gsi.go.jpの汎用ページのみヒットし、町独自のページは
+      // 町サイト自身の防災ナビゲーションから特定した。See D34。
+      regionKey: 'shien-shiribeshi',
+      key: 'iwanai',
+      title: '岩内町',
+      description: '岩内町の避難所・ハザードマップページ（津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.iwanai.hokkaido.jp/暮らしガイド/防災/避難所・ハザードマップ/'
+    },
+    {
+      regionKey: 'shien-hidaka',
+      key: 'hidaka',
+      title: '日高町',
+      description: '日高町のハザードマップページ（津波・防災ガイドマップ）を新しいタブで開きます。',
+      url: 'https://www.town.hidaka.hokkaido.jp/prevention/?category=62'
+    },
+    {
+      // 検索結果の上位URL（.../docs/11022.html）は既にstale（404）。町サイト自身の
+      // 防災情報ナビゲーションから現行ページを特定した。See D34。
+      regionKey: 'shien-kamikawa',
+      key: 'higashikagura',
+      title: '東神楽町',
+      description: '東神楽町の防災情報ページ（洪水・ため池のハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.town.higashikagura.lg.jp/c4_bosai/safety/bosai/'
+    },
+    {
+      // 検索結果の上位URL（bosai_map.html）は既にstale（404）。町サイト自身の
+      // ナビゲーションから現行ページを特定した。独自ドメイン（maoi-net.jp）。
+      // See D34。
+      regionKey: 'shien-sorachi',
+      key: 'naganuma',
+      title: '長沼町',
+      description: '長沼町の防災マップページ（洪水・地震・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.maoi-net.jp/kyukyu_bosai/bosai/map/'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'biei',
+      title: '美瑛町',
+      description: '美瑛町の「災害にそなえる」ページ（洪水・土砂災害・十勝岳火山等）を新しいタブで開きます。',
+      url: 'https://town.biei.hokkaido.jp/emergency/'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'kamifurano',
+      title: '上富良野町',
+      description: '上富良野町の防災対策ページ（洪水・十勝岳火山・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.kamifurano.hokkaido.jp/index.php?id=73'
+    },
+    {
+      // 独自ドメイン（higashikawa-town.jp）。JS駆動のパネル型サイトで
+      // <title>はサイト共通の汎用文言だが、本文は防災情報そのもの。See D34。
+      regionKey: 'shien-kamikawa',
+      key: 'higashikawa',
+      title: '東川町',
+      description: '東川町の災害対策ページ（洪水・大雪山（旭岳）火山防災マップ）を新しいタブで開きます。',
+      url: 'https://higashikawa-town.jp/portal/kurashi/panel/68'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'shimizu',
+      title: '清水町',
+      description: '清水町防災ガイドマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.shimizu.hokkaido.jp/disaster/details/post_7.html'
+    },
+    {
+      // 独自ドメイン（akkeshi-town.jp）。See D34。
+      regionKey: 'shien-kushiro',
+      key: 'akkeshi',
+      title: '厚岸町',
+      description: '厚岸町の防災ハザードマップ（津波・土砂災害・洪水）を新しいタブで開きます。',
+      url: 'https://www.akkeshi-town.jp/bousai/bousaitaisaku_05/'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
