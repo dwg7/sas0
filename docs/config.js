@@ -1016,6 +1016,88 @@ window.SAS0_CONFIG = {
       title: '今金町',
       description: '今金町の防災情報（土砂災害警戒区域・ため池ハザードマップ等）を新しいタブで開きます。',
       url: 'https://www.town.imakane.lg.jp/gyousei/kurashi/syoubou/post_43.html'
+    },
+    // バッチ12（10件）：人口上位10の町を追加、6巡目。See D38。
+    {
+      regionKey: 'shien-sorachi',
+      key: 'yuni',
+      title: '由仁町',
+      description: '由仁町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.yuni.lg.jp/chosei/bosai'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'rankoshi',
+      title: '蘭越町',
+      description: '蘭越町のハザードマップ（洪水・土砂災害・津波等）を新しいタブで開きます。',
+      url: 'https://www.town.rankoshi.hokkaido.jp/webMap/index.html'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'saroma',
+      title: '佐呂間町',
+      description: '佐呂間町のハザードマップを新しいタブで開きます。',
+      url: 'https://www.town.saroma.hokkaido.jp/emergency/hazardmap.html'
+    },
+    {
+      // 個別の改定版ニュース記事ではなく、恒久的なカテゴリページを採用
+      // （改定のたびにリンク切れになるのを避けるため）。See D38。
+      regionKey: 'shien-hidaka',
+      key: 'biratori',
+      title: '平取町',
+      description: '平取町のハザードマップ（防災ガイドマップ）を新しいタブで開きます。',
+      url: 'https://www.town.biratori.hokkaido.jp/kurashi/seikatsukankyo/bosai/'
+    },
+    {
+      regionKey: 'shien-kamikawa',
+      key: 'nakafurano',
+      title: '中富良野町',
+      description: '中富良野町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.nakafurano.lg.jp/hotnews/category/116.html'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'kunneppu',
+      title: '訓子府町',
+      description: '訓子府町のハザードマップ（防災ガイドマップ・洪水ハザードマップ）を新しいタブで開きます。',
+      url: 'https://www.town.kunneppu.hokkaido.jp/life/somu/bousai_kikikanri/bousaigaidomap.html'
+    },
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'koshimizu',
+      title: '小清水町',
+      description: '小清水町のハザードマップ（洪水・土砂災害・津波等）を新しいタブで開きます。',
+      url: 'https://www.town.koshimizu.hokkaido.jp/hotnews/detail/00005586.html'
+    },
+    {
+      // 防災専用の別サブドメイン（bousai.town.atsuma.lg.jp）。JS駆動サイトで
+      // <title>は空だが、実ブラウザでは「厚真町Web版ハザードマップ」と
+      // 正しく表示されることを確認済み。See D38。
+      regionKey: 'shien-iburi',
+      key: 'atsuma',
+      title: '厚真町',
+      description: '厚真町のハザードマップ（洪水・土砂災害・津波等）を新しいタブで開きます。',
+      url: 'https://bousai.town.atsuma.lg.jp'
+    },
+    {
+      // 別ドメイン（rausutown-bousai.jp）にWeb版ハザードマップもあるが、
+      // 町の公式ドメイン（rausu-town.jp）上のこのページを採用。<title>は
+      // 空だが実ブラウザでは正しく表示されることを確認済み。See D38。
+      regionKey: 'shien-nemuro',
+      key: 'rausu',
+      title: '羅臼町',
+      description: '羅臼町のハザードマップ（地震・津波・噴火・風水害等）を新しいタブで開きます。',
+      url: 'https://www.rausu-town.jp/pages/view/288'
+    },
+    {
+      // ハザードマップ本体（www1.town.oumu.hokkaido.jp）はHTTPS/SNI不一致
+      // だが、同じ内容へリンクするHTTPS版の防災ページがあるためそちらを
+      // 採用し、allowedProtocols例外を避けた。See D38。
+      regionKey: 'shien-okhotsk',
+      key: 'oumu',
+      title: '雄武町',
+      description: '雄武町の防災ハンドブック・防災マップを新しいタブで開きます。',
+      url: 'https://www.town.oumu.hokkaido.jp/kurashi_tetsuzuki/anshin_anzen/bosai/1/2585.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
