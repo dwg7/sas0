@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Check every http(s) URL referenced in docs/config.js and docs/instruments/*.js
-# actually resolves. A manual maintenance tool, NOT part of the build or deploy —
-# sas0 deliberately has no CI (see CLAUDE.md); this is meant to be run by a
-# human or AI assistant picking the repo back up, the same way D2's
-# `curl -sI` checklist is applied by hand before bumping the Open MCT CDN pin.
+# actually resolves. Runs both by hand (a human or AI assistant picking the
+# repo back up, the same way D2's `curl -sI` checklist is applied by hand
+# before bumping the Open MCT CDN pin) and on a weekly schedule via
+# .github/workflows/check-links.yml (DECISIONS.md D45) — sas0's one CI job,
+# deliberately narrow in scope and separate from the build/deploy process
+# CLAUDE.md says sas0 doesn't have.
 #
 # Usage: scripts/check-links.sh
 #
@@ -21,16 +23,41 @@ cd "$(dirname "$0")/.."
 # "（https://...）" attribution format), not just whitespace.
 urls=$(grep -rhoE "https?://[^\"'\` )）、。」\${}]+" docs/config.js docs/instruments/*.js | sort -u)
 
+# Base-URL templates for runtime string concatenation, not fetchable pages —
+# always FAIL and always expected to (D22). Skipped rather than counted, so
+# neither a human nor the weekly workflow has to keep dismissing them.
+known_templates="
+https://www.jma.go.jp/bosai/warning/data/r8/
+https://www.jma.go.jp/bosai/weather_map/data/png/
+"
+
+fetch_status() {
+  curl -s -o /dev/null -w '%{http_code}' -L --max-time 15 \
+    -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" \
+    "$1" 2>/dev/null || echo "000"
+}
+
 fail=0
 total=0
 while IFS= read -r url; do
   [ -z "$url" ] && continue
+  if grep -qxF "$url" <<<"$known_templates"; then
+    printf 'SKIP %-5s %s\n' '-' "$url"
+    continue
+  fi
   total=$((total + 1))
-  status=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 15 \
-    -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" \
-    "$url" 2>/dev/null || echo "000")
+  status=$(fetch_status "$url")
   if [[ "$status" =~ ^[23] ]]; then
     printf 'OK   %-5s %s\n' "$status" "$url"
+    continue
+  fi
+  # A single retry absorbs the transient bot-protection/rate-limit flakes
+  # this repo has repeatedly seen (Incapsula-fronted sites, occasionally a
+  # non-ASCII path) — see DECISIONS.md D34, D45.
+  sleep 3
+  status=$(fetch_status "$url")
+  if [[ "$status" =~ ^[23] ]]; then
+    printf 'OK   %-5s %s (after retry)\n' "$status" "$url"
   else
     printf 'FAIL %-5s %s\n' "$status" "$url"
     fail=$((fail + 1))

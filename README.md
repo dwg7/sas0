@@ -113,7 +113,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, host allowlists, and iframe sandbox tokens
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)
-- `scripts/check-links.sh` — manual (not CI, D22) tool to re-verify every outbound URL in `docs/config.js`/`docs/instruments/*.js` still resolves
+- `scripts/check-links.sh` — re-verifies every outbound URL in `docs/config.js`/`docs/instruments/*.js` still resolves; runs both by hand (D22) and weekly via `.github/workflows/check-links.yml`, sas0's one CI job (D45)
 
 Open MCT has a few integration quirks specific to loading it from a CDN into a static site (a wrong CDN pin will silently render a blank page) — see [DECISIONS.md](DECISIONS.md) before changing `docs/index.html` or `docs/core.js`.
 

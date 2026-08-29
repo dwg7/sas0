@@ -1,0 +1,57 @@
+name: Check links
+
+# sas0's one CI job — a weekly run of scripts/check-links.sh (D22), filing
+# or updating a single tracking issue on failure. Deliberately narrow: this
+# doesn't build or deploy anything (GitHub Pages still serves docs/ unbuilt
+# either way), it only re-verifies outbound links nobody would otherwise
+# remember to re-check by hand. See DECISIONS.md D45.
+
+on:
+  schedule:
+    # Monday 20:00 UTC = Tuesday 05:00 JST — off-peak, low-stakes timing.
+    - cron: '0 20 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run link checker
+        id: check
+        run: |
+          set +e
+          ./scripts/check-links.sh >check-links-output.txt 2>&1
+          code=$?
+          cat check-links-output.txt
+          echo "exit_code=$code" >>"$GITHUB_OUTPUT"
+
+      - name: Report failures as an issue
+        if: steps.check.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="check-links.sh: 定期チェックで失敗を検出"
+          body_file=$(mktemp)
+          {
+            echo "週次リンクチェック（\`scripts/check-links.sh\`）で以下のFAILが検出されました。"
+            echo "多くはknown false positiveの場合があります — DECISIONS.md D22/D45を確認してください。"
+            echo ""
+            echo '```'
+            grep '^FAIL' check-links-output.txt || true
+            echo '```'
+            echo ""
+            echo "実行ログ: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } >"$body_file"
+
+          existing=$(gh issue list --search "\"$title\" in:title" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "$body_file"
+          else
+            gh issue create --title "$title" --body-file "$body_file"
+          fi
