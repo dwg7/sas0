@@ -408,8 +408,13 @@
         paint: {
           'circle-radius': 6,
           'circle-color': ['case', ['get', 'active'], SEVERITY_COLOR.warning, '#5c7089'],
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#0d1117'
+          // Red outline (independent of active/平常 fill color) is the
+          // at-a-glance cue distinguishing volcano points from quake points
+          // — both are circles of similar size, and a color-only distinction
+          // via fill alone wasn't enough once both layers were on screen
+          // together (D47 feedback).
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#e5484d'
         }
       }
     );
