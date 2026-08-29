@@ -1263,6 +1263,107 @@ window.SAS0_CONFIG = {
       description: '浜頓別町の防災マップ（洪水・津波・土砂災害）を新しいタブで開きます。',
       url: 'http://www.town.hamatonbetsu.hokkaido.jp/disaster/detail.php?content=632',
       allowedProtocols: ['http:']
+    },
+    // バッチ15（12件）：人口上位12の町を追加、9巡目（残り件数が少ないため
+    // やや大きめのバッチ）。See D41。
+    {
+      regionKey: 'shien-sorachi',
+      key: 'tsukigata',
+      title: '月形町',
+      description: '月形町のハザードマップ（水害・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.tsukigata.hokkaido.jp/page/1569.html'
+    },
+    {
+      regionKey: 'shien-hiyama',
+      key: 'otobe',
+      title: '乙部町',
+      description: '乙部町のハザードマップ（津波・洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.otobe.lg.jp/section/soumu/e0taal0000000jho.html'
+    },
+    {
+      // 洪水のみが地図として整備されている。See D41。
+      regionKey: 'shien-shiribeshi',
+      key: 'kyogoku',
+      title: '京極町',
+      description: '京極町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town-kyogoku.jp/page/1157.html'
+    },
+    {
+      // 洪水のみが地図として整備されている。See D41。
+      regionKey: 'shien-kamikawa',
+      key: 'shimokawa',
+      title: '下川町',
+      description: '下川町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.shimokawa.hokkaido.jp/section/bosai/'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'toyokoro',
+      title: '豊頃町',
+      description: '豊頃町のハザードマップ（津波・洪水）を新しいタブで開きます。',
+      url: 'https://www.toyokoro.jp/hazardmap/'
+    },
+    {
+      // 検索結果の上位URLは旧URL体系（301リダイレクト）。町サイト自身の
+      // 現行URLを特定した。See D41。
+      regionKey: 'shien-kamikawa',
+      key: 'wassamu',
+      title: '和寒町',
+      description: '和寒町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.wassamu.hokkaido.jp/affairs/community-safety/disaster-prevention/'
+    },
+    {
+      regionKey: 'shien-sorachi',
+      key: 'numata',
+      title: '沼田町',
+      description: '沼田町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.numata.hokkaido.jp/section/soumu/ujj7s30000001q7o.html'
+    },
+    {
+      // 苫前町と同一IP（45.60.112.77）上のHTTPS/SNI不一致（9件目）。
+      // ドメイン全体でHTTPSが機能せず、HTTPS代替も存在しないため
+      // allowedProtocols: ['http:']が必要。See D41。
+      regionKey: 'shien-shiribeshi',
+      key: 'kuromatsunai',
+      title: '黒松内町',
+      description: '黒松内町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'http://www.kuromatsunai.com/townlife/bousai/file001/',
+      allowedProtocols: ['http:']
+    },
+    {
+      // 検索エンジンには全くヒットせず、町サイト自身のメニューから発見。
+      // 土砂災害マップは未整備（警戒区域指定の告知のみ）。See D41。
+      regionKey: 'shien-kamikawa',
+      key: 'kembuchi',
+      title: '剣淵町',
+      description: '剣淵町のハザードマップ（洪水・ため池等）を新しいタブで開きます。',
+      url: 'https://www.town.kembuchi.hokkaido.jp/kurashi/消防・防災/災害が起きたら/'
+    },
+    {
+      // 具体的な改定版ニュース記事ではなく、恒久的なカテゴリページを採用
+      // （改定のたびにリンク切れになるのを避けるため、D38の平取町と同じ判断）。
+      regionKey: 'shien-rumoi',
+      key: 'obira',
+      title: '小平町',
+      description: '小平町のハザードマップ（津波・洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.obira.hokkaido.jp/hotnews/category/286.html'
+    },
+    {
+      // 黒松内町と同一IP（45.60.112.77）上のHTTPS/SNI不一致（10件目）。
+      // 土砂災害情報は地図でないテキストの注意喚起のみ。See D41。
+      regionKey: 'shien-rumoi',
+      key: 'tomamae',
+      title: '苫前町',
+      description: '苫前町のハザードマップ（津波・洪水）を新しいタブで開きます。',
+      url: 'http://www.town.tomamae.lg.jp/section/somu/lg6iib00000000cj.html',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-rumoi',
+      key: 'teshio',
+      title: '天塩町',
+      description: '天塩町のハザードマップ（津波・洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.teshiotown.hokkaido.jp/?page_id=17345'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
