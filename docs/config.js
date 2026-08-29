@@ -853,6 +853,88 @@ window.SAS0_CONFIG = {
       title: '鷹栖町',
       description: '鷹栖町のハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
       url: 'https://www.town.takasu.hokkaido.jp/page/1263.html'
+    },
+    // バッチ10（10件）：人口上位10の町を追加、4巡目。See D36。
+    {
+      regionKey: 'shien-sorachi',
+      key: 'shintotsukawa',
+      title: '新十津川町',
+      description: '新十津川町のハザードマップ（洪水・地震・ため池等）を新しいタブで開きます。',
+      url: 'https://www.town.shintotsukawa.lg.jp/hotnews/category/253.html'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'kyowa',
+      title: '共和町',
+      description: '共和町の防災対策ページ（土砂災害・避難所情報等）を新しいタブで開きます。',
+      url: 'https://www.town.kyowa.hokkaido.jp/prevention/?content=483'
+    },
+    {
+      // 公式ドメインはtown.tohma（tomaではない）。JS駆動のWebGISアプリで
+      // 素のHTMLの<title>は空だが、ブラウザでのレンダリング後は
+      // 「当麻町洪水ハザードマップ」と確認済み。See D36。
+      regionKey: 'shien-kamikawa',
+      key: 'toma',
+      title: '当麻町',
+      description: '当麻町洪水ハザードマップを新しいタブで開きます。',
+      url: 'https://www.town.tohma.hokkaido.jp/haz/index.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'honbetsu',
+      title: '本別町',
+      description: '本別町WEBハザードマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.honbetsu.hokkaido.jp/webhazardmap/'
+    },
+    {
+      // 検索結果の上位はハザードマップへの直接リンクがないトップページのみ。
+      // 町サイト自身の「くらし＞防災＞防災ガイドマップ」から特定した。See D36。
+      regionKey: 'shien-tokachi',
+      key: 'ashoro',
+      title: '足寄町',
+      description: '足寄町防災ガイドマップ（地震・風水害・土砂災害・雌阿寒岳火山等）を新しいタブで開きます。',
+      url: 'https://www.town.ashoro.hokkaido.jp/kurashi/bousai/bousai_map/page_254.html'
+    },
+    {
+      // 公式ドメインはhokkaido-ikeda.lg.jp（長野県池田町と同名のため注意）。
+      // See D36。
+      regionKey: 'shien-tokachi',
+      key: 'ikeda',
+      title: '池田町',
+      description: '池田町の防災のしおり（洪水・土砂災害・地震ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.town.hokkaido-ikeda.lg.jp/bosai-bohan/bosai/izatoiutoki/5365.html'
+    },
+    {
+      regionKey: 'shien-tokachi',
+      key: 'hiroo',
+      title: '広尾町',
+      description: '広尾町Web版ハザードマップ（津波・洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.hiroo.lg.jp/hazardmap/'
+    },
+    {
+      // 公式ドメインはshihoro.jp（隣接する上士幌町のkamishihoro.jpと
+      // 混同しないよう注意）。See D36。
+      regionKey: 'shien-tokachi',
+      key: 'shihoro',
+      title: '士幌町',
+      description: '士幌町防災ガイドブック・ハザードマップ（全域・市街地）を新しいタブで開きます。',
+      url: 'https://www.shihoro.jp/life/detail.php?content=62'
+    },
+    {
+      // 検索結果の上位は警報レベルの説明ページのみ。町サイト自身の防災
+      // ナビゲーションから防災ガイドマップ本体を特定した。See D36。
+      regionKey: 'shien-shiribeshi',
+      key: 'niseko',
+      title: 'ニセコ町',
+      description: 'ニセコ町防災ガイドマップ（令和3年4月発行）を新しいタブで開きます。',
+      url: 'https://www.town.niseko.lg.jp/kurashi/bosai_anzen/bosai/bousaigaidomappu/'
+    },
+    {
+      regionKey: 'shien-oshima',
+      key: 'oshamambe',
+      title: '長万部町',
+      description: '長万部町の防災ページ（土砂災害・津波・高潮ハザードマップ等）を新しいタブで開きます。',
+      url: 'https://www.town.oshamambe.lg.jp/life/6/23/91/'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
