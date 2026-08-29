@@ -34,7 +34,9 @@ Root order follows daily-use priority first, then 建制順 / 省庁→都道府
 │                                   polygons colored live by warning severity, municipality polygons
 │                                   clickable through to their 市町村 hazard-map link when one exists
 │                                   (D26's polygons used as a linking anchor); hover shows a docked
-│                                   info panel, click opens a link-only popup (D29)
+│                                   info panel, click opens a link-only popup (D29); also plots recent
+│                                   quake epicenters and the 9 volcanoes' locations as point layers,
+│                                   reusing 地震情報/火山情報's own JMA data, no new source (D47)
 ├─ 強震モニタ                    — link; nationwide realtime seismic-intensity map (this source has
 │                                   no HTTPS at all — D19)
 ├─ 川の防災情報                  — link; national river water-level/flood-forecast portal (D20)

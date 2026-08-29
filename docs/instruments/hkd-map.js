@@ -149,6 +149,137 @@
     return municipalities.find((m) => m.title === name) || null;
   }
 
+  // Point layers reuse quake.js / volcano.js's own JMA feeds (D47) — no new
+  // data source, just a second consumer of the same CORS-open bosai API.
+  // Constants/helpers are duplicated rather than shared, matching this
+  // file's existing HOKKAIDO_OFFICES/WARNING_KIND_NAMES duplication of
+  // warnings.js (D10: instrument files are self-contained).
+  const QUAKE_LIST_URL = 'https://www.jma.go.jp/bosai/quake/data/list.json';
+  const QUAKE_MAX_POINTS = 10;
+  const INTENSITY_ORDER = ['1', '2', '3', '4', '5-', '5+', '6-', '6+', '7'];
+
+  function isHokkaidoRelatedQuake(entry) {
+    if (typeof entry.anm === 'string' && entry.anm.includes('北海道')) {
+      return true;
+    }
+    return (entry.int || []).some((region) =>
+      (region.city || []).some((city) => typeof city.code === 'string' && city.code.startsWith('01'))
+    );
+  }
+
+  function maxHokkaidoIntensity(entry) {
+    let max = null;
+    (entry.int || []).forEach((region) => {
+      (region.city || []).forEach((city) => {
+        if (typeof city.code !== 'string' || !city.code.startsWith('01')) {
+          return;
+        }
+        if (max === null || INTENSITY_ORDER.indexOf(city.maxi) > INTENSITY_ORDER.indexOf(max)) {
+          max = city.maxi;
+        }
+      });
+    });
+    return max || entry.maxi || '不明';
+  }
+
+  // JMA's `cod` field is an ISO-6709-like string: signed lat, signed lon,
+  // signed depth/altitude in km, e.g. "+43.5+142.9-10/" — undetermined
+  // epicenters use out-of-range sentinel values, so anything outside real
+  // lat/lon bounds is dropped rather than plotted.
+  function parseQuakeCoordinate(cod) {
+    if (typeof cod !== 'string') {
+      return null;
+    }
+    const match = cod.match(/^([+-]\d+\.?\d*)([+-]\d+\.?\d*)/);
+    if (!match) {
+      return null;
+    }
+    const lat = parseFloat(match[1]);
+    const lon = parseFloat(match[2]);
+    if (Number.isNaN(lat) || Number.isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      return null;
+    }
+    return [lon, lat];
+  }
+
+  async function fetchQuakePoints() {
+    const url = SAS0.getSafeUrl(QUAKE_LIST_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
+    try {
+      const list = await fetch(url).then((response) => response.json());
+      const features = list
+        .filter(isHokkaidoRelatedQuake)
+        .slice(0, QUAKE_MAX_POINTS)
+        .map((entry) => {
+          const coordinate = parseQuakeCoordinate(entry.cod);
+          if (!coordinate) {
+            return null;
+          }
+          const mag = parseFloat(entry.mag);
+          return {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: coordinate },
+            properties: {
+              name: entry.anm,
+              magLabel: entry.mag || '不明',
+              mag: Number.isNaN(mag) ? 3 : mag,
+              intensity: maxHokkaidoIntensity(entry),
+              time: entry.at || entry.rdt || ''
+            }
+          };
+        })
+        .filter(Boolean);
+      return { type: 'FeatureCollection', features };
+    } catch (error) {
+      return { type: 'FeatureCollection', features: [] };
+    }
+  }
+
+  const VOLCANO_LIST_URL = 'https://www.jma.go.jp/bosai/volcano/const/volcano_list.json';
+  const VOLCANO_WARNING_URL = 'https://www.jma.go.jp/bosai/volcano/data/warning.json';
+  // Same 9 continuously-monitored volcanoes as volcano.js / volcano-councils.js — D28.
+  const HOKKAIDO_MONITORED_VOLCANO_CODES = ['104', '105', '107', '108', '109', '111', '112', '113', '114'];
+
+  function extractVolcanoLevelName(warningEntry) {
+    const infos = warningEntry.volcanoInfos || [];
+    const volcanoInfo = infos.find((info) => info.type === '噴火警報・予報（対象火山）');
+    const item = volcanoInfo && volcanoInfo.items && volcanoInfo.items[0];
+    return (item && item.name) || '警戒レベル引き上げ中';
+  }
+
+  async function fetchVolcanoPoints() {
+    const listUrl = SAS0.getSafeUrl(VOLCANO_LIST_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
+    const warningUrl = SAS0.getSafeUrl(VOLCANO_WARNING_URL, {
+      allowedProtocols: ['https:'],
+      allowedHosts: ALLOWED_HOSTS
+    });
+    try {
+      const [volcanoes, warnings] = await Promise.all([
+        fetch(listUrl).then((response) => response.json()),
+        fetch(warningUrl).then((response) => response.json())
+      ]);
+      const warningByCode = new Map(warnings.map((warning) => [String(warning.eventId), warning]));
+      const features = volcanoes
+        .filter((volcano) => HOKKAIDO_MONITORED_VOLCANO_CODES.includes(String(volcano.code)))
+        .map((volcano) => {
+          const lat = parseFloat(volcano.latlon[0]);
+          const lon = parseFloat(volcano.latlon[1]);
+          const active = warningByCode.get(String(volcano.code));
+          return {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [lon, lat] },
+            properties: {
+              name: volcano.name_jp,
+              active: !!active,
+              levelName: active ? extractVolcanoLevelName(active) : '平常'
+            }
+          };
+        });
+      return { type: 'FeatureCollection', features };
+    } catch (error) {
+      return { type: 'FeatureCollection', features: [] };
+    }
+  }
+
   const INFO_PLACEHOLDER_HTML =
     '<div class="sas0-map-info-placeholder">地図上にカーソルを合わせると、市町村・警報の状況が表示されます。</div>';
 
@@ -158,7 +289,13 @@
   // native re-implementation of that visual language, not an integration
   // with Open MCT's actual Inspector plugin (which is coupled to its object
   // selection model, not raw MapLibre hover events). See DECISIONS.md D29.
-  function renderInfoPanel(panel, { municipalityName, areaName, activeWarnings }) {
+  function renderInfoPanel(panel, { pointTitle, pointSubtitle, pointStatus, municipalityName, areaName, activeWarnings }) {
+    if (pointTitle) {
+      const subLine = pointSubtitle ? `<div class="sas0-map-info-area">${escapeHtml(pointSubtitle)}</div>` : '';
+      const statusLine = pointStatus ? `<div class="sas0-map-info-warning">${escapeHtml(pointStatus)}</div>` : '';
+      panel.innerHTML = `<div class="sas0-map-info-title">${escapeHtml(pointTitle)}</div>${subLine}${statusLine}`;
+      return;
+    }
     if (!municipalityName && !areaName) {
       panel.innerHTML = INFO_PLACEHOLDER_HTML;
       return;
@@ -209,6 +346,8 @@
 
     style.sources.jma_1saibun = { type: 'vector', url: jmaSourceUrl };
     style.sources.ksj_n03 = { type: 'vector', url: n03SourceUrl };
+    style.sources.quake_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+    style.sources.volcano_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.layers.push(
       {
         id: 'jma-warning-fill',
@@ -246,6 +385,32 @@
         minzoom: 8,
         layout: { 'text-field': ['get', 'municipality'], 'text-size': 11 },
         paint: { 'text-color': '#dce6f1', 'text-halo-color': '#0d1117', 'text-halo-width': 1 }
+      },
+      // Point layers on top of the polygons — recent Hokkaido-related quake
+      // epicenters and the 9 continuously-monitored volcanoes, both sourced
+      // from data quake.js/volcano.js already fetch. See DECISIONS.md D47.
+      {
+        id: 'quake-epicenter',
+        type: 'circle',
+        source: 'quake_points',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 2, 4, 7, 14],
+          'circle-color': '#f5c542',
+          'circle-opacity': 0.85,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#0d1117'
+        }
+      },
+      {
+        id: 'volcano-point',
+        type: 'circle',
+        source: 'volcano_points',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': ['case', ['get', 'active'], SEVERITY_COLOR.warning, '#5c7089'],
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#0d1117'
+        }
       }
     );
 
@@ -270,6 +435,12 @@
           map.setPaintProperty('jma-warning-fill', 'fill-color', buildFillColorExpression(byAreaCode));
         })
         .catch(() => {});
+      fetchQuakePoints()
+        .then((geojson) => map.getSource('quake_points').setData(geojson))
+        .catch(() => {});
+      fetchVolcanoPoints()
+        .then((geojson) => map.getSource('volcano_points').setData(geojson))
+        .catch(() => {});
     });
 
     map.on('mouseenter', 'ksj-n03-fill', () => {
@@ -279,20 +450,44 @@
       map.getCanvas().style.cursor = '';
     });
 
-    // Hover updates the docked info panel (ambient, non-blocking) with both
-    // layers at once; click opens a popup with a link, from ksj-n03-fill
-    // only. Splitting it this way (rather than a click handler per layer)
-    // is deliberate — both fill layers cover the same ground, so two
-    // independent click handlers used to both fire on one click and stack
-    // two overlapping popups. See DECISIONS.md D29.
+    // Hover updates the docked info panel (ambient, non-blocking); click
+    // opens a popup with a link, from ksj-n03-fill only. Splitting it this
+    // way (rather than a click handler per layer) is deliberate — both fill
+    // layers cover the same ground, so two independent click handlers used
+    // to both fire on one click and stack two overlapping popups. See
+    // DECISIONS.md D29. Quake/volcano points (D47) take priority over the
+    // polygons underneath when present — they're the more specific thing
+    // under the cursor — and are hover-only, no click/link (unlike
+    // ksj-n03-fill, neither has an obvious single link target).
     map.on('mousemove', (event) => {
       const features = map.queryRenderedFeatures(event.point, {
-        layers: ['ksj-n03-fill', 'jma-warning-fill']
+        layers: ['quake-epicenter', 'volcano-point', 'ksj-n03-fill', 'jma-warning-fill']
       });
       if (features.length === 0) {
         renderInfoPanel(infoPanel, {});
         return;
       }
+
+      const quakeFeature = features.find((feature) => feature.layer.id === 'quake-epicenter');
+      if (quakeFeature) {
+        const props = quakeFeature.properties;
+        renderInfoPanel(infoPanel, {
+          pointTitle: props.name,
+          pointSubtitle: props.time,
+          pointStatus: `M${props.magLabel}　北海道内最大震度${props.intensity}`
+        });
+        return;
+      }
+
+      const volcanoFeature = features.find((feature) => feature.layer.id === 'volcano-point');
+      if (volcanoFeature) {
+        renderInfoPanel(infoPanel, {
+          pointTitle: volcanoFeature.properties.name,
+          pointStatus: volcanoFeature.properties.levelName
+        });
+        return;
+      }
+
       const muniFeature = features.find((feature) => feature.layer.id === 'ksj-n03-fill');
       const warnFeature = features.find((feature) => feature.layer.id === 'jma-warning-fill');
       renderInfoPanel(infoPanel, {
