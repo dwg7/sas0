@@ -1180,6 +1180,89 @@ window.SAS0_CONFIG = {
       title: '豊浦町',
       description: '豊浦町防災ガイドマップ（地震・津波・土砂災害等）を新しいタブで開きます。',
       url: 'https://www.town.toyoura.hokkaido.jp/hotnews/detail/00001467.html'
+    },
+    // バッチ14（10件）：人口上位10の町を追加、8巡目。See D40。
+    {
+      regionKey: 'shien-okhotsk',
+      key: 'okoppe',
+      title: '興部町',
+      description: '興部町のハザードマップ（洪水・土砂災害・津波）を新しいタブで開きます。',
+      url: 'https://www.town.okoppe.lg.jp/bosai/hazardmap.html'
+    },
+    {
+      // 洪水マップは未整備。土砂災害・津波のみ。See D40。
+      regionKey: 'shien-oshima',
+      key: 'shikabe',
+      title: '鹿部町',
+      description: '鹿部町のハザードマップ（土砂災害・津波）を新しいタブで開きます。',
+      url: 'https://www.town.shikabe.lg.jp/kurashi_tetsuzuki/anzen_anshin/bosai/2/index.html'
+    },
+    {
+      // JS駆動のWebGISアプリで素のHTMLの<title>は空だが、実ブラウザでは
+      // 「増毛町WEB版防災ハザードマップ」と正しく表示されることを確認済み。
+      // See D40。
+      regionKey: 'shien-rumoi',
+      key: 'mashike',
+      title: '増毛町',
+      description: '増毛町のハザードマップ（洪水・土砂災害・津波）を新しいタブで開きます。',
+      url: 'https://www.town.mashike.hokkaido.jp/menu/bousai/hazardmap/index.html'
+    },
+    {
+      // 増毛町と同様、JS駆動で<title>は空。実ブラウザで「比布町防災マップ」
+      // と正しく表示されることを確認済み。See D40。
+      regionKey: 'shien-kamikawa',
+      key: 'pippu',
+      title: '比布町',
+      description: '比布町のハザードマップ（洪水・土砂災害・ため池）を新しいタブで開きます。',
+      url: 'https://www.town.pippu.hokkaido.jp/htdocs/'
+    },
+    {
+      regionKey: 'shien-oshima',
+      key: 'kikonai',
+      title: '木古内町',
+      description: '木古内町のハザードマップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.kikonai.hokkaido.jp/bosai/bosaimap.html'
+    },
+    {
+      regionKey: 'shien-shiribeshi',
+      key: 'niki',
+      title: '仁木町',
+      description: '仁木町の防災ガイドマップ（洪水・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.niki.hokkaido.jp/section/somuka/irv9760000000gin.html'
+    },
+    {
+      regionKey: 'shien-oshima',
+      key: 'fukushima',
+      title: '福島町',
+      description: '福島町のハザードマップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.fukushima.hokkaido.jp/map/'
+    },
+    {
+      // 土砂災害情報は地図でないテキストの注意喚起のみ。説明文は水害
+      // （洪水・風水害）のみに限定。See D40。
+      regionKey: 'shien-kamikawa',
+      key: 'kamikawa',
+      title: '上川町',
+      description: '上川町の水害ハザードマップ（洪水・風水害）を新しいタブで開きます。',
+      url: 'https://www.town.hokkaido-kamikawa.lg.jp/section/chiikimiryoku/chs81200000009ay.html'
+    },
+    {
+      regionKey: 'shien-hiyama',
+      key: 'assabu',
+      title: '厚沢部町',
+      description: '厚沢部町の防災ハザードマップ（洪水・土砂災害・津波）を新しいタブで開きます。',
+      url: 'https://www.town.assabu.lg.jp/page/9399.html'
+    },
+    {
+      // 名寄市・釧路町・深川市・様似町と同一IP（45.60.112.77）上のHTTPS/SNI
+      // 不一致（8件目）。HTTPS代替も存在しないためallowedProtocols:
+      // ['http:']が必要。See D40。
+      regionKey: 'shien-soya',
+      key: 'hamatonbetsu',
+      title: '浜頓別町',
+      description: '浜頓別町の防災マップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'http://www.town.hamatonbetsu.hokkaido.jp/disaster/detail.php?content=632',
+      allowedProtocols: ['http:']
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。
