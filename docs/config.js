@@ -21,7 +21,7 @@ window.SAS0_CONFIG = {
   hkdMap: {
     title: '状況図',
     description: '北海道の気象警報区域・市町村界を表示します。',
-    allowedHosts: ['stars.optgeo.org', 'gsi-cyberjapan.github.io', 'www.jma.go.jp'],
+    allowedHosts: ['stars.optgeo.org', 'gsi-cyberjapan.github.io', 'www.jma.go.jp', 'cyberjapandata.gsi.go.jp'],
     basemapStyleUrl: 'https://stars.optgeo.org/style/bvmap-dark',
     jmaSourceUrl: 'https://stars.optgeo.org/pmtiles_jma_1saibun_hkd',
     n03SourceUrl: 'https://stars.optgeo.org/pmtiles_ksj_n03_hkd'

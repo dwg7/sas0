@@ -29,16 +29,23 @@ Root order follows daily-use priority first, then 建制順 / 省庁→都道府
 │                                   polygons used as a linking anchor); hover shows a docked info
 │                                   panel, click opens a link-only popup (D29); also plots recent quake
 │                                   epicenters and the 9 volcanoes' locations as point layers, reusing
-│                                   地震情報/火山情報's own JMA data, no new source (D47). Named 地図
-│                                   ("map") until D48 moved it ahead of 気象庁 and renamed it 状況図
-│                                   ("situation map") to match its now-broader status-picture role
-├─ 気象庁                        — pinned second: daily-use, most-refined instruments (4 instruments,
+│                                   地震情報/火山情報's own JMA data, no new source (D47), plus a third
+│                                   point layer of 電子基準点 (GEONET) locations from GSI's own
+│                                   CORS-open tile GeoJSON (D53). Named 地図 ("map") until D48 moved it
+│                                   ahead of 気象庁 and renamed it 状況図 ("situation map") to match its
+│                                   now-broader status-picture role
+├─ 気象庁                        — pinned second: daily-use, most-refined instruments (6 instruments,
 │                                   the only root-level folder besides リンク集 — D43)
-│   ├─ 天気図                    — latest JMA surface weather chart, fetched live
+│   ├─ 天気図                    — latest JMA surface weather chart, fetched live; scrubbable across
+│   │                               the recent frames JMA's own feed already provides (D53)
 │   ├─ 警報・注意報（北海道）      — active JMA advisories/warnings across Hokkaido's 8 forecast regions
 │   ├─ 地震情報（北海道関連）      — recent earthquakes affecting Hokkaido
-│   └─ 火山情報（北海道の火山）    — current alert level for the 9 volcanoes JMA continuously monitors
-│                                   in Hokkaido (filtered from the wider 20-volcano code range — D28)
+│   ├─ 火山情報（北海道の火山）    — current alert level for the 9 volcanoes JMA continuously monitors
+│   │                               in Hokkaido (filtered from the wider 20-volcano code range — D28)
+│   ├─ 地震の規模推移（北海道関連） — SVG scatter of magnitude vs. time, reusing 地震情報's own fetched
+│   │                               data (D53)
+│   └─ 変化の記録                — local-only (no backend) log of changes in 警報・地震・火山 since the
+│                                   last manual refresh (D53)
 ├─ 強震モニタ                    — link; nationwide realtime seismic-intensity map (this source has
 │                                   no HTTPS at all — D19)
 ├─ 川の防災情報                  — link; national river water-level/flood-forecast portal (D20)
@@ -113,7 +120,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 - `docs/index.html` — loads Open MCT and MapLibre GL JS from pinned CDN versions, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` (both take an optional `order` to control display order independent of `<script>` load order — D28) and the shared `getSafeUrl()`/`renderLinkList()` helpers
 - `docs/folders.js` — declares the two folders that exist (気象庁, リンク集) and the root-level `order` values that place root instruments (D28). A folder is only created where it groups 2+ instruments (D43) — 防災科学技術研究所/国土交通省/北海道開発局/北海道/国土地理院/北海道運輸局 used to each be a single-instrument folder and were dissolved; their instruments now register directly with `parentKey: 'root'` or `parentKey: 'reference'` and an explicit `order` where one is needed
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, hkd-map, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus two vector-tile sources hosted on `stars.optgeo.org`, D26/D27)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, gsi-hazard, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, river-info, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus three vector/GeoJSON sources hosted on `stars.optgeo.org` and `cyberjapandata.gsi.go.jp`, D26/D27/D53; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, and host allowlists
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)

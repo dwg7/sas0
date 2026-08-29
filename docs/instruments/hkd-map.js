@@ -311,6 +311,59 @@
     }
   }
 
+  // 国土地理院の地理院タイル — 電子基準点（GEONET）の位置情報。CORSオープン・
+  // 無登録・無償で、政府標準利用規約（出典明記でCC-BY相当）に基づき配信されて
+  // いる（D51/D53で確認）。ズームレベル7では電子基準点のみが収録されるため、
+  // 一等三角点等が混ざらない。北海道全域をカバーするz=7タイル群（x:113-116,
+  // y:45-47の12枚、緯度経度からのタイル座標変換は標準的なWeb Mercatorの式）
+  // をまとめてfetchし、1つのGeoJSONにマージする — quake-epicenter/
+  // volcano-pointと同じ「複数fetch結果をマージしてgeojsonソースにする」
+  // パターン（D47）。See DECISIONS.md D53.
+  const REFERENCE_POINT_TILE_URL = 'https://cyberjapandata.gsi.go.jp/xyz/cp';
+  const REFERENCE_POINT_ZOOM = 7;
+  const REFERENCE_POINT_TILES = [];
+  for (let x = 113; x <= 116; x += 1) {
+    for (let y = 45; y <= 47; y += 1) {
+      REFERENCE_POINT_TILES.push([x, y]);
+    }
+  }
+
+  async function fetchReferencePoints() {
+    const results = await Promise.all(
+      REFERENCE_POINT_TILES.map(([x, y]) => {
+        const url = SAS0.getSafeUrl(`${REFERENCE_POINT_TILE_URL}/${REFERENCE_POINT_ZOOM}/${x}/${y}.geojson`, {
+          allowedProtocols: ['https:'],
+          allowedHosts: ALLOWED_HOSTS
+        });
+        return fetch(url)
+          .then((response) => response.json())
+          .catch(() => null);
+      })
+    );
+
+    const features = [];
+    results.forEach((geojson) => {
+      if (!geojson || !Array.isArray(geojson.features)) {
+        return;
+      }
+      geojson.features.forEach((feature) => {
+        if (feature.properties && feature.properties['基準点種別'] === '電子基準点') {
+          features.push({
+            type: 'Feature',
+            geometry: feature.geometry,
+            properties: {
+              name: feature.properties['点名'],
+              code: feature.properties['基準点コード'],
+              status: feature.properties['成果状態']
+            }
+          });
+        }
+      });
+    });
+
+    return { type: 'FeatureCollection', features };
+  }
+
   const INFO_PLACEHOLDER_HTML =
     '<div class="sas0-map-info-placeholder">地図上にカーソルを合わせると、市町村・警報の状況が表示されます。</div>';
 
@@ -379,6 +432,7 @@
     style.sources.ksj_n03 = { type: 'vector', url: n03SourceUrl };
     style.sources.quake_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.volcano_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+    style.sources.reference_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.layers.push(
       {
         id: 'jma-warning-fill',
@@ -447,6 +501,22 @@
           'circle-stroke-width': 2,
           'circle-stroke-color': '#e5484d'
         }
+      },
+      // 電子基準点（GEONET）— 国土地理院由来であることを示すため、市町村
+      // 境界線と同じ青系（#4c85f0）を使う。地震・火山のポイントより小さく
+      // 目立たせすぎない — 常時100件超が表示される、参照用の背景情報。
+      // See DECISIONS.md D53.
+      {
+        id: 'reference-point',
+        type: 'circle',
+        source: 'reference_points',
+        paint: {
+          'circle-radius': 3,
+          'circle-color': '#4c85f0',
+          'circle-opacity': 0.7,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#0d1117'
+        }
       }
     );
 
@@ -478,6 +548,9 @@
       fetchVolcanoPoints()
         .then((geojson) => map.getSource('volcano_points').setData(geojson))
         .catch(() => {});
+      fetchReferencePoints()
+        .then((geojson) => map.getSource('reference_points').setData(geojson))
+        .catch(() => {});
     });
 
     map.on('mouseenter', 'ksj-n03-fill', () => {
@@ -498,7 +571,7 @@
     // ksj-n03-fill, neither has an obvious single link target).
     map.on('mousemove', (event) => {
       const features = map.queryRenderedFeatures(event.point, {
-        layers: ['quake-epicenter', 'volcano-point', 'ksj-n03-fill', 'jma-warning-fill']
+        layers: ['quake-epicenter', 'volcano-point', 'reference-point', 'ksj-n03-fill', 'jma-warning-fill']
       });
       if (features.length === 0) {
         renderInfoPanel(infoPanel, {});
@@ -521,6 +594,17 @@
         renderInfoPanel(infoPanel, {
           pointTitle: volcanoFeature.properties.name,
           pointStatus: volcanoFeature.properties.levelName
+        });
+        return;
+      }
+
+      const referenceFeature = features.find((feature) => feature.layer.id === 'reference-point');
+      if (referenceFeature) {
+        const props = referenceFeature.properties;
+        renderInfoPanel(infoPanel, {
+          pointTitle: `${props.name}（電子基準点）`,
+          pointSubtitle: props.code,
+          pointStatus: props.status
         });
         return;
       }
