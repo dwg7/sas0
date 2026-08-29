@@ -1098,6 +1098,88 @@ window.SAS0_CONFIG = {
       title: '雄武町',
       description: '雄武町の防災ハンドブック・防災マップを新しいタブで開きます。',
       url: 'https://www.town.oumu.hokkaido.jp/kurashi_tetsuzuki/anshin_anzen/bosai/1/2585.html'
+    },
+    // バッチ13（10件）：人口上位10の町を追加、7巡目。See D39。
+    {
+      // 検索結果の上位はstale（404）。町サイト自身のナビゲーションから
+      // 現行ページを特定した。See D39。
+      regionKey: 'shien-tokachi',
+      key: 'urahoro',
+      title: '浦幌町',
+      description: '浦幌町のハザードマップ（洪水・土砂災害等）を新しいタブで開きます。',
+      url: 'https://urahoro.jp/prevention/?content=483'
+    },
+    {
+      // 検索結果の上位はstale（404）。町サイト自身のナビゲーションから
+      // 現行ページを特定した。See D39。
+      regionKey: 'shien-okhotsk',
+      key: 'tsubetsu',
+      title: '津別町',
+      description: '津別町のハザードマップ（洪水等）を新しいタブで開きます。',
+      url: 'https://www.town.tsubetsu.hokkaido.jp/kurashi_tetsuzuki/bosai_anzenanshin/6/4511.html'
+    },
+    {
+      regionKey: 'shien-hidaka',
+      key: 'erimo',
+      title: 'えりも町',
+      description: 'えりも町のハザードマップ（津波・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.erimo.lg.jp/section/kikaku/u9c3nn00000004rq.html'
+    },
+    {
+      // 名寄市・釧路町・深川市と同一IP（45.60.112.77）上のHTTPS/SNI不一致
+      // （これで7件目のこのパターン）。同内容のHTTPS代替も存在しないため
+      // allowedProtocols: ['http:']が必要。See D39。
+      regionKey: 'shien-hidaka',
+      key: 'samani',
+      title: '様似町',
+      description: '様似町のハザードマップ（洪水・津波・土砂災害）を新しいタブで開きます。',
+      url: 'http://www.samani.jp/bousai/',
+      allowedProtocols: ['http:']
+    },
+    {
+      regionKey: 'shien-hiyama',
+      key: 'kaminokuni',
+      title: '上ノ国町',
+      description: '上ノ国町のハザードマップ（洪水・津波・地震・土砂災害）を新しいタブで開きます。',
+      url: 'https://www.town.kaminokuni.lg.jp/hotnews/detail/00002266.html'
+    },
+    {
+      regionKey: 'shien-oshima',
+      key: 'shiriuchi',
+      title: '知内町',
+      description: '知内町のハザードマップ（洪水・津波）を新しいタブで開きます。',
+      url: 'https://www.town.shiriuchi.hokkaido.jp/kurashi/bosai/bousaimap.html'
+    },
+    {
+      // 洪水のみが地図として整備されており、土砂災害情報は地図でない告知の
+      // 形で別途公開されている。説明文は洪水のみに限定。See D39。
+      regionKey: 'shien-kamikawa',
+      key: 'bifuka',
+      title: '美深町',
+      description: '美深町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.bifuka.hokkaido.jp/cms/section/soumu/qlmcaj0000005h19.html'
+    },
+    {
+      // 美深町と同様、洪水のみが地図として整備されている。See D39。
+      regionKey: 'shien-okhotsk',
+      key: 'kiyosato',
+      title: '清里町',
+      description: '清里町のハザードマップ（洪水）を新しいタブで開きます。',
+      url: 'https://www.town.kiyosato.hokkaido.jp/life/?content=595'
+    },
+    {
+      regionKey: 'shien-soya',
+      key: 'toyotomi',
+      title: '豊富町',
+      description: '豊富町のハザードマップ（洪水・津波・地震等）を新しいタブで開きます。',
+      url: 'https://www.town.toyotomi.hokkaido.jp/section/soumuka/tdlqvk000000jvel.html'
+    },
+    {
+      regionKey: 'shien-iburi',
+      key: 'toyoura',
+      title: '豊浦町',
+      description: '豊浦町防災ガイドマップ（地震・津波・土砂災害等）を新しいタブで開きます。',
+      url: 'https://www.town.toyoura.hokkaido.jp/hotnews/detail/00001467.html'
     }
   ],
   // 火山防災協議会が設置されている北海道の常時観測火山（9火山）。

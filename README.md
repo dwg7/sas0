@@ -53,8 +53,8 @@ Root order follows daily-use priority first, then 建制順 / 省庁→都道府
     ├─ 北海道運輸局
     │   └─ 北海道 旅の安全情報     — link; multilingual transport-disruption/weather status
     ├─ 市町村                    — a single grouped link list (by 振興局/subprefecture), not a folder
-    │                               tree; 122 of 179 municipalities so far, extended in repeatable
-    │                               batches (D23–D25, D31–D38), including all 35 of Hokkaido's cities
+    │                               tree; 132 of 179 municipalities so far, extended in repeatable
+    │                               batches (D23–D25, D31–D39), including all 35 of Hokkaido's cities
     │                               (市) and all 15 villages (村); every subprefecture has at least 2
     │                               entries, plus a live city-run disaster portal for 札幌市 and two
     │                               of its wards (D30)
