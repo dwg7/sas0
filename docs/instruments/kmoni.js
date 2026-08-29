@@ -4,8 +4,7 @@
   SAS0.registerInstrument({
     key: 'kmoni',
     name: config.title || '強震モニタ',
-    parentKey: 'root',
-    order: 3,
+    parentKey: 'reference',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

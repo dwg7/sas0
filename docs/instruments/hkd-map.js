@@ -644,7 +644,11 @@
     name: config.title || '状況図',
     parentKey: 'root',
     autoRefresh: false,
-    order: 1,
+    // 0, not 1 — root now also holds several auto-ordered instruments
+    // (D54's 気象庁 flattening) whose order starts at 1 (core.js's
+    // autoOrder counter). A tie at 1 would let script-load sequence decide,
+    // which isn't guaranteed to keep 状況図 first. See DECISIONS.md D54.
+    order: 0,
     render
   });
 })();

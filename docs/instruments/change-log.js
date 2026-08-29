@@ -336,7 +336,7 @@
   SAS0.registerInstrument({
     key: 'change-log',
     name: '変化の記録',
-    parentKey: 'jma',
+    parentKey: 'root',
     autoRefresh: false,
     render: runOnce
   });

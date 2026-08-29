@@ -1,26 +1,22 @@
 // フォルダは2計器以上を束ねる時だけ作る — 1計器しか持たないフォルダは
 // クリックしてもその1計器しか出てこず、ワンクッション増やすだけの無駄に
-// なるため作らない。その計器は元フォルダの位置（同じ order）へ直接
-// 昇格させる。気象庁（4計器）とリンク集（4項目）は複数計器を束ねるため
-// フォルダとして維持する。See DECISIONS.md D28, D43.
-// order 1 は docs/instruments/hkd-map.js の registerInstrument が使う（状況図、
-// 旧 地図。D48で気象庁より先頭に変更）。
-SAS0.registerFolder({ key: 'jma', name: '気象庁', parentKey: 'root', order: 2 });
-// order 3 は docs/instruments/kmoni.js が使う（強震モニタ、旧 防災科学技術研究所 フォルダ）。
-// order 4 は docs/instruments/river-info.js が使う（川の防災情報、旧 国土交通省 フォルダ）。
-// order 5 は docs/instruments/hokkaido-development-bureau.js が使う（旧 北海道開発局 フォルダ）。
-// order 6 は docs/instruments/hokkaido.js が使う（北海道 防災情報、旧 北海道 フォルダ）。
-
-// リンク集：常用しない・状況情報でない（一度確認すれば足りる参照資料）を
-// まとめる置き場。ハザードマップポータル（docs/instruments/gsi-hazard.js、
-// 旧 国土地理院 フォルダ）・旅の安全情報（docs/instruments/
-// hokkaido-safe-travel.js、旧 北海道運輸局 フォルダ）もここへ直接ぶら下がる
-// 単一計器として自己登録する。市町村・火山（下記コメント参照）も同様。
-// See DECISIONS.md D28, D43.
+// なるため作らない。See DECISIONS.md D28, D43。
+//
+// 気象庁フォルダはD54で廃止した——「いつも使うものはワンクリックで」
+// という運用上の要望により、天気図・警報・注意報・地震・火山・
+// 地震の規模推移・変化の記録の6計器はすべてルート直下へ昇格させた
+// （`order`はscriptタグ読み込み順のまま、明示的な値は付けていない）。
+// リンク集はsas0で唯一残るフォルダで、状況情報ではなく参照資料
+// （一度確認すれば足りるもの）をまとめる置き場——ハザードマップポータル・
+// 北海道 旅の安全情報・市町村・火山（下記コメント参照）に加えて、
+// D54で強震モニタ・川の防災情報・北海道開発局 防災情報ポータルサイト・
+// 北海道 防災情報の4項目もここへ移した（旧D28では「状況情報」として
+// ルート直下に置いていたが、常用頻度の見直しにより参照資料側へ）。
+// See DECISIONS.md D28, D43, D54.
 SAS0.registerFolder({ key: 'reference', name: 'リンク集', parentKey: 'root', order: 9 });
 
-// 市町村・火山は「組織ごとのフォルダ」という慣習（D10）に馴染まない
-// （各市町村・各協議会がそれぞれ別組織）ため、フォルダ階層は作らず
-// docs/instruments/municipalities.js・volcano-councils.js がリンク集直下の
-// 単一計器として自己登録する（内部で見出しつきリストに束ねる）。
+// 市町村・火山（協議会リンク）は「組織ごとのフォルダ」という慣習（D10）に
+// 馴染まない（各市町村・各協議会がそれぞれ別組織）ため、フォルダ階層は
+// 作らず docs/instruments/municipalities.js・volcano-councils.js が
+// リンク集直下の単一計器として自己登録する（内部で見出しつきリストに束ねる）。
 // See DECISIONS.md D20, D28.

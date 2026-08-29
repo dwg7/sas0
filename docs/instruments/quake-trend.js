@@ -151,7 +151,7 @@
   SAS0.registerInstrument({
     key: 'quake-trend',
     name: '地震の規模推移（北海道関連）',
-    parentKey: 'jma',
+    parentKey: 'root',
     render
   });
 })();

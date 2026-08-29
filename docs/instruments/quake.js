@@ -62,8 +62,8 @@
 
   SAS0.registerInstrument({
     key: 'quake',
-    name: '地震情報（北海道関連）',
-    parentKey: 'jma',
+    name: '地震',
+    parentKey: 'root',
     render
   });
 })();

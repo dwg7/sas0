@@ -8,82 +8,87 @@ Current state of sas0, for whoever (human or AI) picks this up next.
 - **Open MCT pinned to `4.3.0-rc1`**, using the current selector-string `start('#app')` form ([DECISIONS.md](DECISIONS.md) D8).
 - **Architecture is Open MCT's own browse tree** (D10), following a UX consulting pass for a concrete daily-use case: a Hokkaido regional survey department director who wants to check a handful of disaster-related sources by clicking through a list, not stare at a fixed grid. Every instrument is a single full-screen view, one click away. Current shape:
 
-  Root order is deliberate, not just registration order (`order` field added to `core.js`, D28): 状況図 and 気象庁 pinned first for daily use — 状況図 leads as of D48 — then 建制順 / 省庁→都道府県→市町村, occasional-reference sources bucketed into リンク集 last. A folder only exists where it groups 2+ instruments (D43) — 気象庁 and リンク集 are the only two; everything else registers directly at its position.
+  Root order is deliberate, not just registration order (`order` field added to `core.js`, D28). As of D54, sas0 has only **one** folder left — リンク集 — everything else the user checks daily sits flat at root, one click away, per an explicit "make frequent items feel like an ops console" request. 状況図 leads (`order: 0`, D48/D54), then the six ex-気象庁 instruments (auto-ordered by script sequence), then リンク集 last.
 
   ```
   状況認識サービス0 (sas0)
-  ├─ 状況図                        — pinned first, daily use; native MapLibre GL JS map, no iframe
-  │                                     (D27); replaces Spiccato, whose one job (proving a complex
-  │                                     CDN-loaded MapLibre site could run embedded in Open MCT — D9)
-  │                                     was already done. JMA forecast polygons colored live by
-  │                                     warning severity; municipality polygons clickable through to
-  │                                     their 市町村 link when one exists (D26/D27). Hover shows a
-  │                                     docked info panel, click opens a link-only popup (D29); also
-  │                                     carries quake-epicenter and volcano-location point layers,
-  │                                     reusing 地震情報/火山情報's own already-fetched JMA data (D47),
+  ├─ 状況図                        — native MapLibre GL JS map, no iframe (D27); replaces Spiccato,
+  │                                     whose one job (proving a complex CDN-loaded MapLibre site could
+  │                                     run embedded in Open MCT — D9) was already done. JMA forecast
+  │                                     polygons colored live by warning severity; municipality polygons
+  │                                     clickable through to their 市町村 link when one exists (D26/D27).
+  │                                     Hover shows a docked info panel, click opens a link-only popup
+  │                                     (D29); also carries quake-epicenter and volcano-location point
+  │                                     layers, reusing 地震/火山's own already-fetched JMA data (D47),
   │                                     plus a third point layer of 電子基準点 (GEONET) locations from
   │                                     GSI's own CORS-open tile GeoJSON (D53). Named 地図 until D48
-  │                                     moved it ahead of 気象庁 and renamed it, matching its now-broader
-  │                                     status-picture role
-  ├─ 気象庁                        — pinned second, daily use; only other root-level folder besides
-  │                                     リンク集 (D43), holds 6 instruments
-  │   ├─ 天気図                    — live JMA surface weather chart; scrubbable across the recent
-  │   │                               frames JMA's own list.json already provides, not just the latest
-  │   │                               one (D53)
-  │   ├─ 警報・注意報（北海道）      — active advisories/warnings, 8 forecast regions
-  │   ├─ 地震情報（北海道関連）      — recent Hokkaido-relevant earthquakes
-  │   ├─ 火山情報（北海道の火山）    — current alert level, the 9 continuously-monitored volcanoes
-  │   │                               only (filtered from a wider 20-volcano range, D28)
-  │   ├─ 地震の規模推移（北海道関連） — SVG scatter of magnitude vs. time, reusing 地震情報's own
-  │   │                               fetched data; started as an attempt to use Open MCT's native
-  │   │                               Plot/telemetry API for the first time, abandoned after hitting an
-  │   │                               unresolved internal rendering wall specific to hand-registered
-  │   │                               (not `+Create`-made) telemetry objects — see D53 for the full story
-  │   └─ 変化の記録                — local-only (localStorage, no backend/sync) log of what changed in
+  │                                     moved it ahead of 気象庁 (itself dissolved as of D54) and renamed
+  │                                     it, matching its now-broader status-picture role
+  ├─ 天気図                        — live JMA surface weather chart; scrubbable across the recent frames
+  │                                     JMA's own list.json already provides, not just the latest one
+  │                                     (D53). Was inside 気象庁 until D54 flattened it to root
+  ├─ 警報・注意報                  — active advisories/warnings, 8 forecast regions. Renamed from
+  │                                     「警報・注意報（北海道）」 and promoted from 気象庁 to root (D54)
+  ├─ 地震                          — recent Hokkaido-relevant earthquakes. Renamed from
+  │                                     「地震情報（北海道関連）」 and promoted from 気象庁 to root (D54)
+  ├─ 火山                          — current alert level, the 9 continuously-monitored volcanoes only
+  │                                     (filtered from a wider 20-volcano range, D28). Renamed from
+  │                                     「火山情報（北海道の火山）」 and promoted from 気象庁 to root (D54)
+  ├─ 地震の規模推移（北海道関連） — SVG scatter of magnitude vs. time, reusing 地震's own fetched data;
+  │                                     started as an attempt to use Open MCT's native Plot/telemetry API
+  │                                     for the first time, abandoned after hitting an unresolved internal
+  │                                     rendering wall specific to hand-registered (not `+Create`-made)
+  │                                     telemetry objects — see D53 for the full story. Promoted from
+  │                                     気象庁 to root along with everything else in D54
+  ├─ 変化の記録                    — local-only (localStorage, no backend/sync) log of what changed in
   │                                     警報・地震・火山 since the last manual refresh — sas0's answer to
-  │                                     "notifications" without a push infrastructure (D53)
-  ├─ 強震モニタ                    — link; nationwide realtime seismic intensity; this source is
-  │                                     HTTP-only, no HTTPS at all (D19). Was its own 防災科学技術
-  │                                     研究所 folder until D43 dissolved every single-instrument folder
-  ├─ 川の防災情報                  — link; national river water-level/flood-forecast portal (D20).
-  │                                     Was its own 国土交通省 folder until D43
-  ├─ 北海道開発局 防災情報ポータルサイト — link; the bureau's own curated portal (河川/土砂災害/道路/港湾/
-  │                                     気象/地震津波/火山), a third distinct MLIT-family org alongside
-  │                                     北海道運輸局 and 国土交通省 (D21). Was its own 北海道開発局
-  │                                     folder until D43; renamed with the org prefix so it isn't
-  │                                     confused with the other "防災情報" items now that it's flat
-  ├─ 北海道 防災情報                — one compact link list: pref homepage (framing blocked) +
-  │                                     北海道防災ポータル (live 179-municipality evacuation/warning/
-  │                                     river/landslide/volcano status on one map, D19). Was its own
-  │                                     北海道 folder until D43; renamed from the too-generic「防災情報」
-  └─ リンク集                      — occasional-reference sources, not live status (D28); only other
-                                      root-level folder besides 気象庁, holds 4 instruments (D43)
+  │                                     "notifications" without a push infrastructure (D53). Promoted
+  │                                     from 気象庁 to root in D54
+  └─ リンク集                      — occasional-reference sources, not live status (D28); sas0's only
+                                      remaining folder (D54 dissolved 気象庁, the other one). Now holds
+                                      8 items: the original 4 plus 強震モニタ・川の防災情報・
+                                      北海道開発局 防災情報ポータルサイト・北海道 防災情報, moved here
+                                      from root in D54 (D28 had classified these as "status info" worth
+                                      a root slot; usage patterns argued otherwise)
       ├─ ハザードマップポータル      — link (D14 — embedding breaks it). Was its own 国土地理院 folder
       │                               until D43
+      ├─ 北海道 防災情報            — one compact link list: pref homepage (framing blocked) +
+      │                               北海道防災ポータル (live 179-municipality evacuation/warning/
+      │                               river/landslide/volcano status on one map, D19). Was its own
+      │                               北海道 folder until D43, then a root instrument until D54 moved
+      │                               it here; renamed from the too-generic「防災情報」
       ├─ 北海道 旅の安全情報         — link; multilingual transport-disruption/weather status (D19).
       │                               Was its own 北海道運輸局 folder until D43
+      ├─ 北海道開発局 防災情報ポータルサイト — link; the bureau's own curated portal (河川/土砂災害/道路/
+      │                               港湾/気象/地震津波/火山), a third distinct MLIT-family org
+      │                               alongside 北海道運輸局 and 国土交通省 (D21). Was its own
+      │                               北海道開発局 folder until D43, then a root instrument until D54
+      ├─ 強震モニタ                — link; nationwide realtime seismic intensity; this source is
+      │                               HTTP-only, no HTTPS at all (D19). Was its own 防災科学技術研究所
+      │                               folder until D43, then a root instrument until D54 moved it here
+      ├─ 川の防災情報               — link; national river water-level/flood-forecast portal (D20). Was
+      │                               its own 国土交通省 folder until D43, then a root instrument
+      │                               until D54
       ├─ 市町村                    — single grouped link list (NOT a folder tree — flattened in D20),
       │                               179 of Hokkaido's 179 municipalities — full coverage (D42);
       │                               35 cities (市, D31), 15 villages (村, D33), 129 towns (町,
-      │                               D18/D23–D25/D31–D32/D34–D42), one row per subprefecture
-      │                               heading; 石狩振興局 has 札幌市's static hazard map, さっぽろ
-      │                               防災ポータル's live per-ward dashboard (D19), and two wards
-      │                               with independently valuable pages of their own — 豊平区・
-      │                               清田区 (D30)
-      └─ 火山                      — single link list (flattened in D20), 9 rows, one per volcano
-                                      with an established 火山防災協議会 (D15), each linking to that
-                                      council's own evacuation-plan material rather than JMA's
-                                      summary (D18) — same 9 volcanoes as 気象庁's list above, but
-                                      complementary information (D28)
+      │                               D18/D23–D25/D31–D42), one row per subprefecture heading; 石狩振興局
+      │                               has 札幌市's static hazard map, さっぽろ防災ポータル's live
+      │                               per-ward dashboard (D19), and two wards with independently
+      │                               valuable pages of their own — 豊平区・清田区 (D30)
+      └─ 火山                      — single link list (flattened in D20), 9 rows, one per volcano with
+                                      an established 火山防災協議会 (D15), each linking to that
+                                      council's own evacuation-plan material rather than JMA's summary
+                                      (D18) — same 9 volcanoes as the root-level 火山 instrument above,
+                                      but complementary information (D28)
   ```
-
-  All four 気象庁 instruments were verified against live data while building this (including two Hokkaido volcanoes that happened to be at an elevated alert level at the time — レベル２, correctly rendered).
 
 - **UI language unified to Japanese.** Instrument names, alt text, and copy were a mix of English and Japanese through the first build-out; all user-facing strings are Japanese now (proper nouns like "Spiccato" excepted). The root folder is named 状況認識サービス0 rather than the bare identifier `sas0`. This repo's own docs (this file included) stay in English by prior decision — see [CLAUDE.md](CLAUDE.md)'s "Project philosophy" section for the reasoning and the audience split.
 - **Project philosophy formalized**: why open-data-only is a permanent boundary rather than a gap, why Open MCT specifically, and how this connects to DWG7's own mission — see [DECISIONS.md](DECISIONS.md) D16–D17 and README's "Why open data only?". Read this before adding any data source that isn't already genuinely public.
 
 ## Resolved since last handover
 
+- **気象庁 folder dissolved — sas0 now has exactly one folder (リンク集).** A direct usability request ("make frequently-used items feel like a one-click ops console") drove two moves: the 6 instruments that had been inside 気象庁 (天気図・警報・注意報・地震・火山・地震の規模推移・変化の記録) promoted to root, with the first four renamed to drop their qualifiers (「警報・注意報（北海道）」→「警報・注意報」, 「地震情報（北海道関連）」→「地震」, 「火山情報（北海道の火山）」→「火山」); and the 4 items D28 had originally classified as root-level "status info" (強震モニタ・川の防災情報・北海道開発局 防災情報ポータルサイト・北海道 防災情報) moved into リンク集 instead, revising that classification based on actual usage patterns. Root is now 状況図 followed by 6 flat instruments then リンク集 (which grew to 8 items) — no intermediate folder level except リンク集 itself. Along the way, found and fixed a real ordering bug: 状況図's explicit `order: 1` tied with the first auto-ordered ex-気象庁 instrument (which also resolved to `1`), so 状況図 needed `order: 0` to guarantee it stays first. See [DECISIONS.md](DECISIONS.md) D54.
 - **Source-count expansion being a dead end (D51/D52) redirected effort toward "use existing sources more deeply."** Four features shipped: 天気図 gained a scrubber over JMA's already-fetched recent-frames array; 状況図 gained a third point layer (電子基準点/GEONET locations, CORS-open GSI tile GeoJSON, found via a priority investigation into GEONET given its closeness to DWG7's own domain); a new 変化の記録 instrument logs what changed in 警報/地震/火山 since the last manual refresh, entirely client-side (localStorage, no backend); and 地震の規模推移（北海道関連） visualizes quake magnitude over time as an SVG scatter. That last one started as an attempt to use Open MCT's own Plot/telemetry API for the first time in sas0's history — it got substantially far (correct metadata, composition, live data resolution all verified directly) before hitting an apparently-unresolved internal Open MCT rendering gap specific to telemetry objects registered outside its own `+Create` flow; abandoned in favor of a plain SVG chart reusing the same fetch logic, after user consultation. See [DECISIONS.md](DECISIONS.md) D53 for the complete investigation, including which other telemetry-shaped candidates (アメダス, 河川・ダム, GEONETの日々の座標値) were checked and why they weren't built this round.
 - **Surveyed whether sas0 should broaden beyond Hokkaido-government/JMA sources — concluded no viable third source exists yet, and why.** At the user's request, checked 日赤/道内NPO, L-Alert（公共情報コモンズ）, MLIT's 不動産情報ライブラリ disaster API, 国交省/内閣府-adjacent open data, 在札幌各国公館（actually only 米・韓・露・中 — no European country, contrary to the initial assumption）, and finally news media (NHK, 北海道新聞) at the user's follow-up. Every candidate failed on registration/contract requirements, missing CORS, explicit no-reuse terms, or simply being too static/low-value to bother with. This surfaced a reusable two-axis principle for evaluating future candidates: "open access" (anyone can read, no registration) and "wants to be aggregated" (explicitly designed/licensed for reuse) are independent and empirically anti-correlated — news orgs are open-to-read but reuse-prohibited (their business model depends on controlling presentation); L-Alert/MLIT's API are reuse-intended but registration-gated (liability/quality control). 気象庁 and 国土地理院 are the rare sources positive on both axes, which is why they're structurally hard to replace by finding "similar" agencies — added to CLAUDE.md's philosophy section as an evaluation heuristic for the next data-source candidate. See [DECISIONS.md](DECISIONS.md) D51. Next expansion direction: axes other than source count (display/feature improvements), not more sources.
 - **地図 renamed to 状況図 and promoted to root position 1, ahead of 気象庁.** Now that it also carries quake/volcano status (D47), "地図" (a bare description of what it renders) undersold its role; 状況図 ("situation map/picture") names what it's actually for. `docs/config.js`'s `hkdMap.title` and `docs/instruments/hkd-map.js`'s `order` changed; `docs/folders.js`'s 気象庁 `order` moved from 1 to 2 to make room. See [DECISIONS.md](DECISIONS.md) D48.
@@ -126,7 +131,7 @@ A guiding principle surfaced during this work ([DECISIONS.md](DECISIONS.md) D13)
 ## Where to look
 
 - [README.md](README.md) — what sas0 is/isn't, why it's open-data-only, current instrument tree, roadmap, live site
-- [DECISIONS.md](DECISIONS.md) — why things are built the way they are; D10–D17 cover the tree/instrument-registry architecture, the Hokkaido data sources, and the project's guiding philosophy; D18–D19 cover the municipality/volcano-council expansion and the issue #2 sources; D20 covers the `renderLinkList` redesign, the 市町村/火山 flattening, and the CORS investigation into daily-monitoring digestion; D21 covers 北海道開発局; D22 covers `scripts/check-links.sh` and the stale-link detection design; D23–D25 cover the 14→22→30→38 municipality batches and the repeatable-batch process itself; D26 covers the two Hokkaido-only vector-tile layers built on `~/stars`; D27 covers 状況図, the native MapLibre instrument that replaced Spiccato (named 地図 until D48); D28 covers the root folder reorganization (`order` field, リンク集, the 火山情報 volcano filter); D29 covers 状況図's hover-panel/click-popup UX redesign; D30 covers the 札幌市区 investigation; D31–D42 cover the sixteen municipality batches from 38/179 to full 179/179 coverage (D31 = all cities, D33 = all villages, D42 = the final batch), each recording that batch's specific judgment calls — see D42 itself for the cumulative list of recurring patterns (HTTPS/SNI mismatches, stale search results, non-standard domains, JS-rendered titles) found across the whole series; D43 covers dissolving every single-instrument folder (only 気象庁 and リンク集 remain as folders); D44 covers moving 状況図's hover info panel from the right side to the bottom; D45 covers the Open MCT/CORS re-checks and sas0's first CI (weekly `check-links.sh` run); D46 covers the 179-municipality hazard-map format survey and what it settles about D13's mappable-vs-non-mappable question; D47 covers the link-only-source digestibility survey (JMA's `bosai` API is the only CORS-open source in sas0's ecosystem) and adding quake-epicenter/volcano-location point layers to 状況図; D48 covers promoting 状況図 to root position 1 (ahead of 気象庁) and renaming it from 地図; D49 covers the volcano-point red outline (distinguishing it from quake points); D50 covers the calm/no-warning fill color redesign (grey → pale green) and its color theory; D51 covers the source-expansion survey (日赤/NPO/L-Alert/在外公館/報道) and the "open access vs. wants-to-be-aggregated are independent axes" heuristic; D52 is a values-structure reflection (not a code decision) on where sas0/DWG7's bottom-up, non-coercive approach sits relative to top-down integrated-GIS/geoportal mandates; D53 covers the four "use existing sources more deeply" features (天気図 scrubbing, 電子基準点 point layer, 変化の記録, 地震の規模推移) and the detailed account of why the native Open MCT Plot/telemetry attempt was abandoned for a plain SVG chart
+- [DECISIONS.md](DECISIONS.md) — why things are built the way they are; D10–D17 cover the tree/instrument-registry architecture, the Hokkaido data sources, and the project's guiding philosophy; D18–D19 cover the municipality/volcano-council expansion and the issue #2 sources; D20 covers the `renderLinkList` redesign, the 市町村/火山 flattening, and the CORS investigation into daily-monitoring digestion; D21 covers 北海道開発局; D22 covers `scripts/check-links.sh` and the stale-link detection design; D23–D25 cover the 14→22→30→38 municipality batches and the repeatable-batch process itself; D26 covers the two Hokkaido-only vector-tile layers built on `~/stars`; D27 covers 状況図, the native MapLibre instrument that replaced Spiccato (named 地図 until D48); D28 covers the root folder reorganization (`order` field, リンク集, the 火山情報 volcano filter); D29 covers 状況図's hover-panel/click-popup UX redesign; D30 covers the 札幌市区 investigation; D31–D42 cover the sixteen municipality batches from 38/179 to full 179/179 coverage (D31 = all cities, D33 = all villages, D42 = the final batch), each recording that batch's specific judgment calls — see D42 itself for the cumulative list of recurring patterns (HTTPS/SNI mismatches, stale search results, non-standard domains, JS-rendered titles) found across the whole series; D43 covers dissolving every single-instrument folder (only 気象庁 and リンク集 remain as folders); D44 covers moving 状況図's hover info panel from the right side to the bottom; D45 covers the Open MCT/CORS re-checks and sas0's first CI (weekly `check-links.sh` run); D46 covers the 179-municipality hazard-map format survey and what it settles about D13's mappable-vs-non-mappable question; D47 covers the link-only-source digestibility survey (JMA's `bosai` API is the only CORS-open source in sas0's ecosystem) and adding quake-epicenter/volcano-location point layers to 状況図; D48 covers promoting 状況図 to root position 1 (ahead of 気象庁) and renaming it from 地図; D49 covers the volcano-point red outline (distinguishing it from quake points); D50 covers the calm/no-warning fill color redesign (grey → pale green) and its color theory; D51 covers the source-expansion survey (日赤/NPO/L-Alert/在外公館/報道) and the "open access vs. wants-to-be-aggregated are independent axes" heuristic; D52 is a values-structure reflection (not a code decision) on where sas0/DWG7's bottom-up, non-coercive approach sits relative to top-down integrated-GIS/geoportal mandates; D53 covers the four "use existing sources more deeply" features (天気図 scrubbing, 電子基準点 point layer, 変化の記録, 地震の規模推移) and the detailed account of why the native Open MCT Plot/telemetry attempt was abandoned for a plain SVG chart; D54 covers dissolving 気象庁 (its 6 instruments promoted to root) and moving 4 root-level "status info" items into リンク集, per a direct usability request — リンク集 is sas0's only folder as of this decision
 - [CLAUDE.md](CLAUDE.md) — working notes for AI coding assistants in this repo, including how to add a new instrument or organization folder, and the philosophy section to read first
 
 ## Roadmap reminder

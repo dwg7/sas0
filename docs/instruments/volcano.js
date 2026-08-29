@@ -58,8 +58,8 @@
 
   SAS0.registerInstrument({
     key: 'volcano',
-    name: '火山情報（北海道の火山）',
-    parentKey: 'jma',
+    name: '火山',
+    parentKey: 'root',
     render
   });
 })();

@@ -144,8 +144,8 @@
 
   SAS0.registerInstrument({
     key: 'warnings',
-    name: '警報・注意報（北海道）',
-    parentKey: 'jma',
+    name: '警報・注意報',
+    parentKey: 'root',
     render
   });
 })();

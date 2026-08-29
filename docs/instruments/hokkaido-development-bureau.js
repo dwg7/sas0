@@ -4,8 +4,7 @@
   SAS0.registerInstrument({
     key: 'hokkaido-development-bureau',
     name: config.title || '北海道開発局 防災情報ポータルサイト',
-    parentKey: 'root',
-    order: 5,
+    parentKey: 'reference',
     autoRefresh: false,
     render(container) {
       container.innerHTML = '';

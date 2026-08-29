@@ -97,7 +97,7 @@
   SAS0.registerInstrument({
     key: 'weather',
     name: config.title || '天気図',
-    parentKey: 'jma',
+    parentKey: 'root',
     render
   });
 })();
