@@ -19,7 +19,7 @@ window.SAS0_CONFIG = {
   // Basemap + both Hokkaido-only overlay layers (D26) are served from
   // stars.optgeo.org. See DECISIONS.md D27.
   hkdMap: {
-    title: '地図',
+    title: '状況図',
     description: '北海道の気象警報区域・市町村界を表示します。',
     allowedHosts: ['stars.optgeo.org', 'gsi-cyberjapan.github.io', 'www.jma.go.jp'],
     basemapStyleUrl: 'https://stars.optgeo.org/style/bvmap-dark',

@@ -520,10 +520,10 @@
 
   SAS0.registerInstrument({
     key: 'hkd-map',
-    name: config.title || '地図',
+    name: config.title || '状況図',
     parentKey: 'root',
     autoRefresh: false,
-    order: 2,
+    order: 1,
     render
   });
 })();

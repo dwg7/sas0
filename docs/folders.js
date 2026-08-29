@@ -3,8 +3,9 @@
 // なるため作らない。その計器は元フォルダの位置（同じ order）へ直接
 // 昇格させる。気象庁（4計器）とリンク集（4項目）は複数計器を束ねるため
 // フォルダとして維持する。See DECISIONS.md D28, D43.
-SAS0.registerFolder({ key: 'jma', name: '気象庁', parentKey: 'root', order: 1 });
-// order 2 は docs/instruments/hkd-map.js の registerInstrument が使う（地図）。
+// order 1 は docs/instruments/hkd-map.js の registerInstrument が使う（状況図、
+// 旧 地図。D48で気象庁より先頭に変更）。
+SAS0.registerFolder({ key: 'jma', name: '気象庁', parentKey: 'root', order: 2 });
 // order 3 は docs/instruments/kmoni.js が使う（強震モニタ、旧 防災科学技術研究所 フォルダ）。
 // order 4 は docs/instruments/river-info.js が使う（川の防災情報、旧 国土交通省 フォルダ）。
 // order 5 は docs/instruments/hokkaido-development-bureau.js が使う（旧 北海道開発局 フォルダ）。
