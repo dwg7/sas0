@@ -29,10 +29,12 @@ Root order follows daily-use priority first, with occasional-reference sources b
 │                                   used as a linking anchor); hover shows a docked info panel, click
 │                                   opens a link-only popup (D29); also plots recent quake epicenters
 │                                   and the 9 volcanoes' locations as point layers, reusing 地震/火山's
-│                                   own JMA data, no new source (D47), plus a third point layer of
+│                                   own JMA data, no new source (D47), a third point layer of
 │                                   電子基準点 (GEONET) locations from GSI's own CORS-open tile GeoJSON
-│                                   (D53). Named 地図 ("map") until D48 moved it ahead of 気象庁 (itself
-│                                   dissolved in D54) and renamed it 状況図 ("situation map"). Layer
+│                                   (D53), and a fourth of Hokkaido's 226 AMeDAS stations, colored by
+│                                   1-hour precipitation using the same yellow→orange escalation
+│                                   language as the warning polygons (D59). Named 地図 ("map") until D48
+│                                   moved it ahead of 気象庁 (itself dissolved in D54) and renamed it 状況図. Layer
 │                                   stacking order (top to bottom: quake circles, volcano circles,
 │                                   municipality labels, 電子基準点 circles, area fills) tuned in D55
 ├─ 更新情報                      — local-only (localStorage, no backend/sync) log of what changed in

@@ -364,6 +364,118 @@
     return { type: 'FeatureCollection', features };
   }
 
+  // アメダス（気象庁）— 北海道内の観測地点ごとの現在の降水量・気温・風を
+  // 状況図の4つ目のポイントレイヤーとして表示する。CORSオープンを実地確認
+  // 済み（D47/D51で存在を確認、今回改めて`amedastable.json`・
+  // `latest_time.txt`・`data/map/*.json`の3エンドポイントすべてで
+  // `access-control-allow-origin: *`を確認）。See DECISIONS.md D59。
+  //
+  // 観測点マスタ（`amedastable.json`、全国1286地点）は5桁コードの先頭2桁が
+  // 地方区分になっており、実データで「11」（稚内・宗谷地方）から「24」
+  // （檜山地方）までが北海道内であることを確認した（25以降は該当なし、
+  // 31から青森県が始まる）——北海道用の固定コード一覧を別途持つ必要はなく、
+  // このプレフィックス判定だけで足りる。
+  const AMEDAS_TABLE_URL = 'https://www.jma.go.jp/bosai/amedas/const/amedastable.json';
+  const AMEDAS_LATEST_TIME_URL = 'https://www.jma.go.jp/bosai/amedas/data/latest_time.txt';
+  const AMEDAS_MAP_BASE_URL = 'https://www.jma.go.jp/bosai/amedas/data/map';
+
+  function isHokkaidoAmedasCode(code) {
+    const prefix = parseInt(code.slice(0, 2), 10);
+    return prefix >= 11 && prefix <= 24;
+  }
+
+  // 度分表記（例：[45, 31.2] = 45度31.2分）を10進度に変換。
+  function degMinToDecimal([deg, min]) {
+    return deg + min / 60;
+  }
+
+  const WIND_DIRECTION_NAMES = [
+    '静穏',
+    '北',
+    '北北東',
+    '北東',
+    '東北東',
+    '東',
+    '東南東',
+    '南東',
+    '南南東',
+    '南',
+    '南南西',
+    '南西',
+    '西南西',
+    '西',
+    '西北西',
+    '北西',
+    '北北西'
+  ];
+
+  function formatAmedasValue(entry, key, unit) {
+    if (!entry[key] || entry[key][0] === null) {
+      return null;
+    }
+    return `${entry[key][0]}${unit}`;
+  }
+
+  async function fetchAmedasPoints() {
+    try {
+      const tableUrl = SAS0.getSafeUrl(AMEDAS_TABLE_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
+      const latestTimeUrl = SAS0.getSafeUrl(AMEDAS_LATEST_TIME_URL, {
+        allowedProtocols: ['https:'],
+        allowedHosts: ALLOWED_HOSTS
+      });
+      const [table, latestTimeText] = await Promise.all([
+        fetch(tableUrl).then((response) => response.json()),
+        fetch(latestTimeUrl).then((response) => response.text())
+      ]);
+
+      // "2026-08-30T11:20:00+09:00" -> "20260830112000"（マップJSONのURLの
+      // タイムスタンプ形式）。JSTはUTC+9固定で表記も常に+09:00なので、
+      // '+'以前の日時部分から区切り文字を取り除くだけで変換できる。
+      const timestamp = latestTimeText.trim().split('+')[0].replace(/[-:T]/g, '');
+      const mapUrl = SAS0.getSafeUrl(`${AMEDAS_MAP_BASE_URL}/${timestamp}.json`, {
+        allowedProtocols: ['https:'],
+        allowedHosts: ALLOWED_HOSTS
+      });
+      const observations = await fetch(mapUrl).then((response) => response.json());
+
+      const features = [];
+      Object.keys(table).forEach((code) => {
+        if (!isHokkaidoAmedasCode(code)) {
+          return;
+        }
+        const station = table[code];
+        const entry = observations[code];
+        if (!entry) {
+          return;
+        }
+        const precipitation1h = entry.precipitation1h && entry.precipitation1h[0] !== null ? entry.precipitation1h[0] : 0;
+        const windDirectionIndex = entry.windDirection ? entry.windDirection[0] : null;
+        features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [degMinToDecimal(station.lon), degMinToDecimal(station.lat)]
+          },
+          properties: {
+            name: station.kjName,
+            precipitation1h,
+            precipitation1hLabel: formatAmedasValue(entry, 'precipitation1h', 'mm/h') || '－',
+            precipitation24hLabel: formatAmedasValue(entry, 'precipitation24h', 'mm/24h') || '－',
+            tempLabel: formatAmedasValue(entry, 'temp', '℃') || null,
+            windLabel:
+              entry.wind && entry.wind[0] !== null
+                ? `${WIND_DIRECTION_NAMES[windDirectionIndex] || ''}の風 ${entry.wind[0]}m/s`
+                : null
+          }
+        });
+      });
+
+      return { type: 'FeatureCollection', features };
+    } catch (error) {
+      return { type: 'FeatureCollection', features: [] };
+    }
+  }
+
   const INFO_PLACEHOLDER_HTML =
     '<div class="sas0-map-info-placeholder">地図上にカーソルを合わせると、市町村・警報の状況が表示されます。</div>';
 
@@ -433,14 +545,17 @@
     style.sources.quake_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.volcano_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.reference_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+    style.sources.amedas_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     // MapLibreはstyle.layers配列の後ろにあるものほど上に描画される。
     // 重なり順は下から：地域の面（警報ポリゴン→市町村ポリゴン）→
-    // 電子基準点→注記（市町村名ラベル）→火山→地震、の順に積む
+    // 電子基準点→アメダス→注記（市町村名ラベル）→火山→地震、の順に積む
     // （＝画面上での見え方は逆順で、地震が最前面）。D53時点では
     // ポイントレイヤーを単純にポリゴンの後ろへ追加しただけで、
     // 注記（ksj-n03-label）が電子基準点の下に隠れる／地震と火山の
     // 前後関係が未整理だったのを、使い勝手の指摘を受けて明示的に
-    // 並べ替えた。See DECISIONS.md D55.
+    // 並べ替えた（D55）。アメダス（D59）は電子基準点と同じ「常時多数の点が
+    // 出る背景情報」だが、静的な位置情報ではなく現在の気象状況という
+    // より「生きた」情報のため、電子基準点より上・注記より下に置く。
     style.layers.push(
       {
         id: 'jma-warning-fill',
@@ -482,6 +597,33 @@
           'circle-radius': 3,
           'circle-color': '#4c85f0',
           'circle-opacity': 0.7,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#0d1117'
+        }
+      },
+      // アメダス — 降水量（1時間）で色・不透明度・大きさを変える。0mmの地点は
+      // 電子基準点に近い控えめな青（無警報時の地図が静かなままになるよう、
+      // D50の「平常時は目立たせない」方針を踏襲）、雨が強まるほどSEVERITY_COLOR
+      // （警報・注意報と同じ黄→橙のエスカレーション配色）に近づく——警報ポリ
+      // ゴンの色使いと視覚的な語彙を共有させている。See DECISIONS.md D59.
+      {
+        id: 'amedas-point',
+        type: 'circle',
+        source: 'amedas_points',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['get', 'precipitation1h'], 0, 3, 10, 6, 30, 10],
+          'circle-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'precipitation1h'],
+            0,
+            '#4c85f0',
+            10,
+            SEVERITY_COLOR.advisory,
+            30,
+            SEVERITY_COLOR.warning
+          ],
+          'circle-opacity': ['interpolate', ['linear'], ['get', 'precipitation1h'], 0, 0.35, 30, 0.9],
           'circle-stroke-width': 1,
           'circle-stroke-color': '#0d1117'
         }
@@ -559,6 +701,9 @@
       fetchReferencePoints()
         .then((geojson) => map.getSource('reference_points').setData(geojson))
         .catch(() => {});
+      fetchAmedasPoints()
+        .then((geojson) => map.getSource('amedas_points').setData(geojson))
+        .catch(() => {});
     });
 
     map.on('mouseenter', 'ksj-n03-fill', () => {
@@ -579,7 +724,14 @@
     // ksj-n03-fill, neither has an obvious single link target).
     map.on('mousemove', (event) => {
       const features = map.queryRenderedFeatures(event.point, {
-        layers: ['quake-epicenter', 'volcano-point', 'reference-point', 'ksj-n03-fill', 'jma-warning-fill']
+        layers: [
+          'quake-epicenter',
+          'volcano-point',
+          'amedas-point',
+          'reference-point',
+          'ksj-n03-fill',
+          'jma-warning-fill'
+        ]
       });
       if (features.length === 0) {
         renderInfoPanel(infoPanel, {});
@@ -602,6 +754,21 @@
         renderInfoPanel(infoPanel, {
           pointTitle: volcanoFeature.properties.name,
           pointStatus: volcanoFeature.properties.levelName
+        });
+        return;
+      }
+
+      const amedasFeature = features.find((feature) => feature.layer.id === 'amedas-point');
+      if (amedasFeature) {
+        const props = amedasFeature.properties;
+        const statusParts = [`降水量（1時間）：${props.precipitation1hLabel}`, `（24時間：${props.precipitation24hLabel}）`];
+        if (props.windLabel) {
+          statusParts.push(`　${props.windLabel}`);
+        }
+        renderInfoPanel(infoPanel, {
+          pointTitle: `${props.name}（アメダス）`,
+          pointSubtitle: props.tempLabel,
+          pointStatus: statusParts.join('')
         });
         return;
       }
