@@ -16,7 +16,7 @@ sas0 is a static GitHub Pages prototype built with Open MCT.
 
 It asks a narrow question: can publicly available instruments be assembled into a calm, readable, shared awareness console without building command infrastructure?
 
-Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigation: each instrument is a separate object, one click away. Most sit flat at root; occasional-reference sources are grouped inside リンク集, the only folder in the tree (D54). The current tree (driven by a small Hokkaido disaster-preparedness use case, but arbitrary to extend):
+Rather than a fixed layout, sas0 uses Open MCT's own browse tree as its navigation: each instrument is a separate object, one click away. The current tree (driven by a small Hokkaido disaster-preparedness use case, but arbitrary to extend):
 
 Root order follows daily-use priority first, with occasional-reference sources bucketed at the end (D28). As of D54, リンク集 is the only folder in the whole tree — everything else the user checks daily sits flat at root, one click away, per a direct usability request to make frequent items feel like a one-click ops console:
 
