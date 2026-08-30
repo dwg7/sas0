@@ -52,6 +52,10 @@ Root order follows daily-use priority first, with occasional-reference sources b
 ├─ 地震の規模推移               — SVG scatter of magnitude vs. time, reusing 地震's own fetched data
 │                                   (D53); promoted to root in D54; shortened from 「地震の規模推移
 │                                   （北海道関連）」 in D55 to match the other root instruments' names
+├─ 巡回モード                    — cycles through the 7 status instruments above on a timer, browser
+│                                   Fullscreen API plus sas0's own CSS hiding Open MCT's own chrome
+│                                   (header/tree/inspector/breadcrumb — real Espresso-theme classes,
+│                                   confirmed live), for a wall-display/kiosk-style rotation (D58)
 └─ リンク集                      — occasional-reference sources, not live status (D28); sas0's only
                                     folder as of D54, holding 7 instruments, one per operating
                                     organization (D56 renamed these from what-it-links-to descriptions
@@ -132,7 +136,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 - `docs/index.html` — loads Open MCT and MapLibre GL JS from pinned CDN versions, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` (both take an optional `order` to control display order independent of `<script>` load order — D28) and the shared `getSafeUrl()`/`renderLinkList()` helpers
 - `docs/folders.js` — declares リンク集, sas0's only remaining folder (D54 dissolved 気象庁, the other one), and the root-level `order` values that place root instruments (D28). A folder is only created where it groups 2+ instruments (D43) — 防災科学技術研究所/国土交通省/北海道開発局/北海道/国土地理院/北海道運輸局/気象庁 used to each wrap a set of instruments in their own folder and were all dissolved; their instruments now register directly with `parentKey: 'root'` or `parentKey: 'reference'` and an explicit `order` where one is needed
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, mlit, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus three vector/GeoJSON sources hosted on `stars.optgeo.org` and `cyberjapandata.gsi.go.jp`, D26/D27/D53; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, tour-mode, mlit, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus three vector/GeoJSON sources hosted on `stars.optgeo.org` and `cyberjapandata.gsi.go.jp`, D26/D27/D53; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, and host allowlists
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)

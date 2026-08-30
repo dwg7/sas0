@@ -253,6 +253,12 @@ window.SAS0 = (function () {
     registerInstrument,
     getSafeUrl,
     renderLinkList,
+    // Programmatic navigation, for 巡回モード (docs/instruments/tour-mode.js) to
+    // cycle through instruments on a timer. Thin wrapper so that file doesn't
+    // need its own reference to the openmct/NAMESPACE closure variables here.
+    navigateTo(key) {
+      openmct.router.setPath(`/browse/${NAMESPACE}:${key}`);
+    },
     start() {
       openmct.on('start', () => {
         openmct.router.setPath(`/browse/${NAMESPACE}:root`);
