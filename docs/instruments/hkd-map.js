@@ -548,14 +548,16 @@
     style.sources.amedas_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     // MapLibreはstyle.layers配列の後ろにあるものほど上に描画される。
     // 重なり順は下から：地域の面（警報ポリゴン→市町村ポリゴン）→
-    // 電子基準点→アメダス→注記（市町村名ラベル）→火山→地震、の順に積む
-    // （＝画面上での見え方は逆順で、地震が最前面）。D53時点では
-    // ポイントレイヤーを単純にポリゴンの後ろへ追加しただけで、
-    // 注記（ksj-n03-label）が電子基準点の下に隠れる／地震と火山の
-    // 前後関係が未整理だったのを、使い勝手の指摘を受けて明示的に
-    // 並べ替えた（D55）。アメダス（D59）は電子基準点と同じ「常時多数の点が
-    // 出る背景情報」だが、静的な位置情報ではなく現在の気象状況という
-    // より「生きた」情報のため、電子基準点より上・注記より下に置く。
+    // 電子基準点→アメダス→火山→地震、の順に積む（＝画面上での見え方は
+    // 逆順で、地震が最前面）。D53時点ではポイントレイヤーを単純にポリゴンの
+    // 後ろへ追加しただけで、地震と火山の前後関係が未整理だったのを、使い
+    // 勝手の指摘を受けて明示的に並べ替えた（D55）。アメダス（D59）は電子
+    // 基準点と同じ「常時多数の点が出る背景情報」だが、静的な位置情報では
+    // なく現在の気象状況というより「生きた」情報のため、電子基準点より
+    // 上に置く。市町村名の注記（symbolレイヤー）は、離島などで同じ地名が
+    // 密集して重なって出る問題があったため、D60で完全に削除した——
+    // ホバー時の情報パネルで市町村名は既に確認できるので、常時表示の注記
+    // が必須ではないと判断した。
     style.layers.push(
       {
         id: 'jma-warning-fill',
@@ -585,27 +587,31 @@
         'source-layer': 'ksj_n03_shichoson',
         paint: { 'line-color': '#4c85f0', 'line-width': 0.5 }
       },
-      // 電子基準点（GEONET）— 国土地理院由来であることを示すため、市町村
-      // 境界線と同じ青系（#4c85f0）を使う。地震・火山のポイントより小さく
-      // 目立たせすぎない — 常時100件超が表示される、参照用の背景情報。
-      // 面の直上・注記の直下に置く（D55）。See DECISIONS.md D53, D55.
+      // 電子基準点（GEONET）— アメダス（緑系）と一目で見分けられるよう、
+      // はっきりした青にした（D60、市町村境界線の淡い青#4c85f0よりも
+      // 彩度・明度を上げている）。地震・火山のポイントより小さく目立たせ
+      // すぎない — 常時100件超が表示される、参照用の背景情報。
+      // 面の直上に置く（D55、D59でアメダスをこの上に追加）。
+      // See DECISIONS.md D53, D55, D60.
       {
         id: 'reference-point',
         type: 'circle',
         source: 'reference_points',
         paint: {
           'circle-radius': 3,
-          'circle-color': '#4c85f0',
-          'circle-opacity': 0.7,
+          'circle-color': '#2f6fe0',
+          'circle-opacity': 0.75,
           'circle-stroke-width': 1,
           'circle-stroke-color': '#0d1117'
         }
       },
       // アメダス — 降水量（1時間）で色・不透明度・大きさを変える。0mmの地点は
-      // 電子基準点に近い控えめな青（無警報時の地図が静かなままになるよう、
-      // D50の「平常時は目立たせない」方針を踏襲）、雨が強まるほどSEVERITY_COLOR
-      // （警報・注意報と同じ黄→橙のエスカレーション配色）に近づく——警報ポリ
-      // ゴンの色使いと視覚的な語彙を共有させている。See DECISIONS.md D59.
+      // CALM_COLOR（緑、状況図の他の「平常」表現と同じ色）——電子基準点の
+      // 青とはっきり区別でき、無警報時の地図が静かなままになるよう
+      // （D50の「平常時は目立たせない」方針も踏襲）。雨が強まるほど
+      // SEVERITY_COLOR（警報・注意報と同じ黄→橙のエスカレーション配色）に
+      // 近づく——警報ポリゴンの色使いと視覚的な語彙を共有させている。
+      // See DECISIONS.md D59, D60.
       {
         id: 'amedas-point',
         type: 'circle',
@@ -617,29 +623,19 @@
             ['linear'],
             ['get', 'precipitation1h'],
             0,
-            '#4c85f0',
+            CALM_COLOR,
             10,
             SEVERITY_COLOR.advisory,
             30,
             SEVERITY_COLOR.warning
           ],
-          'circle-opacity': ['interpolate', ['linear'], ['get', 'precipitation1h'], 0, 0.35, 30, 0.9],
+          'circle-opacity': ['interpolate', ['linear'], ['get', 'precipitation1h'], 0, 0.45, 30, 0.9],
           'circle-stroke-width': 1,
           'circle-stroke-color': '#0d1117'
         }
       },
-      {
-        id: 'ksj-n03-label',
-        type: 'symbol',
-        source: 'ksj_n03',
-        'source-layer': 'ksj_n03_shichoson',
-        minzoom: 8,
-        layout: { 'text-field': ['get', 'municipality'], 'text-size': 11 },
-        paint: { 'text-color': '#dce6f1', 'text-halo-color': '#0d1117', 'text-halo-width': 1 }
-      },
-      // 地震・火山のポイントは注記より上、かつ地震が火山より最前面
-      // （地震の方が発生頻度・時間的な鮮度への関心が高いため）。
-      // See DECISIONS.md D47, D55.
+      // 地震・火山のポイントは最前面——地震が火山より最前面（地震の方が
+      // 発生頻度・時間的な鮮度への関心が高いため）。See DECISIONS.md D47, D55.
       {
         id: 'volcano-point',
         type: 'circle',

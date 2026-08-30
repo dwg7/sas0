@@ -31,10 +31,14 @@ Root order follows daily-use priority first, with occasional-reference sources b
 │                                   and the 9 volcanoes' locations as point layers, reusing 地震/火山's
 │                                   own JMA data, no new source (D47), a third point layer of
 │                                   電子基準点 (GEONET) locations from GSI's own CORS-open tile GeoJSON
-│                                   (D53), and a fourth of Hokkaido's 226 AMeDAS stations, colored by
-│                                   1-hour precipitation using the same yellow→orange escalation
-│                                   language as the warning polygons (D59). Named 地図 ("map") until D48
-│                                   moved it ahead of 気象庁 (itself dissolved in D54) and renamed it 状況図. Layer
+│                                   in a distinct blue (D53, recolored D60), and a fourth of Hokkaido's
+│                                   226 AMeDAS stations in green-to-orange by 1-hour precipitation,
+│                                   reusing the warning-polygon color language (D59, recolored D60 so
+│                                   its calm color no longer collided with 電子基準点's blue). The
+│                                   always-on municipality-name labels were removed in D60 (duplicate
+│                                   labels piling up over small/island municipalities) — names are
+│                                   still available on hover. Named 地図 ("map") until D48 moved it
+│                                   ahead of 気象庁 (itself dissolved in D54) and renamed it 状況図. Layer
 │                                   stacking order (top to bottom: quake circles, volcano circles,
 │                                   municipality labels, 電子基準点 circles, area fills) tuned in D55
 ├─ 更新情報                      — local-only (localStorage, no backend/sync) log of what changed in
