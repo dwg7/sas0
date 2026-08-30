@@ -3,7 +3,8 @@
 
   SAS0.registerInstrument({
     key: 'hokkaido-development-bureau',
-    name: config.title || '北海道開発局 防災情報ポータルサイト',
+    // 計器名は運営組織、行内のリンクタイトルはconfig.titleのまま — D56。
+    name: '北海道開発局',
     parentKey: 'reference',
     autoRefresh: false,
     render(container) {

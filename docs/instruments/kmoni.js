@@ -3,7 +3,9 @@
 
   SAS0.registerInstrument({
     key: 'kmoni',
-    name: config.title || '強震モニタ',
+    // 計器名は運営組織（防災科学技術研究所＝防災科研）、行内のリンクタイトルは
+    // config.title（「強震モニタ」）のまま — D56。
+    name: '防災科学技術研究所',
     parentKey: 'reference',
     autoRefresh: false,
     render(container) {

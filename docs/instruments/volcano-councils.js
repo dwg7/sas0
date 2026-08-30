@@ -3,7 +3,7 @@
 
   SAS0.registerInstrument({
     key: 'volcano-councils',
-    name: '火山',
+    name: '火山防災協議会',
     parentKey: 'reference',
     autoRefresh: false,
     render(container) {

@@ -4,7 +4,7 @@
 
   SAS0.registerInstrument({
     key: 'hokkaido-links',
-    name: '北海道 防災情報',
+    name: '北海道庁',
     parentKey: 'reference',
     autoRefresh: false,
     render(container) {
