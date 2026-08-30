@@ -433,6 +433,14 @@
     style.sources.quake_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.volcano_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.reference_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+    // MapLibreはstyle.layers配列の後ろにあるものほど上に描画される。
+    // 重なり順は下から：地域の面（警報ポリゴン→市町村ポリゴン）→
+    // 電子基準点→注記（市町村名ラベル）→火山→地震、の順に積む
+    // （＝画面上での見え方は逆順で、地震が最前面）。D53時点では
+    // ポイントレイヤーを単純にポリゴンの後ろへ追加しただけで、
+    // 注記（ksj-n03-label）が電子基準点の下に隠れる／地震と火山の
+    // 前後関係が未整理だったのを、使い勝手の指摘を受けて明示的に
+    // 並べ替えた。See DECISIONS.md D55.
     style.layers.push(
       {
         id: 'jma-warning-fill',
@@ -462,6 +470,22 @@
         'source-layer': 'ksj_n03_shichoson',
         paint: { 'line-color': '#4c85f0', 'line-width': 0.5 }
       },
+      // 電子基準点（GEONET）— 国土地理院由来であることを示すため、市町村
+      // 境界線と同じ青系（#4c85f0）を使う。地震・火山のポイントより小さく
+      // 目立たせすぎない — 常時100件超が表示される、参照用の背景情報。
+      // 面の直上・注記の直下に置く（D55）。See DECISIONS.md D53, D55.
+      {
+        id: 'reference-point',
+        type: 'circle',
+        source: 'reference_points',
+        paint: {
+          'circle-radius': 3,
+          'circle-color': '#4c85f0',
+          'circle-opacity': 0.7,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#0d1117'
+        }
+      },
       {
         id: 'ksj-n03-label',
         type: 'symbol',
@@ -471,21 +495,9 @@
         layout: { 'text-field': ['get', 'municipality'], 'text-size': 11 },
         paint: { 'text-color': '#dce6f1', 'text-halo-color': '#0d1117', 'text-halo-width': 1 }
       },
-      // Point layers on top of the polygons — recent Hokkaido-related quake
-      // epicenters and the 9 continuously-monitored volcanoes, both sourced
-      // from data quake.js/volcano.js already fetch. See DECISIONS.md D47.
-      {
-        id: 'quake-epicenter',
-        type: 'circle',
-        source: 'quake_points',
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 2, 4, 7, 14],
-          'circle-color': '#f5c542',
-          'circle-opacity': 0.85,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#0d1117'
-        }
-      },
+      // 地震・火山のポイントは注記より上、かつ地震が火山より最前面
+      // （地震の方が発生頻度・時間的な鮮度への関心が高いため）。
+      // See DECISIONS.md D47, D55.
       {
         id: 'volcano-point',
         type: 'circle',
@@ -502,18 +514,14 @@
           'circle-stroke-color': '#e5484d'
         }
       },
-      // 電子基準点（GEONET）— 国土地理院由来であることを示すため、市町村
-      // 境界線と同じ青系（#4c85f0）を使う。地震・火山のポイントより小さく
-      // 目立たせすぎない — 常時100件超が表示される、参照用の背景情報。
-      // See DECISIONS.md D53.
       {
-        id: 'reference-point',
+        id: 'quake-epicenter',
         type: 'circle',
-        source: 'reference_points',
+        source: 'quake_points',
         paint: {
-          'circle-radius': 3,
-          'circle-color': '#4c85f0',
-          'circle-opacity': 0.7,
+          'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 2, 4, 7, 14],
+          'circle-color': '#f5c542',
+          'circle-opacity': 0.85,
           'circle-stroke-width': 1,
           'circle-stroke-color': '#0d1117'
         }

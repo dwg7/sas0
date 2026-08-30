@@ -32,7 +32,13 @@ Root order follows daily-use priority first, with occasional-reference sources b
 │                                   own JMA data, no new source (D47), plus a third point layer of
 │                                   電子基準点 (GEONET) locations from GSI's own CORS-open tile GeoJSON
 │                                   (D53). Named 地図 ("map") until D48 moved it ahead of 気象庁 (itself
-│                                   dissolved in D54) and renamed it 状況図 ("situation map")
+│                                   dissolved in D54) and renamed it 状況図 ("situation map"). Layer
+│                                   stacking order (top to bottom: quake circles, volcano circles,
+│                                   municipality labels, 電子基準点 circles, area fills) tuned in D55
+├─ 更新情報                      — local-only (localStorage, no backend/sync) log of what changed in
+│                                   警報・地震・火山 since the last manual refresh (D53, named 変化の記録
+│                                   until D55). Promoted from the now-dissolved 気象庁 folder to root in
+│                                   D54; moved to sit directly under 状況図 and renamed in D55
 ├─ 天気図                        — latest JMA surface weather chart, fetched live; scrubbable across
 │                                   the recent frames JMA's own feed already provides (D53). Promoted
 │                                   from the now-dissolved 気象庁 folder to root in D54
@@ -43,10 +49,9 @@ Root order follows daily-use priority first, with occasional-reference sources b
 ├─ 火山                          — current alert level for the 9 volcanoes JMA continuously monitors
 │                                   in Hokkaido (filtered from the wider 20-volcano code range — D28).
 │                                   Renamed from 「火山情報（北海道の火山）」, promoted to root in D54
-├─ 地震の規模推移（北海道関連） — SVG scatter of magnitude vs. time, reusing 地震's own fetched data
-│                                   (D53); promoted to root in D54
-├─ 変化の記録                    — local-only (no backend) log of changes in 警報・地震・火山 since the
-│                                   last manual refresh (D53); promoted to root in D54
+├─ 地震の規模推移               — SVG scatter of magnitude vs. time, reusing 地震's own fetched data
+│                                   (D53); promoted to root in D54; shortened from 「地震の規模推移
+│                                   （北海道関連）」 in D55 to match the other root instruments' names
 └─ リンク集                      — occasional-reference sources, not live status (D28); sas0's only
                                     folder as of D54, holding 8 instruments: the original 4 below plus
                                     強震モニタ・川の防災情報・北海道開発局 防災情報ポータルサイト・

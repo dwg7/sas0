@@ -335,7 +335,7 @@
 
   SAS0.registerInstrument({
     key: 'change-log',
-    name: '変化の記録',
+    name: '更新情報',
     parentKey: 'root',
     autoRefresh: false,
     render: runOnce
