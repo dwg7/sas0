@@ -54,14 +54,47 @@
     return intervalHandle !== null;
   }
 
-  function tick() {
-    currentIndex = (currentIndex + 1) % activeTargets.length;
+  // 自動tick・矢印キーでの手動送り、両方をここに集約する——JavaScriptの
+  // `%`は負数を正にラップしない（`-1 % 5`は`-1`のまま）ため、後方（矢印
+  // キー左）の遷移では単純な`% length`だけでは壊れる。`resetTimer`が
+  // trueの時（手動操作時）は、直後に自動tickが割り込まないようタイマー
+  // を仕切り直す。
+  function goToIndex(newIndex, { resetTimer }) {
+    const length = activeTargets.length;
+    currentIndex = ((newIndex % length) + length) % length;
     const target = activeTargets[currentIndex];
     SAS0.navigateTo(target.key);
     if (overlayEl) {
       overlayEl.querySelector('.sas0-tour-overlay-label').textContent = `巡回中：${target.name}`;
     }
+    if (resetTimer && intervalHandle) {
+      clearInterval(intervalHandle);
+      intervalHandle = setInterval(() => goToIndex(currentIndex + 1, { resetTimer: false }), activeIntervalSec * 1000);
+    }
   }
+
+  function isEditableTarget(target) {
+    if (!target) {
+      return false;
+    }
+    const tag = target.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable;
+  }
+
+  // 巡回中のみ矢印キーで前後に手動送りできる。入力欄にフォーカスがある
+  // 間は素通しする——巡回対象の計器が検索欄等を持つ場合に備えた防御。
+  document.addEventListener('keydown', (event) => {
+    if (!isRunning() || isEditableTarget(event.target)) {
+      return;
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      goToIndex(currentIndex + 1, { resetTimer: true });
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      goToIndex(currentIndex - 1, { resetTimer: true });
+    }
+  });
 
   function buildOverlay() {
     overlayEl = document.createElement('div');
@@ -96,8 +129,8 @@
     }
     buildOverlay();
     currentIndex = -1;
-    tick();
-    intervalHandle = setInterval(tick, intervalSec * 1000);
+    goToIndex(0, { resetTimer: false });
+    intervalHandle = setInterval(() => goToIndex(currentIndex + 1, { resetTimer: false }), intervalSec * 1000);
   }
 
   function stopTour() {
@@ -127,13 +160,14 @@
     const heading = document.createElement('p');
     heading.className = 'sas0-tour-intro';
     heading.textContent =
-      '選んだ計器を一定間隔で自動的に切り替えて、全画面で表示し続けます。壁掛けディスプレイでの常時表示や、定点監視での巡回チェックを想定しています。';
+      '選んだ計器を一定間隔で自動的に切り替えて、全画面で表示し続けます。壁掛けディスプレイでの常時表示や、定点監視での巡回チェックを想定しています。巡回中は←→キーで前後の計器に手動で移動でき、移動すると自動切り替えのタイマーもそこからやり直します。';
     container.appendChild(heading);
 
     if (isRunning()) {
       const runningNote = document.createElement('p');
       runningNote.className = 'sas0-tour-running-note';
-      runningNote.textContent = '現在、巡回モードは実行中です。停止するには画面上のボタンか、Escキーを押してください。';
+      runningNote.textContent =
+        '現在、巡回モードは実行中です。←→キーで前後の計器に手動移動できます。停止するには画面上のボタンか、Escキーを押してください。';
       container.appendChild(runningNote);
       const stopButton = document.createElement('button');
       stopButton.type = 'button';

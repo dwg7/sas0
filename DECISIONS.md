@@ -898,3 +898,17 @@ issue #3をきっかけに始まったクロスセッション相談（mapterhor
 **このドキュメントの性質**：sas0自身の意思決定記録（DECISIONS.md）とは異なり、3つの独立プロジェクト（sas0・mapterhorn-monitor・claude-mct）が対等な立場で持ち寄った知見の集積であり、上下関係はない。矛盾する知見（Plot APIまわり）は無理に一本化せず、未解決のまま両論併記している——特にPlot APIについては、claude-mctの「`hints.domain`/`hints.range`を正しく設定すれば動く」という報告と、sas0が実際にテストしていたメタデータが既にその条件をほぼ満たしていたにも関わらず描画されなかったという記録が食い違ったままで、バージョン差（4.2.0 vs 4.3.0-rc1）かオブジェクト構造の違いかを3者間で切り分け中——D53の「未解決のまま諦めた」という結論を安易に上書きしないよう、慎重に扱った。
 
 **運用方針**：今後のOpen MCT実地知見の更新は`OPENMCT-NOTES.md`への変更として行い、他リポジトリ（`mapterhorn-japan-bridge`のDECISIONS.md D91、`claude-mct`側の記録）はこのファイルへのリンクのみを保持し、内容を複製しない。README.md/HANDOVER.md/CLAUDE.mdの相互参照にも追加した。
+
+## D66: 巡回モードに矢印キーでの手動送りを追加 — mapterhorn-japan-bridgeとの相談から
+
+OPENMCT-NOTES.mdの整備を通じたやり取りの中で、`mapterhorn-japan-bridge/mapterhorn-monitor`が自分たちの巡回モードに「巡回中、左右矢印キーで前後の計器へ手動遷移する」機能を実装する際にsas0へ相談があった。sas0のD58には元々この機能が無く、一般的な落とし穴（入力欄フォーカス時のガード、後方遷移でのJavaScriptの`%`演算子が負数をラップしない問題、`preventDefault()`）を伝えるに留めた。mapterhorn-monitor側が実装・検証を終え、「自動tick・手動キー操作・タイマーリセットを1つの関数に集約する」設計を教えてくれたのを受け、ユーザーの指示でsas0にも同機能を追加した。
+
+**実装**：`docs/instruments/tour-mode.js`の`tick()`を、mapterhorn-monitorの`goToCycleIndex()`と同じ発想の`goToIndex(newIndex, { resetTimer })`に統合した。
+
+- 負数モジュロの罠（`-1 % 5`は`-1`のままで`4`にならない）を`((newIndex % length) + length) % length`で回避——JavaScript特有の落とし穴として、自前実装時に見落としやすい。
+- `resetTimer: true`（矢印キーでの手動操作時）は、`clearInterval`→`setInterval`し直して自動切り替えのタイマーを仕切り直す——手動で送った直後に自動tickが割り込んで二重遷移しないようにする。
+- `document.addEventListener('keydown', ...)`をモジュールスコープに置き、`isRunning()`でない時は無視、`event.target`が`INPUT`/`TEXTAREA`/`SELECT`または`isContentEditable`の時も無視（巡回対象の計器が入力欄を持つ場合への防御）、対象キー時は`event.preventDefault()`を呼ぶ。
+- オーバーレイの「巡回中：〇〇」ラベル更新も`goToIndex`に一元化——自動・手動どちらの経路でも更新漏れが起きない。
+- 操作パネルの説明文・実行中の案内文に、矢印キーでの手動送りができる旨を追記。
+
+**検証**：ローカルサーバーで実機確認。ArrowRightでの前進、ArrowLeftでの後退、index 0からArrowLeftを押した際の後方ラップアラウンド（最後の計器＝地震の規模推移に戻る）、オーバーレイラベルの追従、停止ボタン、巡回停止後は矢印キーが無視されること、をすべて確認した。コンソールエラーは既知のD4のみ。
