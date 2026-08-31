@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Working notes for AI coding assistants in this repo. See [README.md](README.md) for what sas0 is, [DECISIONS.md](DECISIONS.md) for why it's built this way, and [HANDOVER.md](HANDOVER.md) for current state and open items.
+Working notes for AI coding assistants in this repo. See [README.md](README.md) for what sas0 is, [DECISIONS.md](DECISIONS.md) for why it's built this way, [HANDOVER.md](HANDOVER.md) for current state and open items, and [OPENMCT-NOTES.md](OPENMCT-NOTES.md) for cross-project Open MCT field notes (sas0 hosts the master copy shared with `mapterhorn-japan-bridge`/`claude-mct` — D65).
 
 ## What this repo is
 
