@@ -42,7 +42,8 @@
 
 - **sas0の経験（4.3.0-rc1、CDN）**：providerが返す非永続オブジェクトに対し、メタデータ・合成・`request()`（実測30件を直接計測）・凡例（Min/Max表示）はすべて正しく動作するのに、**実際のグラフ描画（点・線）だけが最後まで空**。WebGLキャンバスは健全（`preserveDrawingBuffer: true`で「本当に何も描かれていない」ことを確認）。素のテレメトリオブジェクトではなく`telemetry.plot.overlay`タイプでラップし`configuration.series`を事前注入しても同じ。`markers: true`にすると別の内部エラー`getXVal is not a function`。差分検証のため純正「+CREATE」でOverlay Plotを新規作成しようとしたが、sas0のツリーが読み取り専用プロバイダのため保存先が存在せず断念——「`+Create`された永続オブジェクトなら動くのか」は**未検証のまま**。
 - **claude-mctの検証（4.2.0、npm）**：`telemetry.values`に`hints: { domain: 1 }`（時間軸）と`hints: { range: 1 }`（値、`format`が`string`以外）を正しく揃えれば、providerが返す非永続オブジェクトでもPlotは正常に描画される、と報告。ただし——
-- **未解決の食い違い**：sas0が実際にテストしていたメタデータは`{ key: 'mag', format: 'float', hints: { range: 1 } }` / `{ key: 'timestamp', source: 'time', format: 'utc', hints: { domain: 1 } }`で、claude-mctの条件をほぼ満たしていたにも関わらず描画されなかった。バージョン差（4.2.0 vs 4.3.0-rc1）かオブジェクトのラッパー構造の違いが本当の原因ではないかと、現在3プロジェクト間で切り分け中。**この節は未確定として扱うこと。**
+- **判明した本物のバグ——`telemetry.values`配列の並び順**：claude-mctがsas0のメタデータ形状（`mag`/`timestamp`、`float`/`utc`）を最小構成で再現・検証した結果、**配列内で`hints.domain`の値が`hints.range`の値より後ろに書かれていると、`PlotSeriesData.onXKeyChange()`が`this.formats[e]`を見つけられず`this.getXVal`が一度も設定されない**ことを特定した（`4.3.0-rc1`のnpmビルドで再現、`4.3.1`でも再現）。sas0の元のメタデータは`mag`（range）が先、`timestamp`（domain）が後——まさにこの順序だった。これは`markers: true`で出ていた`getXVal is not a function`エラーの実際の原因として確度が高い。**対策：`telemetry.values`は必ずdomain値（時間軸）を先に、range値（データ値）を後に書く。**
+- **それでも残る食い違い**：配列順を修正しても、claude-mctの**最小再現環境ではバージョンを問わず（4.2.0/4.3.0-rc1/4.3.1すべて）描画されなかった**。一方、claude-mctの本体アプリ（複数フィールド・ツリー経由のナビゲーション・実際に動くsubscribe）では`4.2.0`で正常に描画されている。つまりバージョン差では説明がつかず、**「最小構成 vs フルアプリ」の何らかの構造差**（root直下か子オブジェクトか、他プラグインの有無、subscribeの実動作有無等）が影響している可能性が高い——ここは未特定のまま。sas0の元のコードは当時のセッション内でのみ存在し、コミットされる前に元に戻されたため、リポジトリ履歴には残っていない（DECISIONS.md D53に記録された形状の引用のみが手がかり）。**この節は未確定として扱うこと。**
 - **`openmct.plugins.PlanLayout()`（タイムライン/ガントチャート）**：sas0・mapterhorn-monitorとも、providerが返すオブジェクトに対して`.c-plan__contents`が常に空になり、「Attempted to mutate immutable object」というエラーが出る（sas0はPlotの`xKey`/`yKey`/`interpolate`等のカスタムフィールドを試した際にも同文言のエラーに遭遇）。claude-mctはコード読解のみでの判断だが、`plan`タイプはアップロードされたJSON blobと`getMutable()`ベースの永続化を前提にしていると推測——3者の情報は矛盾なく一致しており、確度は高い。**providerパターンとは相性が悪いと考えてよく、独自SVG/Canvasでの代替を推奨。**
 - **実践的な結論（現時点）**：Plot/Telemetryの高機能ビューは、自分の正確なバージョン・構成で直接試すまで動作を仮定しない方がよい。3プロジェクトとも、素のSVG/Canvasを自前のビュープロバイダで描画するアプローチは確実に動いており、実績のある安全な代替手段になっている。
 
@@ -92,6 +93,17 @@ Open MCT自体には「フルスクリーン表示用のビュー」のような
 
 また、npm経由とCDN（unpkg）経由では、同じ「latest」でも指すバージョンが異なりうる（claude-mctの指摘）——`npm install`は素直に安定版へ着地しやすいのに対し、CDN経由でバージョン指定を省略・緩めると、RCを含む最新が掴まれる可能性がある。
 
+**さらに重要な訂正（claude-mctが2026-09-01に確認）**：openmctのnpm dist-tagsは直感に反する付け方になっている——
+
+```
+stable:   4.0.0
+unstable: 4.2.0   ← claude-mctが実際に使っているバージョン
+next:     4.1.0-alpha
+latest:   4.3.1   ← 直近（数日前）に公開されたばかりの正式版
+```
+
+「新しいはずの`4.2.0`が`unstable`タグ、より古い`4.0.0`が`stable`タグ」という、パッケージ名だけでは読み取れない状態になっている。**「安定版で固定したい」場合、`npm install openmct@latest`はもちろん`@unstable`のような直感的な名前も罠になりうる——`npm install openmct@stable`のように、dist-tag名を明示して確認するのが確実。** また`latest`タグ（`4.3.1`）は、CDN側で複数プロジェクトが長期間rc扱いだと思っていた`4.3.0`系より新しい正式版が既に出ていたことも意味する——sas0・mapterhorn-monitorとも、次回のバージョン再確認時にはこの`4.3.1`を候補に入れる価値がある。
+
 **暫定的な指針**：
 
 1. CDN経由・低ステークスなら、RCを含む最新を追ってよい。ただし必ずバージョンの実在確認（`curl -sI`）をしてから固定し、定期的な再確認（sas0のD45パターン、週次CI等）を組み込む。
@@ -100,7 +112,7 @@ Open MCT自体には「フルスクリーン表示用のビュー」のような
 
 ## 未解決の論点
 
-- Plot APIがproviderオブジェクトで動くかどうかは、バージョン・オブジェクト構造依存の可能性があり、まだ切り分けが終わっていない（上記参照）。
+- Plot APIの配列順バグ（domain/rangeの並び）は特定・修正済みだが、それでも「最小構成では描画されず、フルアプリでは描画される」という食い違いが残っている——バージョン依存ではなく、アプリ構造（root直下か子オブジェクトか、他プラグインの有無、subscribeの実動作有無等）が影響している可能性が高い。原因未特定。
 - `openmct.on('start', ...)`の信頼性が、バージョン依存かmapterhorn-monitor固有の環境要因かも未確定。
 - マルチモニタ環境でのフルスクリーン挙動は3プロジェクトとも未検証。
 
