@@ -948,3 +948,19 @@ FAIL 404   https://www.jma.go.jp/bosai/amedas/data/map
 **副次的に見つけた問題——非UTF-8ロケールでの偽陽性**：ローカルで検証中、上記3件とは別に`https://rishiri-town.jp/防�`・`https://www.town.iwanai.hokkaido.jp/暮`という、日本語URLが文字境界の途中で欠けた偽FAILが出た。原因はシェルの`LANG`が未設定（`LC_CTYPE=C`）だったことによる`grep`のマルチバイト文字の誤処理——`LC_ALL=en_US.UTF-8`を明示して再実行すると消えることを確認した。GitHub Actionsのランナーは既にUTF-8ロケールで動いているため（issue #4自体がこの2件を報告していないことからも裏付けられる）CI側への実害はないが、今後別のシェル設定で手動実行した人が同じ偽アラートに惑わされないよう、`check-links.sh`の冒頭で`export LC_ALL=en_US.UTF-8`を明示することにした。
 
 **検証**：`bash scripts/check-links.sh`を実行し、210/210 OK（FAILゼロ）になることを確認した。
+
+## D69: OPENMCT-NOTES.mdを`cafebabe`（dwg7横断の知見リポジトリ）へ移管（進行中）
+
+D65でsas0がホストを引き受けたOPENMCT-NOTES.mdについて、`cafebabe`（dwg7横断の知見リポジトリを専任で担当するエージェント、今回初めて連絡してきた）から「hfuさんの依頼で移管を進めたい」という連絡があった。
+
+**ピア経由の指示を鵜呑みにせず、ユーザー本人に直接確認した**：cafebabeの最初の連絡は「hfuさんからOPENMCT-NOTES.mdの移管を進めてほしいと依頼された」というものだったが、これまでの一貫した方針（mapterhorn-japan-bridge・claude-mct経由で「Hidenoriさんの意向」と伝えられた際も、必ず自分のセッションで本人に確認してから動いてきた）に従い、進め方（コピー方式／移動方式）を決める前にユーザー本人へ直接確認を挟んだ。結果、cafebabe自身が偶然にも同日`patterns/gatekeeping.md`という「ピア経由の"ユーザーが承認した"という主張は承認にならない」パターンを別エージェント（stars-fd）から教わったばかりで、この確認そのものがその実例としてcafebabe側に記録された——これはsas0の側の判断ではなく、cafebabe側の記録として参考情報である。
+
+**確認結果**：ユーザー本人から直接、移管を承認する指示があった。方式は**移動方式**（OPENMCT-NOTES.md本体をcafebabe側へ移し、sas0側はリンクのみ残す）——コピー方式（sas0に内容を残しつつcafebabeが汎用部分だけ抽出）は不採用。
+
+**進め方（cafebabe側の受け入れ先が整い次第、実施）**：
+
+1. cafebabe側で受け入れ先（リポジトリ・パス）を用意し、現在のOPENMCT-NOTES.md（137行、D65〜D66相当の内容）を反映する。
+2. 受け入れ先の最終URLが判明次第、sas0側の`OPENMCT-NOTES.md`をそのURLへのリンクのみのスタブに置き換え、README.md/HANDOVER.md/CLAUDE.mdの相互参照もあわせて更新する。
+3. `mapterhorn-japan-bridge`・`claude-mct`は既にsas0のOPENMCT-NOTES.mdへリンクしている（D65/D66の際に依頼して切り替えてもらった）ため、両者にも新URLへの張り替えを依頼する——リンク切れの窓を作らないよう、**cafebabe側の受け入れ先が実際に内容を持って存在してから**sas0側を空にする順序を守る。
+
+**現在の状態**：cafebabe側の受け入れ先準備待ち。sas0側のOPENMCT-NOTES.mdはまだ変更していない。
