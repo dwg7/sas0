@@ -18,7 +18,9 @@
 // ベースに揃え（国土交通省・北海道庁・北海道運輸局・北海道開発局・
 // 防災科学技術研究所・火山防災協議会）、旧gsi-hazard.js/river-info.jsを
 // 一つの「国土交通省」計器（mlit.js）に統合した——市町村はそのまま。
-// See DECISIONS.md D28, D43, D54, D56.
+// D67でひぐまっぷ（higumap.js）を追加——ここだけD56の「運営組織名」方針
+// から意図的に外れ、ブランド名のまま計器名にしている（詳細はD67参照）。
+// See DECISIONS.md D28, D43, D54, D56, D67.
 SAS0.registerFolder({ key: 'reference', name: 'リンク集', parentKey: 'root', order: 9 });
 
 // 市町村・火山（協議会リンク）は「組織ごとのフォルダ」という慣習（D10）に

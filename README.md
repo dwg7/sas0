@@ -63,7 +63,7 @@ Root order follows daily-use priority first, with occasional-reference sources b
 │                                   (header/tree/inspector/breadcrumb — real Espresso-theme classes,
 │                                   confirmed live), for a wall-display/kiosk-style rotation (D58)
 └─ リンク集                      — occasional-reference sources, not live status (D28); sas0's only
-                                    folder as of D54, holding 7 instruments, one per operating
+                                    folder as of D54, holding 8 instruments, one per operating
                                     organization (D56 renamed these from what-it-links-to descriptions
                                     to who-runs-it, and merged the old 川の防災情報 link into 国土交通省)
     ├─ 国土交通省                — link list: ハザードマップポータル (this app doesn't tolerate iframe
@@ -80,6 +80,11 @@ Root order follows daily-use priority first, with occasional-reference sources b
     │                               (D21). Named 北海道開発局 防災情報ポータルサイト until D56
     ├─ 防災科学技術研究所         — link; nationwide realtime seismic-intensity map (this source has
     │                               no HTTPS at all — D19). Named 強震モニタ until D56
+    ├─ ひぐまっぷ                 — link; bear-sighting/damage reports sourced from participating
+    │                               Hokkaido municipalities (not embeddable — no CORS on its data feed).
+    │                               Kept its brand name rather than an operating-org name (D56's usual
+    │                               pattern) since the operator itself is unrecognizable to users while
+    │                               municipalities publicize it by this name (D67, Issue #5)
     ├─ 市町村                    — a single grouped link list (by 振興局/subprefecture), not a folder
     │                               tree; all 179 of Hokkaido's municipalities (35 cities, 15
     │                               villages, 129 towns), built up over sixteen repeatable batches
@@ -142,7 +147,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 - `docs/index.html` — loads Open MCT and MapLibre GL JS from pinned CDN versions, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` (both take an optional `order` to control display order independent of `<script>` load order — D28) and the shared `getSafeUrl()`/`renderLinkList()` helpers
 - `docs/folders.js` — declares リンク集, sas0's only remaining folder (D54 dissolved 気象庁, the other one), and the root-level `order` values that place root instruments (D28). A folder is only created where it groups 2+ instruments (D43) — 防災科学技術研究所/国土交通省/北海道開発局/北海道/国土地理院/北海道運輸局/気象庁 used to each wrap a set of instruments in their own folder and were all dissolved; their instruments now register directly with `parentKey: 'root'` or `parentKey: 'reference'` and an explicit `order` where one is needed
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, tour-mode, mlit, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus three vector/GeoJSON sources hosted on `stars.optgeo.org` and `cyberjapandata.gsi.go.jp`, D26/D27/D53; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, tour-mode, mlit, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, higumap, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus four vector/GeoJSON sources hosted on `stars.optgeo.org`, `cyberjapandata.gsi.go.jp`, and `www.jma.go.jp`, D26/D27/D53/D59; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, and host allowlists
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)
