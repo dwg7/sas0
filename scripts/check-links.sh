@@ -18,17 +18,31 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+# A non-UTF-8 shell locale (e.g. LANG="", LC_CTYPE=C — seen on a stock macOS
+# shell) makes grep mishandle multi-byte Japanese characters mid-URL,
+# truncating them into garbled paths that spuriously FAIL even though the
+# real URL is fine. GitHub Actions' runner already defaults to a UTF-8
+# locale (confirmed: CI's actual FAIL list has never shown this), so this is
+# purely for whoever runs the script by hand on a differently-configured
+# shell — matching a false alarm hit locally while investigating D68/issue #4.
+export LC_ALL=en_US.UTF-8
+
 # Stops at ASCII/JP quote and bracket punctuation that shows up around URLs
 # in this codebase's comments and JSDoc-citation strings (e.g. D6's
 # "（https://...）" attribution format), not just whitespace.
 urls=$(grep -rhoE "https?://[^\"'\` )）、。」\${}]+" docs/config.js docs/instruments/*.js | sort -u)
 
-# Base-URL templates for runtime string concatenation, not fetchable pages —
-# always FAIL and always expected to (D22). Skipped rather than counted, so
-# neither a human nor the weekly workflow has to keep dismissing them.
+# Base-URL templates for runtime string concatenation, and one XML namespace
+# identifier (not a URL template, but not a fetchable page either) — none of
+# these are pages to check, and they always FAIL/expected to (D22, D68).
+# Skipped rather than counted, so neither a human nor the weekly workflow has
+# to keep dismissing them.
 known_templates="
 https://www.jma.go.jp/bosai/warning/data/r8/
 https://www.jma.go.jp/bosai/weather_map/data/png/
+https://cyberjapandata.gsi.go.jp/xyz/cp
+https://www.jma.go.jp/bosai/amedas/data/map
+http://www.w3.org/2000/svg
 "
 
 fetch_status() {

@@ -926,3 +926,25 @@ Issue #5で「ひぐまっぷ」（`https://higumap.info/recent`）と「クマ�
 **計器名の判断——D56の「運営組織名」方針から意図的に外れた**：D56はリンク集の計器名を「何にリンクするか」から「誰が運営しているか」（例：強震モニタ→防災科学技術研究所）に統一する方針だった。しかしひぐまっぷの運営元「ダッピスタジオ合同会社」は利用者にとって無意味な名前であり、連携先の市町村自身も「ひぐまっぷ」というサービス名で案内している（例：美幌町の告知ページタイトルは「ヒグマ出没情報（ひぐまっぷ）」）。D56の狙いは「利用者にとって意味のある名前にする」ことであり、この場合はサービス名の方がその狙いに合致するため、組織名ではなくサービス名をそのまま計器名にした——D56の方針を機械的に適用せず、狙いに立ち返って判断した例。
 
 **検証**：ローカルサーバーで実機確認。リンク集内に「ひぐまっぷ」が防災科学技術研究所の直後・市町村の前に表示されること、リンク先URLが正しいこと、コンソールエラーは既知のD4のみであることを確認した。
+
+## D68: check-links.shの既知の偽陽性2件を追加除外 — [Issue #4](https://github.com/dwg7/sas0/issues/4)への対応
+
+週次の`check-links.yml`（D45）が3件のFAILを検出し、`github-actions[bot]`が自動でissue #4を起票した：
+
+```
+FAIL 403   http://www.w3.org/2000/svg
+FAIL 404   https://cyberjapandata.gsi.go.jp/xyz/cp
+FAIL 404   https://www.jma.go.jp/bosai/amedas/data/map
+```
+
+いずれもD22で確立した「実行時に文字列連結するベースURL・識別子は、そのままでは実在するページではないので必ずFAILする」という既知のパターンに当てはまることを、実際にソースを確認して裏付けた。
+
+- `http://www.w3.org/2000/svg`：`quake-trend.js`（D53）の`SVG_NS`定数——`document.createElementNS()`に渡すXML名前空間の識別子であり、そもそも「ページ」ではない。ベースURLのテンプレートですらない、D22/D45の既存2件（`weather.js`の`imageBaseUrl`、`warnings.js`のJMA URLテンプレート）ともまた違う、3つ目のカテゴリの偽陽性。
+- `https://cyberjapandata.gsi.go.jp/xyz/cp`：`hkd-map.js`（D53）の`REFERENCE_POINT_TILE_URL`——`${REFERENCE_POINT_TILE_URL}/${zoom}/${x}/${y}.geojson`の形で実行時に連結される、電子基準点タイルのベースURL。
+- `https://www.jma.go.jp/bosai/amedas/data/map`：`hkd-map.js`（D59）の`AMEDAS_MAP_BASE_URL`——`${AMEDAS_MAP_BASE_URL}/${timestamp}.json`の形で実行時に連結される、アメダス実測値のベースURL。
+
+3件とも`scripts/check-links.sh`の`known_templates`スキップリストに追加した。あわせてコメントも「実行時連結のベースURLテンプレート」だけでなく「XML名前空間識別子」も含む表現に一般化した。
+
+**副次的に見つけた問題——非UTF-8ロケールでの偽陽性**：ローカルで検証中、上記3件とは別に`https://rishiri-town.jp/防�`・`https://www.town.iwanai.hokkaido.jp/暮`という、日本語URLが文字境界の途中で欠けた偽FAILが出た。原因はシェルの`LANG`が未設定（`LC_CTYPE=C`）だったことによる`grep`のマルチバイト文字の誤処理——`LC_ALL=en_US.UTF-8`を明示して再実行すると消えることを確認した。GitHub Actionsのランナーは既にUTF-8ロケールで動いているため（issue #4自体がこの2件を報告していないことからも裏付けられる）CI側への実害はないが、今後別のシェル設定で手動実行した人が同じ偽アラートに惑わされないよう、`check-links.sh`の冒頭で`export LC_ALL=en_US.UTF-8`を明示することにした。
+
+**検証**：`bash scripts/check-links.sh`を実行し、210/210 OK（FAILゼロ）になることを確認した。
