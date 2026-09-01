@@ -170,4 +170,4 @@ cd docs && python3 -m http.server 8000
 - [DECISIONS.md](DECISIONS.md) — why things are built the way they are, including the Open MCT/CDN gotchas found while getting this to actually render
 - [HANDOVER.md](HANDOVER.md) — current state and open next steps
 - [CLAUDE.md](CLAUDE.md) — working notes for AI coding assistants in this repo
-- [OPENMCT-NOTES.md](OPENMCT-NOTES.md) — cross-project Open MCT field notes, contributed by and shared with other DWG7/`hfu` projects running Open MCT (`mapterhorn-japan-bridge`, `claude-mct`); sas0 hosts the master copy as the flagship Open MCT deployment (D65)
+- [OPENMCT-NOTES.md](OPENMCT-NOTES.md) — now a stub: cross-project Open MCT field notes moved to [`dwg7/cafebabe`](https://github.com/dwg7/cafebabe/blob/main/patterns/open-mct.md), a dedicated cross-DWG7 knowledge repo, after sas0 hosted the master copy for a day as the flagship Open MCT deployment (D65, migrated D69)

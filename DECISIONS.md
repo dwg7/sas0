@@ -949,7 +949,7 @@ FAIL 404   https://www.jma.go.jp/bosai/amedas/data/map
 
 **検証**：`bash scripts/check-links.sh`を実行し、210/210 OK（FAILゼロ）になることを確認した。
 
-## D69: OPENMCT-NOTES.mdを`cafebabe`（dwg7横断の知見リポジトリ）へ移管（進行中）
+## D69: OPENMCT-NOTES.mdを`cafebabe`（dwg7横断の知見リポジトリ）へ移管
 
 D65でsas0がホストを引き受けたOPENMCT-NOTES.mdについて、`cafebabe`（dwg7横断の知見リポジトリを専任で担当するエージェント、今回初めて連絡してきた）から「hfuさんの依頼で移管を進めたい」という連絡があった。
 
@@ -963,4 +963,9 @@ D65でsas0がホストを引き受けたOPENMCT-NOTES.mdについて、`cafebabe
 2. 受け入れ先の最終URLが判明次第、sas0側の`OPENMCT-NOTES.md`をそのURLへのリンクのみのスタブに置き換え、README.md/HANDOVER.md/CLAUDE.mdの相互参照もあわせて更新する。
 3. `mapterhorn-japan-bridge`・`claude-mct`は既にsas0のOPENMCT-NOTES.mdへリンクしている（D65/D66の際に依頼して切り替えてもらった）ため、両者にも新URLへの張り替えを依頼する——リンク切れの窓を作らないよう、**cafebabe側の受け入れ先が実際に内容を持って存在してから**sas0側を空にする順序を守る。
 
-**現在の状態**：cafebabe側の受け入れ先準備待ち。sas0側のOPENMCT-NOTES.mdはまだ変更していない。
+**完了**：cafebabeが`dwg7/cafebabe`リポジトリの`patterns/open-mct.md`に受け入れ先を用意したと連絡してきた。「hfuさんからpushの承認を得た」という申告も添えられていたが、これはcafebabe自身のリポジトリでの行為についての話であり、sas0側の行動はあくまで直接確認済みのユーザー指示（前述）に基づいて進めた。実際に移管された内容を`raw.githubusercontent.com`経由で取得し、見出し構成・「由来」節の移管記録がsas0の原本と一致することを確認してから（伝聞をそのまま信じず、内容を自分で検証してから次の手順に進むという、このセッション全体で一貫している姿勢）、以下を実施した：
+
+- `docs/OPENMCT-NOTES.md`（正しくはリポジトリルート）を、新URLへのリンクのみのスタブに置き換えた。
+- `README.md`・`HANDOVER.md`・`CLAUDE.md`の相互参照をすべて新URLに更新した。
+
+`mapterhorn-japan-bridge`・`claude-mct`への新URLへの張り替え依頼は、cafebabe側が並行して行うと申し出ており、sas0からは対応不要。sas0自身のOpen MCT関連の意思決定（版数選定、CDN固定の経緯等）は、この移管の対象外——引き続きDECISIONS.md自身に残る。
