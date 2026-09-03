@@ -72,6 +72,16 @@
   // deliberate green rather than fading into that white, so this sits
   // higher than the severity tiers' own resting point would suggest.
   const CALM_OPACITY = 0.4;
+  // アメダス専用の紫〜マゼンタ系グラデーション（D70）。D59では警報と同じ
+  // SEVERITY_COLOR/CALM_COLORを流用していたが、火山ポイント（同じ緑〜赤の
+  // 語彙を使う、D47）と平常時・悪化時の両方で同じ色になってしまい、雨天時
+  // に多数のアメダス点と火山を見分けられないという問題が判明した。警報
+  // ポリゴン・火山が占有する緑→黄→橙→赤、電子基準点の青、地震の金色、
+  // どれとも重ならない独立した色相を割り当てる——「平常＝緑」という
+  // D50の統一言語からは外れるが、アメダスの0mmは警報が出るような異常
+  // ではなく単に「今降っていない」という、他の"平常"とは性質が違う状態
+  // なので、独自のグラデーション内で濃淡を表現する方が実態に合う。
+  const AMEDAS_COLOR = { calm: '#7c6fb0', advisory: '#9b4fd6', warning: '#a3129e' };
 
   function severityOf(name) {
     if (name.includes('特別警報') || name.includes('危険警報')) {
@@ -605,13 +615,12 @@
           'circle-stroke-color': '#0d1117'
         }
       },
-      // アメダス — 降水量（1時間）で色・不透明度・大きさを変える。0mmの地点は
-      // CALM_COLOR（緑、状況図の他の「平常」表現と同じ色）——電子基準点の
-      // 青とはっきり区別でき、無警報時の地図が静かなままになるよう
-      // （D50の「平常時は目立たせない」方針も踏襲）。雨が強まるほど
-      // SEVERITY_COLOR（警報・注意報と同じ黄→橙のエスカレーション配色）に
-      // 近づく——警報ポリゴンの色使いと視覚的な語彙を共有させている。
-      // See DECISIONS.md D59, D60.
+      // アメダス — 降水量（1時間）で色・不透明度・大きさを変える。AMEDAS_COLOR
+      // の紫〜マゼンタ系グラデーションを使う——火山・警報ポリゴンの緑〜赤とは
+      // 独立した色相なので、雨天時に多数のアメダス点が並んでも火山ポイントと
+      // 混同しない（D70、D59の反省）。0mmは薄い紫・低不透明度で、無警報時の
+      // 地図が静かなままになるようにするD50の方針は維持している。
+      // See DECISIONS.md D59, D60, D70.
       {
         id: 'amedas-point',
         type: 'circle',
@@ -623,13 +632,13 @@
             ['linear'],
             ['get', 'precipitation1h'],
             0,
-            CALM_COLOR,
+            AMEDAS_COLOR.calm,
             10,
-            SEVERITY_COLOR.advisory,
+            AMEDAS_COLOR.advisory,
             30,
-            SEVERITY_COLOR.warning
+            AMEDAS_COLOR.warning
           ],
-          'circle-opacity': ['interpolate', ['linear'], ['get', 'precipitation1h'], 0, 0.45, 30, 0.9],
+          'circle-opacity': ['interpolate', ['linear'], ['get', 'precipitation1h'], 0, 0.35, 30, 0.9],
           'circle-stroke-width': 1,
           'circle-stroke-color': '#0d1117'
         }
