@@ -32,9 +32,11 @@ Root order follows daily-use priority first, with occasional-reference sources b
 │                                   own JMA data, no new source (D47), a third point layer of
 │                                   電子基準点 (GEONET) locations from GSI's own CORS-open tile GeoJSON
 │                                   in a distinct blue (D53, recolored D60), and a fourth of Hokkaido's
-│                                   226 AMeDAS stations in green-to-orange by 1-hour precipitation,
-│                                   reusing the warning-polygon color language (D59, recolored D60 so
-│                                   its calm color no longer collided with 電子基準点's blue). The
+│                                   226 AMeDAS stations by 1-hour precipitation, in its own purple-to-
+│                                   magenta color family (D59; recolored twice — D60 so its calm color
+│                                   no longer collided with 電子基準点's blue, then D70 off the warning-
+│                                   polygon green/orange language entirely, after that turned out to
+│                                   collide with 火山's own calm/active colors too). The
 │                                   always-on municipality-name labels were removed in D60 (duplicate
 │                                   labels piling up over small/island municipalities) — names are
 │                                   still available on hover. Named 地図 ("map") until D48 moved it
