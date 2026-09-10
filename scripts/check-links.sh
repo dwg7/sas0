@@ -52,6 +52,26 @@ fetch_status() {
     "$1" 2>/dev/null || echo "000"
 }
 
+# Which HTTP statuses are worth trying again. A 404/410 is the site telling
+# us the page is genuinely gone — retrying it just makes the run slower
+# without ever changing the answer. Timeouts/connection failures (000),
+# rate limits (408/429), any 5xx, and 403 (this repo's municipal sites are
+# frequently WAF-fronted and answer the first hit from a new IP with a block)
+# are the ones that actually flip to 200 on a second look. See DECISIONS.md D72.
+is_transient() {
+  case "$1" in
+    000 | 403 | 408 | 429 | 5??) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Total attempts per URL, including the first. Was 2 (one retry) until D72:
+# Issue #6 was a 今金町 503 that survived both attempts in CI, yet answered
+# 200 on the very next request by hand — with 199 URLs checked weekly, at
+# least one flaky host per run is close to guaranteed, and a tracking issue
+# that cries wolf every week stops being read at all.
+MAX_ATTEMPTS=3
+
 fail=0
 total=0
 while IFS= read -r url; do
@@ -62,17 +82,23 @@ while IFS= read -r url; do
   fi
   total=$((total + 1))
   status=$(fetch_status "$url")
+  attempt=1
+  # Retries absorb the transient bot-protection/rate-limit flakes this repo
+  # has repeatedly seen (Incapsula-fronted sites, occasionally a non-ASCII
+  # path) — see DECISIONS.md D34, D45, D72. Backoff is 3s then 9s; a
+  # definitively-dead status (404/410) breaks out immediately.
+  while [[ ! "$status" =~ ^[23] ]] && is_transient "$status" && [ "$attempt" -lt "$MAX_ATTEMPTS" ]; do
+    sleep $((3 ** attempt))
+    status=$(fetch_status "$url")
+    attempt=$((attempt + 1))
+  done
+
   if [[ "$status" =~ ^[23] ]]; then
-    printf 'OK   %-5s %s\n' "$status" "$url"
-    continue
-  fi
-  # A single retry absorbs the transient bot-protection/rate-limit flakes
-  # this repo has repeatedly seen (Incapsula-fronted sites, occasionally a
-  # non-ASCII path) — see DECISIONS.md D34, D45.
-  sleep 3
-  status=$(fetch_status "$url")
-  if [[ "$status" =~ ^[23] ]]; then
-    printf 'OK   %-5s %s (after retry)\n' "$status" "$url"
+    if [ "$attempt" -gt 1 ]; then
+      printf 'OK   %-5s %s (after %d attempts)\n' "$status" "$url" "$attempt"
+    else
+      printf 'OK   %-5s %s\n' "$status" "$url"
+    fi
   else
     printf 'FAIL %-5s %s\n' "$status" "$url"
     fail=$((fail + 1))
