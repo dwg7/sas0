@@ -42,6 +42,7 @@ https://www.jma.go.jp/bosai/warning/data/r8/
 https://www.jma.go.jp/bosai/weather_map/data/png/
 https://cyberjapandata.gsi.go.jp/xyz/cp
 https://www.jma.go.jp/bosai/amedas/data/map
+https://www.jma.go.jp/bosai/jmatile/data/nowc
 http://www.w3.org/2000/svg
 "
 

@@ -36,7 +36,12 @@ Root order follows daily-use priority first, with occasional-reference sources b
 │                                   magenta color family (D59; recolored twice — D60 so its calm color
 │                                   no longer collided with 電子基準点's blue, then D70 off the warning-
 │                                   polygon green/orange language entirely, after that turned out to
-│                                   collide with 火山's own calm/active colors too). The
+│                                   collide with 火山's own calm/active colors too), and a raster
+│                                   layer of JMA's 降水ナウキャスト — the map's first continuous
+│                                   field (as opposed to points and polygons) and sas0's first
+│                                   *forecast* data, scrubbable from 3 hours back to 1 hour ahead
+│                                   using the frames JMA already publishes, so the map gets a time
+│                                   axis without any stored history (D71). The
 │                                   always-on municipality-name labels were removed in D60 (duplicate
 │                                   labels piling up over small/island municipalities) — names are
 │                                   still available on hover. Named 地図 ("map") until D48 moved it
@@ -149,7 +154,7 @@ This repository is GitHub Pages oriented and static-only: `main`'s `docs/` direc
 - `docs/index.html` — loads Open MCT and MapLibre GL JS from pinned CDN versions, then the scripts below, in order
 - `docs/core.js` — Open MCT bootstrap; defines `SAS0.registerFolder()`/`SAS0.registerInstrument()` (both take an optional `order` to control display order independent of `<script>` load order — D28) and the shared `getSafeUrl()`/`renderLinkList()` helpers
 - `docs/folders.js` — declares リンク集, sas0's only remaining folder (D54 dissolved 気象庁, the other one), and the root-level `order` values that place root instruments (D28). A folder is only created where it groups 2+ instruments (D43) — 防災科学技術研究所/国土交通省/北海道開発局/北海道/国土地理院/北海道運輸局/気象庁 used to each wrap a set of instruments in their own folder and were all dissolved; their instruments now register directly with `parentKey: 'root'` or `parentKey: 'reference'` and an explicit `order` where one is needed
-- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, tour-mode, mlit, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, higumap, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus four vector/GeoJSON sources hosted on `stars.optgeo.org`, `cyberjapandata.gsi.go.jp`, and `www.jma.go.jp`, D26/D27/D53/D59; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
+- `docs/instruments/*.js` — one file per instrument or instrument group (weather, warnings, quake, volcano, quake-trend, change-log, hkd-map, tour-mode, mlit, hokkaido, hokkaido-safe-travel, hokkaido-development-bureau, kmoni, higumap, municipalities, volcano-councils), each calling `SAS0.registerInstrument()` (municipalities/volcano-councils loop over a `config.js` array and render one grouped `renderLinkList()`; hkd-map builds a MapLibre style at render time from a fetched basemap plus four vector/GeoJSON sources and one raster tile layer, hosted on `stars.optgeo.org`, `cyberjapandata.gsi.go.jp`, and `www.jma.go.jp`, D26/D27/D53/D59/D71; quake-trend renders a plain SVG chart, not Open MCT's native Plot view — see D53 for why)
 - `docs/boot.js` — calls `SAS0.start()`; must load last, after every instrument has registered
 - `docs/config.js` — instrument titles, URLs, and host allowlists
 - `docs/style.css` — shared instrument layout and per-instrument styling (warning severity colors, link lists, etc.)

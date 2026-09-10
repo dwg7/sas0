@@ -486,6 +486,95 @@
     }
   }
 
+  // 高解像度降水ナウキャスト（気象庁）— 状況図で初めての「ラスター」レイヤー
+  // であり、初めての「予測」情報でもある。これまでの状況図は点（アメダス・
+  // 地震・火山・電子基準点）と面（予報区・市町村界）だけで構成されていて、
+  // 連続した場そのものを描くレイヤーが無かった——雨は本来226点でサンプリング
+  // するものではなく面で見るもので、アメダス（D59）の配色が火山・電子基準点と
+  // 二度も衝突した（D60・D70）のも、突き詰めれば点で面を表現しようとしている
+  // ことの副作用だった。アメダスの点は残す（地点名つきの実測値が読める）が、
+  // 面の分布はこのレイヤーが担う。
+  //
+  // 新しい提供組織は増えていない——気象庁は既にsas0が最も深く使っている、
+  // CLAUDE.mdの2軸（オープン、かつ取り込まれたい）を満たす情報源で、その
+  // まだ使っていなかった部分にあたる。
+  //
+  // targetTimes_N1.json = 実況（過去3時間・5分間隔・37コマ）
+  // targetTimes_N2.json = 予測（+1時間まで・5分間隔・12コマ）
+  // 両方とも`access-control-allow-origin: *`を実地確認済み。これが効くのは、
+  // D53の天気図スクラブと同じ「気象庁が既に配信している時系列を、新規fetchを
+  // 増やさず使い切る」という手が、今度は空間データに対して使えるという点——
+  // 状況図の時間軸が、リポジトリへの自動書き込み（D57のハーベスター）という
+  // 一線を越えずに手に入る。
+  const NOWCAST_OBSERVED_TIMES_URL = 'https://www.jma.go.jp/bosai/jmatile/data/nowc/targetTimes_N1.json';
+  const NOWCAST_FORECAST_TIMES_URL = 'https://www.jma.go.jp/bosai/jmatile/data/nowc/targetTimes_N2.json';
+  // 実行時に {basetime}/none/{validtime}/... を連結して使うベースURL。
+  // 単体では解決しないので、check-links.shのknown_templatesに登録してある
+  // （D22/D68と同じ扱い）。URLの3番目のセグメント（none/fcst）は、実況・予測の
+  // どちらのコマでも同一バイト列が返ることを実測で確認したので'none'で統一する。
+  const NOWCAST_TILE_BASE_URL = 'https://www.jma.go.jp/bosai/jmatile/data/nowc';
+  // D6のJMA引用要件をラスターソースのattributionとして載せる（MapLibreが
+  // 地図右下に自動表示する）。状況図がJMAデータを使うのはこれが初めてでは
+  // ないが、出典表示を持つのはこのレイヤーが初めて。
+  const NOWCAST_ATTRIBUTION = '出典：気象庁ホームページ（https://www.jma.go.jp/bosai/nowc/）';
+
+  function nowcastTileUrl(frame) {
+    return `${NOWCAST_TILE_BASE_URL}/${frame.basetime}/none/${frame.validtime}/surf/hrpns/{z}/{x}/{y}.png`;
+  }
+
+  // "20260910182500"（気象庁のtargetTimesはUTC表記）→ Date。区切り記号なしの
+  // この文字列をそのままDateに渡すと、実装依存の解釈かローカル時刻誤認になる
+  // ので、明示的にISO 8601のUTC形式へ組み立て直す。
+  function parseNowcastTime(stamp) {
+    return new Date(
+      `${stamp.slice(0, 4)}-${stamp.slice(4, 6)}-${stamp.slice(6, 8)}T` +
+        `${stamp.slice(8, 10)}:${stamp.slice(10, 12)}:${stamp.slice(12, 14)}Z`
+    );
+  }
+
+  function formatNowcastLabel(frame, isNow) {
+    const time = parseNowcastTime(frame.validtime).toLocaleTimeString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    if (isNow) {
+      return `${time}（現在）`;
+    }
+    return `${time}（${frame.forecast ? '予測' : '実況'}）`;
+  }
+
+  async function fetchNowcastFrames() {
+    const urls = [NOWCAST_OBSERVED_TIMES_URL, NOWCAST_FORECAST_TIMES_URL].map((raw) =>
+      SAS0.getSafeUrl(raw, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS })
+    );
+    if (urls.some((url) => !url)) {
+      return [];
+    }
+    const [observed, forecast] = await Promise.all(
+      urls.map((url) =>
+        fetch(url)
+          .then((response) => response.json())
+          .catch(() => [])
+      )
+    );
+    const toFrames = (entries, isForecast) =>
+      (Array.isArray(entries) ? entries : [])
+        .filter((entry) => entry && entry.basetime && entry.validtime)
+        .map((entry) => ({ basetime: entry.basetime, validtime: entry.validtime, forecast: isForecast }));
+
+    const observedFrames = toFrames(observed, false);
+    // 気象庁は新しい順に返すので、スライダー用に古い→新しい順へ並べ替える。
+    observedFrames.sort((a, b) => a.validtime.localeCompare(b.validtime));
+    const latestObserved = observedFrames.length ? observedFrames[observedFrames.length - 1].validtime : '';
+    // 予測側の先頭が実況の最新と重なることがあり得るので、実況を正として
+    // 重複するコマは落とす——スライダーに同じ時刻の停止点が2つ並ばないように。
+    const forecastFrames = toFrames(forecast, true).filter((frame) => frame.validtime > latestObserved);
+    forecastFrames.sort((a, b) => a.validtime.localeCompare(b.validtime));
+
+    return observedFrames.concat(forecastFrames);
+  }
+
   const INFO_PLACEHOLDER_HTML =
     '<div class="sas0-map-info-placeholder">地図上にカーソルを合わせると、市町村・警報の状況が表示されます。</div>';
 
@@ -528,10 +617,21 @@
     mapDiv.className = 'sas0-map';
     mapWrap.appendChild(mapDiv);
 
+    // 降水ナウキャストのタイムバー。地図の下・情報パネルの上に置く。
+    // コマ一覧が取れなかった場合はレイヤーごと出さないので、既定は非表示。
+    const nowcastBar = document.createElement('div');
+    nowcastBar.className = 'sas0-map-nowcast';
+    nowcastBar.hidden = true;
+    mapWrap.appendChild(nowcastBar);
+
     const infoPanel = document.createElement('div');
     infoPanel.className = 'sas0-map-info';
     infoPanel.innerHTML = INFO_PLACEHOLDER_HTML;
     mapWrap.appendChild(infoPanel);
+
+    // ベースマップのfetchと並走させる（どちらもレイヤー構築に必要なので、
+    // 直列にすると初期表示がそのぶん遅くなる）。
+    const nowcastFramesPromise = fetchNowcastFrames().catch(() => []);
 
     const styleUrl = SAS0.getSafeUrl(config.basemapStyleUrl, { allowedHosts: ALLOWED_HOSTS });
     const jmaSourceUrl = SAS0.getSafeUrl(config.jmaSourceUrl, { allowedHosts: ALLOWED_HOSTS });
@@ -556,6 +656,38 @@
     style.sources.volcano_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.reference_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.amedas_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+
+    const nowcastFrames = await nowcastFramesPromise;
+    // 「現在」＝実況の最後のコマ。予測コマがあればその手前が境目になる。
+    const nowcastNowIndex = Math.max(
+      0,
+      nowcastFrames.filter((frame) => !frame.forecast).length - 1
+    );
+    if (nowcastFrames.length) {
+      style.sources.nowcast = {
+        type: 'raster',
+        tiles: [nowcastTileUrl(nowcastFrames[nowcastNowIndex])],
+        tileSize: 256,
+        // minzoom/maxzoomをどちらも6に固定しているのは、気象庁のナウキャスト
+        // タイルが**偶数ズームにしか実データを持たない**ため（D71）。奇数ズーム
+        // （5・7・9…）もHTTP 200を返すが、中身はPLTE/tRNSチャンクを持たない
+        // 完全に空のPNGで、エラーはどこにも出ないまま何も描かれない——2地点
+        // （北海道・東海）で z=4,6,8,10 は実データ、z=3,5,7,9 は空、という
+        // 同じ結果を確認した。
+        //
+        // タイルサイズ256のとき、MapLibreは「地図のズーム+1」のタイルを要求
+        // するので、状況図の既定ズーム6ではz=7＝空タイルを引きに行ってしまう。
+        // これが実装当初、雨が降っていても何も表示されなかった原因だった。
+        // 6に固定すると、どの地図ズームでもz=6のタイルだけを引いて拡大縮小
+        // する。z=6は緯度43度あたりで約1km/pxで、ナウキャストの1kmメッシュと
+        // ほぼ等倍——寄ったときに見える四角いブロックは、補間で作った嘘では
+        // なく元データの分解能そのものになる（raster-resamplingが'nearest'
+        // なのも同じ理由）。
+        minzoom: 6,
+        maxzoom: 6,
+        attribution: NOWCAST_ATTRIBUTION
+      };
+    }
     // MapLibreはstyle.layers配列の後ろにあるものほど上に描画される。
     // 重なり順は下から：地域の面（警報ポリゴン→市町村ポリゴン）→
     // 電子基準点→アメダス→火山→地震、の順に積む（＝画面上での見え方は
@@ -597,6 +729,25 @@
         'source-layer': 'ksj_n03_shichoson',
         paint: { 'line-color': '#4c85f0', 'line-width': 0.5 }
       },
+      // 降水ナウキャスト — 面（警報ポリゴン・市町村界）より上、点レイヤーより
+      // 下。D55で決めた「点が最前面、面が最背面」の方針の中では、雨は面の側の
+      // 情報だが、警報ポリゴンの下に敷くと平常時の淡い緑（CALM_COLOR）に色を
+      // 濁されてしまうので、面の"直上"に置く。不透明度を0.75に落として、下の
+      // 市町村界が透けて読めるようにしている。
+      //
+      // raster-resamplingを'nearest'にしているのは意図的——ナウキャストの色は
+      // 降水強度の離散的な階級であって連続階調ではないので、既定の'linear'で
+      // 補間すると、気象庁が定義していない中間色を勝手に作り出してしまう。
+      ...(nowcastFrames.length
+        ? [
+            {
+              id: 'nowcast-raster',
+              type: 'raster',
+              source: 'nowcast',
+              paint: { 'raster-opacity': 0.75, 'raster-resampling': 'nearest' }
+            }
+          ]
+        : []),
       // 電子基準点（GEONET）— アメダス（緑系）と一目で見分けられるよう、
       // はっきりした青にした（D60、市町村境界線の淡い青#4c85f0よりも
       // 彩度・明度を上げている）。地震・火山のポイントより小さく目立たせ
@@ -686,6 +837,47 @@
       ]
     });
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    // タイムバー。既定は「現在」（実況の最新コマ）で、左へ動かすと過去3時間、
+    // 右へ動かすと+1時間の予測。D53の天気図スクラブと同じく、既定の表示は
+    // 従来と同じ「今」のままなので、この機能は純粋に追加のみ。
+    if (nowcastFrames.length > 1) {
+      nowcastBar.hidden = false;
+
+      const title = document.createElement('span');
+      title.className = 'sas0-map-nowcast-title';
+      title.textContent = '降水ナウキャスト';
+
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.className = 'sas0-map-nowcast-slider';
+      slider.min = '0';
+      slider.max = String(nowcastFrames.length - 1);
+      slider.value = String(nowcastNowIndex);
+      slider.setAttribute('aria-label', '降水ナウキャストの表示時刻');
+
+      const label = document.createElement('span');
+      label.className = 'sas0-map-nowcast-label';
+      label.textContent = formatNowcastLabel(nowcastFrames[nowcastNowIndex], true);
+
+      slider.addEventListener('input', () => {
+        const index = Number(slider.value);
+        const frame = nowcastFrames[index];
+        if (!frame) {
+          return;
+        }
+        label.textContent = formatNowcastLabel(frame, index === nowcastNowIndex);
+        nowcastBar.classList.toggle('is-forecast', Boolean(frame.forecast));
+        const source = map.getSource('nowcast');
+        if (source && typeof source.setTiles === 'function') {
+          source.setTiles([nowcastTileUrl(frame)]);
+        }
+      });
+
+      nowcastBar.appendChild(title);
+      nowcastBar.appendChild(slider);
+      nowcastBar.appendChild(label);
+    }
 
     let warningsByAreaCode = new Map();
 
