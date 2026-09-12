@@ -2,22 +2,15 @@
 
 Current state of sas0, for whoever (human or AI) picks this up next.
 
-## Pick up here — 2026-09-12
+## Pick up here — 2026-09-13
 
 Read this section first; it holds the state that isn't visible from the code alone.
 
-**⚠️ There are two commits on local `main` that have not been pushed.** This repo's convention is that commits happen when work completes but pushes wait for the user to say so, so this is expected, not an accident — but it means `origin/main` and the live GitHub Pages site are both a step behind this working copy. Check with `git log origin/main..HEAD --oneline` before doing anything that assumes the site is current.
+**All local `main` commits are pushed as of 2026-09-13**, including the D73 roadmap review itself (`591fe68`). `origin/main` and the live GitHub Pages site are current with this working copy.
 
-| Commit | What | Decision |
-|---|---|---|
-| `8176b8b` | 状況図 gained JMA's 降水ナウキャスト raster layer | D71 |
-| `aa1cd3a` | `check-links.sh` retry hardening | D72 |
+**[Issue #6](https://github.com/dwg7/sas0/issues/6) is closed (2026-09-13).** It was an auto-filed weekly `check-links.yml` failure naming one 今金町 URL as a 503; re-verified as HTTP 200 before closing, and D72's retry hardening should stop this class of flake from re-filing.
 
-The user was asked whether to push and had not answered when the session ended. **Ask before pushing** rather than assuming.
-
-**[Issue #6](https://github.com/dwg7/sas0/issues/6) is open and can almost certainly be closed.** It's an auto-filed weekly `check-links.yml` failure naming one 今金町 URL as a 503. That URL passes now (verified in two separate full runs, 213/213 OK), and D72 specifically hardened the retry logic so this class of flake stops filing issues. The user was asked about closing it and had not answered. **Don't close it unilaterally** — it's the user's call, and the question is already on the table.
-
-**What was just finished, and what's next.** A roadmap review (D73) diagnosed that sas0 has exhausted horizontal expansion (more sources) and that recent decisions had become mostly corrections of earlier ones. It produced a four-step order; steps 1 and 2 are the two unpushed commits above. Remaining:
+**What was just finished, and what's next.** A roadmap review (D73) diagnosed that sas0 has exhausted horizontal expansion (more sources) and that recent decisions had become mostly corrections of earlier ones. It produced a four-step order; steps 1 and 2 (降水ナウキャスト, check-links retry hardening) are pushed and Issue #6 stemming from step 2 is closed. Remaining:
 
 3. **Bump Open MCT `4.3.0-rc1` → `4.3.1`** (open item 6 below). Independent and self-contained; best done when nothing else is in flight, since it needs D2's full verification checklist re-run.
 4. **The harvester ≡ Exchange Model v0** (open items 9 and 10 below) — D73's main structural finding is that these two long-standing backlog items are *the same deliverable*, not two. This one crosses the `contents: write` line (sas0's first repository-writing CI) and needs the user's explicit go-ahead immediately before starting, per D57-1's own conclusion.
