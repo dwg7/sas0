@@ -35,6 +35,39 @@ window.SAS0 = (function () {
     }
   }
 
+  // A short-lived cache over fetch()+.json(), keyed by URL. Several
+  // instruments independently poll the same JMA endpoints (D10's "instrument
+  // files are self-contained" means each keeps its own parsing logic, not
+  // that each should also make its own network round-trip) — without this,
+  // navigating between them, or 巡回モード cycling through them, re-fetches
+  // identical data over and over. `ttlMs` should match how often the
+  // underlying feed actually changes, not how often a given instrument
+  // happens to re-render. See DECISIONS.md D77.
+  const jsonFetchCache = new Map();
+
+  function fetchJsonCached(url, options) {
+    if (!url) {
+      return Promise.reject(new Error('fetchJsonCached: empty url'));
+    }
+    const ttlMs = (options && options.ttlMs) || 60000;
+    const cached = jsonFetchCache.get(url);
+    if (cached && Date.now() - cached.time < ttlMs) {
+      return cached.promise;
+    }
+    const promise = fetch(url).then((response) => response.json());
+    const entry = { promise, time: Date.now() };
+    jsonFetchCache.set(url, entry);
+    // A failed fetch shouldn't poison the cache for the rest of its TTL —
+    // evict it (unless a newer call already replaced it) so the next caller
+    // retries instead of piling onto a stale rejection.
+    promise.catch(() => {
+      if (jsonFetchCache.get(url) === entry) {
+        jsonFetchCache.delete(url);
+      }
+    });
+    return promise;
+  }
+
   function renderLinkRow({ title, description, url, allowedProtocols }) {
     const row = document.createElement('div');
     row.className = 'sas0-link-row';
@@ -252,6 +285,7 @@ window.SAS0 = (function () {
     registerFolder,
     registerInstrument,
     getSafeUrl,
+    fetchJsonCached,
     renderLinkList,
     // Programmatic navigation, for 巡回モード (docs/instruments/tour-mode.js) to
     // cycle through instruments on a timer. Thin wrapper so that file doesn't

@@ -189,6 +189,45 @@ body {
   color: #a6c6ef;
 }
 
+/* 警報・注意報の一覧⇔北海道全体表示(tabularmap、D77)の切り替え。
+   .sas0-warning-instrumentは.sas0-instrumentのflex columnをそのまま使い、
+   ここでは各ペインの伸縮だけを足す。 */
+.sas0-warning-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.sas0-warning-mode-button {
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #dce6f1;
+  background: #111a26;
+  border: 1px solid #243247;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sas0-warning-mode-button:hover {
+  border-color: #4c85f0;
+}
+
+.sas0-warning-mode-button.is-active {
+  color: #0d1117;
+  background: #5fae8c;
+  border-color: #5fae8c;
+}
+
+/* tabularmap.js自身の.tm-rootがheight:100%を前提にしている
+   (docs/vendor/tabularmap/README.md参照)ため、flex:1/min-height:0で
+   実際の高さを持たせる — .sas0-map-wrap(状況図)と同じパターン。 */
+.sas0-warning-tabular-pane {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
 .sas0-warning-section {
   border: 1px solid #243247;
   background: #111a26;

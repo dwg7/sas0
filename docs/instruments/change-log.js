@@ -4,6 +4,12 @@
   const ENTRIES_KEY = 'sas0.changeLog.entries.v1';
   const MAX_ENTRIES = 50;
 
+  // 警報・注意報(warnings.js、内部のtabularmap含む)・状況図(hkd-map.js)と
+  // 同じ8ファイルを読む。SAS0.fetchJsonCachedで生JSONの取得だけ共有する
+  // (D77)。change-log自体はrunOnce(訪問のたび1回)なので、このTTLは主に
+  // 巡回モードで短時間に他計器と行き来した時のヒットを狙ったもの。
+  const WARNING_CACHE_TTL_MS = 2 * 60 * 1000;
+
   // Duplicated from warnings.js — D10's "instrument files are
   // self-contained" convention.
   const HOKKAIDO_OFFICES = [
@@ -84,9 +90,7 @@
           allowedProtocols: ['https:'],
           allowedHosts: ALLOWED_HOSTS
         });
-        return fetch(url)
-          .then((response) => response.json())
-          .catch(() => null);
+        return SAS0.fetchJsonCached(url, { ttlMs: WARNING_CACHE_TTL_MS }).catch(() => null);
       })
     );
     const byOffice = {};

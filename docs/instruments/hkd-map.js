@@ -10,6 +10,11 @@
   // class10Items[].areaCode in the same office JSON warnings.js already uses.
   const HOKKAIDO_OFFICES = ['011000', '012000', '013000', '014030', '014100', '015000', '016000', '017000'];
 
+  // 警報・注意報(warnings.js)・更新情報(change-log.js)・北海道全体表示
+  // (D77、警報・注意報内のtabularmap)と同じ8ファイルを読む。SAS0.fetchJsonCached
+  // で生JSONの取得だけを共有し、実際のJMAへのリクエスト回数を1本化する。
+  const WARNING_CACHE_TTL_MS = 2 * 60 * 1000;
+
   const WARNING_KIND_NAMES = {
     '02': '暴風雪警報',
     '03': '大雨警報',
@@ -100,9 +105,7 @@
           allowedProtocols: ['https:'],
           allowedHosts: ALLOWED_HOSTS
         });
-        return fetch(url)
-          .then((response) => response.json())
-          .catch(() => null);
+        return SAS0.fetchJsonCached(url, { ttlMs: WARNING_CACHE_TTL_MS }).catch(() => null);
       })
     );
 
