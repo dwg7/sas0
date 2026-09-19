@@ -55,18 +55,23 @@
     '49': '土砂災害危険警報'
   };
 
-  function extractActiveWarnings(report) {
-    const items = (report && report.warning && report.warning.class10Items) || [];
+  // warnings.jsと同じ理由でreports配列全体を走査する(D76) — r8のJSONは
+  // dataTypeCodeの異なる複数の電文シリーズが並んでおり、先頭(reports[0])
+  // だけでは他のシリーズにしか現れない警報を取りこぼす。
+  function extractActiveWarnings(reports) {
     const active = [];
-    items.forEach((item) => {
-      (item.kinds || []).forEach((kind) => {
-        if (!kind.code || kind.status === '解除') {
-          return;
-        }
-        const name = WARNING_KIND_NAMES[kind.code] || `不明な警報種別 (code=${kind.code})`;
-        if (!active.some((existing) => existing.name === name && existing.status === kind.status)) {
-          active.push({ name, status: kind.status });
-        }
+    (reports || []).forEach((report) => {
+      const items = (report && report.warning && report.warning.class10Items) || [];
+      items.forEach((item) => {
+        (item.kinds || []).forEach((kind) => {
+          if (!kind.code || kind.status === '解除') {
+            return;
+          }
+          const name = WARNING_KIND_NAMES[kind.code] || `不明な警報種別 (code=${kind.code})`;
+          if (!active.some((existing) => existing.name === name && existing.status === kind.status)) {
+            active.push({ name, status: kind.status });
+          }
+        });
       });
     });
     return active;
@@ -89,7 +94,7 @@
       if (!Array.isArray(reports) || reports.length === 0) {
         return;
       }
-      byOffice[HOKKAIDO_OFFICES[i][0]] = extractActiveWarnings(reports[0]);
+      byOffice[HOKKAIDO_OFFICES[i][0]] = extractActiveWarnings(reports);
     });
     return byOffice;
   }

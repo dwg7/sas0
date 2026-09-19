@@ -63,22 +63,31 @@
     return 'sas0-severity-advisory';
   }
 
-  function extractActiveWarnings(report) {
-    const items = (report && report.warning && report.warning.class10Items) || [];
+  // `reports`はr8の1府県予報区分のJSON全体(配列)。中身は同じ内容の重複では
+  // なく、dataTypeCodeの異なる複数の電文シリーズ(VPWW55/56/58/59/61等)が
+  // 並んでいて、どれが「今アクティブな警報を含む」かは順番から分からない
+  // ——これまでは先頭(reports[0])だけを見ており、他の電文シリーズにしか
+  // 現れない警報(例: 濃霧注意報)を取りこぼしていた。必ず配列全体を
+  // 走査する（D76 — tabularmaps/doとの突き合わせで発覚。同じ修正を
+  // hkd-map.js/change-log.jsにも適用済み）。
+  function extractActiveWarnings(reports) {
     const active = [];
 
-    items.forEach((item) => {
-      (item.kinds || []).forEach((kind) => {
-        if (!kind.code) {
-          return; // "発表警報・注意報はなし"
-        }
-        if (kind.status === '解除') {
-          return; // already lifted
-        }
-        const name = WARNING_KIND_NAMES[kind.code] || `不明な警報種別 (code=${kind.code})`;
-        if (!active.some((existing) => existing.name === name && existing.status === kind.status)) {
-          active.push({ name, status: kind.status });
-        }
+    (reports || []).forEach((report) => {
+      const items = (report && report.warning && report.warning.class10Items) || [];
+      items.forEach((item) => {
+        (item.kinds || []).forEach((kind) => {
+          if (!kind.code) {
+            return; // "発表警報・注意報はなし"
+          }
+          if (kind.status === '解除') {
+            return; // already lifted
+          }
+          const name = WARNING_KIND_NAMES[kind.code] || `不明な警報種別 (code=${kind.code})`;
+          if (!active.some((existing) => existing.name === name && existing.status === kind.status)) {
+            active.push({ name, status: kind.status });
+          }
+        });
       });
     });
 
@@ -109,7 +118,7 @@
       }
 
       const officeName = HOKKAIDO_OFFICES[i][1];
-      const active = extractActiveWarnings(reports[0]);
+      const active = extractActiveWarnings(reports);
       if (active.length === 0) {
         return;
       }

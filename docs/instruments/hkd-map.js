@@ -108,26 +108,33 @@
 
     const byAreaCode = new Map();
 
+    // r8のJSONはdataTypeCodeの異なる複数の電文シリーズが並んでいて、先頭
+    // (reports[0])だけでは他のシリーズにしか現れない警報を取りこぼす
+    // (D76 — tabularmaps/doとの突き合わせで発覚。同じ修正をwarnings.js/
+    // change-log.jsにも適用済み)。配列全体を走査し、同じareaCodeが複数の
+    // シリーズにまたがって出てきた場合は警報を合算する。
     results.forEach((reports) => {
       if (!Array.isArray(reports) || reports.length === 0) {
         return;
       }
-      const items = (reports[0].warning && reports[0].warning.class10Items) || [];
-      items.forEach((item) => {
-        const active = [];
-        (item.kinds || []).forEach((kind) => {
-          if (!kind.code || kind.status === '解除') {
-            return;
-          }
-          const name = WARNING_KIND_NAMES[kind.code];
-          if (!name) {
-            return;
-          }
-          active.push({ name, severity: severityOf(name) });
+      reports.forEach((report) => {
+        const items = (report.warning && report.warning.class10Items) || [];
+        items.forEach((item) => {
+          (item.kinds || []).forEach((kind) => {
+            if (!kind.code || kind.status === '解除') {
+              return;
+            }
+            const name = WARNING_KIND_NAMES[kind.code];
+            if (!name) {
+              return;
+            }
+            const existing = byAreaCode.get(item.areaCode) || [];
+            if (!existing.some((warning) => warning.name === name)) {
+              existing.push({ name, severity: severityOf(name) });
+            }
+            byAreaCode.set(item.areaCode, existing);
+          });
         });
-        if (active.length > 0) {
-          byAreaCode.set(item.areaCode, active);
-        }
       });
     });
 
