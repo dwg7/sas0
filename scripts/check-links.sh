@@ -46,10 +46,16 @@ https://www.jma.go.jp/bosai/jmatile/data/nowc
 http://www.w3.org/2000/svg
 "
 
+# curl's -w '%{http_code}' already prints 000 itself when the connection
+# fails or times out, and exits non-zero. An earlier `|| echo "000"` fallback
+# here appended a *second* 000, producing "000000" — which is_transient()
+# never matched, so connection failures were silently never retried at all
+# (found via Issues #7/#8, D80). The `|| true` just keeps `set -u`/errexit
+# callers from tripping on curl's non-zero exit without touching the output.
 fetch_status() {
-  curl -s -o /dev/null -w '%{http_code}' -L --max-time 15 \
+  curl -s -o /dev/null -w '%{http_code}' -L --connect-timeout 10 --max-time 20 \
     -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" \
-    "$1" 2>/dev/null || echo "000"
+    "$1" 2>/dev/null || true
 }
 
 # Which HTTP statuses are worth trying again. A 404/410 is the site telling
@@ -60,20 +66,38 @@ fetch_status() {
 # are the ones that actually flip to 200 on a second look. See DECISIONS.md D72.
 is_transient() {
   case "$1" in
-    000 | 403 | 408 | 429 | 5??) return 0 ;;
+    000 | 000000 | "" | 403 | 408 | 429 | 5??) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-# Total attempts per URL, including the first. Was 2 (one retry) until D72:
-# Issue #6 was a 今金町 503 that survived both attempts in CI, yet answered
-# 200 on the very next request by hand — with 199 URLs checked weekly, at
-# least one flaky host per run is close to guaranteed, and a tracking issue
-# that cries wolf every week stops being read at all.
-MAX_ATTEMPTS=3
+# Total attempts per URL, including the first. Was 2 until D72, 3 until D80.
+# Backoff is 5s, 15s, 45s between attempts (see check_url). A bot-protection
+# block (Imperva/Incapsula-fronted municipal sites: Issues #7 留萌市, #8 平取町)
+# tends to need a longer pause than a plain 503 to clear, so the waits grew.
+MAX_ATTEMPTS=4
+
+# Seconds to wait before the one deferred re-check of everything that still
+# failed after its own retries (D80). Gives a rate-limit/WAF window time to
+# reset for the whole run's worth of requests from one IP, which per-URL
+# backoff alone can't do.
+RECHECK_DELAY=90
+
+# Sets globals: status (final code) and attempt (attempts used).
+check_url() {
+  local url="$1" max="$2"
+  status=$(fetch_status "$url")
+  attempt=1
+  while [[ ! "$status" =~ ^[23] ]] && is_transient "$status" && [ "$attempt" -lt "$max" ]; do
+    sleep $((5 * 3 ** (attempt - 1)))
+    status=$(fetch_status "$url")
+    attempt=$((attempt + 1))
+  done
+}
 
 fail=0
 total=0
+deferred=()
 while IFS= read -r url; do
   [ -z "$url" ] && continue
   if grep -qxF "$url" <<<"$known_templates"; then
@@ -81,17 +105,11 @@ while IFS= read -r url; do
     continue
   fi
   total=$((total + 1))
-  status=$(fetch_status "$url")
-  attempt=1
   # Retries absorb the transient bot-protection/rate-limit flakes this repo
   # has repeatedly seen (Incapsula-fronted sites, occasionally a non-ASCII
-  # path) — see DECISIONS.md D34, D45, D72. Backoff is 3s then 9s; a
-  # definitively-dead status (404/410) breaks out immediately.
-  while [[ ! "$status" =~ ^[23] ]] && is_transient "$status" && [ "$attempt" -lt "$MAX_ATTEMPTS" ]; do
-    sleep $((3 ** attempt))
-    status=$(fetch_status "$url")
-    attempt=$((attempt + 1))
-  done
+  # path) — see DECISIONS.md D34, D45, D72, D80. A definitively-dead status
+  # (404/410) breaks out immediately.
+  check_url "$url" "$MAX_ATTEMPTS"
 
   if [[ "$status" =~ ^[23] ]]; then
     if [ "$attempt" -gt 1 ]; then
@@ -99,11 +117,30 @@ while IFS= read -r url; do
     else
       printf 'OK   %-5s %s\n' "$status" "$url"
     fi
+  elif is_transient "$status"; then
+    # Don't call it a FAIL yet — hold it for the deferred re-check below.
+    deferred+=("$url")
   else
     printf 'FAIL %-5s %s\n' "$status" "$url"
     fail=$((fail + 1))
   fi
 done <<<"$urls"
+
+# One last look at everything that stayed transiently-broken, after a longer
+# pause. Only genuinely persistent failures get reported (and file an issue).
+if [ "${#deferred[@]}" -gt 0 ]; then
+  echo "--- re-checking ${#deferred[@]} URL(s) after ${RECHECK_DELAY}s"
+  sleep "$RECHECK_DELAY"
+  for url in "${deferred[@]}"; do
+    check_url "$url" 2
+    if [[ "$status" =~ ^[23] ]]; then
+      printf 'OK   %-5s %s (after deferred re-check)\n' "$status" "$url"
+    else
+      printf 'FAIL %-5s %s\n' "$status" "$url"
+      fail=$((fail + 1))
+    fi
+  done
+fi
 
 echo "---"
 echo "$((total - fail))/$total OK"
