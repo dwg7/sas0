@@ -70,10 +70,10 @@
   const SEVERITY_OPACITY = { advisory: 0.35, warning: 0.42, special: 0.5 };
   const SEVERITY_RANK = { advisory: 1, warning: 2, special: 3 };
   const CALM_COLOR = '#5fae8c';
-  // stars.optgeo.org's "bvmap-dark" basemap is actually a light/white
-  // ground (its own style JSON's background-color is white/pale-grey,
-  // confirmed by inspection — "dark" apparently names something else about
-  // it, not the ground color) — a pale fill needs real opacity to read as
+  // stars.optgeo.org's bvmap-dark basemap (used until D79) was actually a
+  // light/white ground, and bvmap-starlight (the current one) is too (its
+  // background-color is white/pale-grey, confirmed by inspection) — a pale
+  // fill needs real opacity to read as
   // deliberate green rather than fading into that white, so this sits
   // higher than the severity tiers' own resting point would suggest.
   const CALM_OPACITY = 0.4;
