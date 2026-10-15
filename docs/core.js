@@ -50,11 +50,16 @@ window.SAS0 = (function () {
       return Promise.reject(new Error('fetchJsonCached: empty url'));
     }
     const ttlMs = (options && options.ttlMs) || 60000;
+    // `force` is for a user-pressed 更新 button (D82): skip both this cache and
+    // the browser's own HTTP cache, then store the fresh response so every
+    // other consumer of the same URL sees it too. (ttlMs: 0 can't express
+    // this — it falls through the `||` above to the 60s default.)
+    const force = Boolean(options && options.force);
     const cached = jsonFetchCache.get(url);
-    if (cached && Date.now() - cached.time < ttlMs) {
+    if (!force && cached && Date.now() - cached.time < ttlMs) {
       return cached.promise;
     }
-    const promise = fetch(url).then((response) => response.json());
+    const promise = fetch(url, force ? { cache: 'reload' } : undefined).then((response) => response.json());
     const entry = { promise, time: Date.now() };
     jsonFetchCache.set(url, entry);
     // A failed fetch shouldn't poison the cache for the rest of its TTL —

@@ -121,18 +121,21 @@
     return 'advisory';
   }
 
-  async function fetchWarningsByAreaCode() {
+  async function fetchWarningsByAreaCode(force) {
     const results = await Promise.all(
       HOKKAIDO_OFFICES.map((office) => {
         const url = SAS0.getSafeUrl(`https://www.jma.go.jp/bosai/warning/data/r8/${office.code}.json`, {
           allowedProtocols: ['https:'],
           allowedHosts: ALLOWED_HOSTS
         });
-        return SAS0.fetchJsonCached(url, { ttlMs: WARNING_CACHE_TTL_MS }).catch(() => null);
+        return SAS0.fetchJsonCached(url, { ttlMs: WARNING_CACHE_TTL_MS, force }).catch(() => null);
       })
     );
 
     const byAreaCode = new Map();
+    // 全振興局・全電文シリーズのreportDatetimeの最大値(警報・注意報の「発表」
+    // 表示と同じ意味)。ISO 8601(+09:00)なので文字列比較で足りる。
+    let reportedAt = null;
 
     // r8のJSONはdataTypeCodeの異なる複数の電文シリーズが並んでいて、先頭
     // (reports[0])だけでは他のシリーズにしか現れない警報を取りこぼす
@@ -150,6 +153,9 @@
         return;
       }
       reports.forEach((report) => {
+        if (report.reportDatetime && (!reportedAt || report.reportDatetime > reportedAt)) {
+          reportedAt = report.reportDatetime;
+        }
         const items = (report.warning && report.warning.class10Items) || [];
         items.forEach((item) => {
           (item.kinds || []).forEach((kind) => {
@@ -170,7 +176,7 @@
       });
     });
 
-    return { byAreaCode, failedOffices };
+    return { byAreaCode, failedOffices, reportedAt };
   }
 
   function bestSeverity(activeWarnings) {
@@ -288,36 +294,41 @@
     return [lon, lat];
   }
 
-  async function fetchQuakePoints() {
+  // 更新ボタン(D82)で強制再取得する時は、ブラウザ自身のHTTPキャッシュも
+  // 迂回する。
+  function fetchFresh(url, force) {
+    return fetch(url, force ? { cache: 'reload' } : undefined);
+  }
+
+  // 以下の地震・火山・アメダスの取得関数は、失敗時に空のFeatureCollectionを
+  // 返さず例外を投げる(D82)。空の結果は「地震がない」と見分けがつかず、
+  // 取得失敗を呼び出し側が表示できなかったため。
+  async function fetchQuakePoints(force) {
     const url = SAS0.getSafeUrl(QUAKE_LIST_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
-    try {
-      const list = await fetch(url).then((response) => response.json());
-      const features = list
-        .filter(isHokkaidoRelatedQuake)
-        .slice(0, QUAKE_MAX_POINTS)
-        .map((entry) => {
-          const coordinate = parseQuakeCoordinate(entry.cod);
-          if (!coordinate) {
-            return null;
+    const list = await fetchFresh(url, force).then((response) => response.json());
+    const features = list
+      .filter(isHokkaidoRelatedQuake)
+      .slice(0, QUAKE_MAX_POINTS)
+      .map((entry) => {
+        const coordinate = parseQuakeCoordinate(entry.cod);
+        if (!coordinate) {
+          return null;
+        }
+        const mag = parseFloat(entry.mag);
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: coordinate },
+          properties: {
+            name: entry.anm,
+            magLabel: entry.mag || '不明',
+            mag: Number.isNaN(mag) ? 3 : mag,
+            intensity: maxHokkaidoIntensity(entry),
+            time: entry.at || entry.rdt || ''
           }
-          const mag = parseFloat(entry.mag);
-          return {
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: coordinate },
-            properties: {
-              name: entry.anm,
-              magLabel: entry.mag || '不明',
-              mag: Number.isNaN(mag) ? 3 : mag,
-              intensity: maxHokkaidoIntensity(entry),
-              time: entry.at || entry.rdt || ''
-            }
-          };
-        })
-        .filter(Boolean);
-      return { type: 'FeatureCollection', features };
-    } catch (error) {
-      return { type: 'FeatureCollection', features: [] };
-    }
+        };
+      })
+      .filter(Boolean);
+    return { type: 'FeatureCollection', features };
   }
 
   const VOLCANO_LIST_URL = 'https://www.jma.go.jp/bosai/volcano/const/volcano_list.json';
@@ -332,38 +343,34 @@
     return (item && item.name) || '警戒レベル引き上げ中';
   }
 
-  async function fetchVolcanoPoints() {
+  async function fetchVolcanoPoints(force) {
     const listUrl = SAS0.getSafeUrl(VOLCANO_LIST_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
     const warningUrl = SAS0.getSafeUrl(VOLCANO_WARNING_URL, {
       allowedProtocols: ['https:'],
       allowedHosts: ALLOWED_HOSTS
     });
-    try {
-      const [volcanoes, warnings] = await Promise.all([
-        fetch(listUrl).then((response) => response.json()),
-        fetch(warningUrl).then((response) => response.json())
-      ]);
-      const warningByCode = new Map(warnings.map((warning) => [String(warning.eventId), warning]));
-      const features = volcanoes
-        .filter((volcano) => HOKKAIDO_MONITORED_VOLCANO_CODES.includes(String(volcano.code)))
-        .map((volcano) => {
-          const lat = parseFloat(volcano.latlon[0]);
-          const lon = parseFloat(volcano.latlon[1]);
-          const active = warningByCode.get(String(volcano.code));
-          return {
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [lon, lat] },
-            properties: {
-              name: volcano.name_jp,
-              active: !!active,
-              levelName: active ? extractVolcanoLevelName(active) : '平常'
-            }
-          };
-        });
-      return { type: 'FeatureCollection', features };
-    } catch (error) {
-      return { type: 'FeatureCollection', features: [] };
-    }
+    const [volcanoes, warnings] = await Promise.all([
+      fetchFresh(listUrl, force).then((response) => response.json()),
+      fetchFresh(warningUrl, force).then((response) => response.json())
+    ]);
+    const warningByCode = new Map(warnings.map((warning) => [String(warning.eventId), warning]));
+    const features = volcanoes
+      .filter((volcano) => HOKKAIDO_MONITORED_VOLCANO_CODES.includes(String(volcano.code)))
+      .map((volcano) => {
+        const lat = parseFloat(volcano.latlon[0]);
+        const lon = parseFloat(volcano.latlon[1]);
+        const active = warningByCode.get(String(volcano.code));
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          properties: {
+            name: volcano.name_jp,
+            active: !!active,
+            levelName: active ? extractVolcanoLevelName(active) : '平常'
+          }
+        };
+      });
+    return { type: 'FeatureCollection', features };
   }
 
   // 国土地理院の地理院タイル — 電子基準点（GEONET）の位置情報。CORSオープン・
@@ -471,64 +478,60 @@
     return `${entry[key][0]}${unit}`;
   }
 
-  async function fetchAmedasPoints() {
-    try {
-      const tableUrl = SAS0.getSafeUrl(AMEDAS_TABLE_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
-      const latestTimeUrl = SAS0.getSafeUrl(AMEDAS_LATEST_TIME_URL, {
-        allowedProtocols: ['https:'],
-        allowedHosts: ALLOWED_HOSTS
-      });
-      const [table, latestTimeText] = await Promise.all([
-        fetch(tableUrl).then((response) => response.json()),
-        fetch(latestTimeUrl).then((response) => response.text())
-      ]);
+  async function fetchAmedasPoints(force) {
+    const tableUrl = SAS0.getSafeUrl(AMEDAS_TABLE_URL, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS });
+    const latestTimeUrl = SAS0.getSafeUrl(AMEDAS_LATEST_TIME_URL, {
+      allowedProtocols: ['https:'],
+      allowedHosts: ALLOWED_HOSTS
+    });
+    const [table, latestTimeText] = await Promise.all([
+      fetchFresh(tableUrl, force).then((response) => response.json()),
+      fetchFresh(latestTimeUrl, force).then((response) => response.text())
+    ]);
 
-      // "2026-08-30T11:20:00+09:00" -> "20260830112000"（マップJSONのURLの
-      // タイムスタンプ形式）。JSTはUTC+9固定で表記も常に+09:00なので、
-      // '+'以前の日時部分から区切り文字を取り除くだけで変換できる。
-      const timestamp = latestTimeText.trim().split('+')[0].replace(/[-:T]/g, '');
-      const mapUrl = SAS0.getSafeUrl(`${AMEDAS_MAP_BASE_URL}/${timestamp}.json`, {
-        allowedProtocols: ['https:'],
-        allowedHosts: ALLOWED_HOSTS
-      });
-      const observations = await fetch(mapUrl).then((response) => response.json());
+    // "2026-08-30T11:20:00+09:00" -> "20260830112000"（マップJSONのURLの
+    // タイムスタンプ形式）。JSTはUTC+9固定で表記も常に+09:00なので、
+    // '+'以前の日時部分から区切り文字を取り除くだけで変換できる。
+    const timestamp = latestTimeText.trim().split('+')[0].replace(/[-:T]/g, '');
+    const mapUrl = SAS0.getSafeUrl(`${AMEDAS_MAP_BASE_URL}/${timestamp}.json`, {
+      allowedProtocols: ['https:'],
+      allowedHosts: ALLOWED_HOSTS
+    });
+    const observations = await fetchFresh(mapUrl, force).then((response) => response.json());
 
-      const features = [];
-      Object.keys(table).forEach((code) => {
-        if (!isHokkaidoAmedasCode(code)) {
-          return;
+    const features = [];
+    Object.keys(table).forEach((code) => {
+      if (!isHokkaidoAmedasCode(code)) {
+        return;
+      }
+      const station = table[code];
+      const entry = observations[code];
+      if (!entry) {
+        return;
+      }
+      const precipitation1h = entry.precipitation1h && entry.precipitation1h[0] !== null ? entry.precipitation1h[0] : 0;
+      const windDirectionIndex = entry.windDirection ? entry.windDirection[0] : null;
+      features.push({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [degMinToDecimal(station.lon), degMinToDecimal(station.lat)]
+        },
+        properties: {
+          name: station.kjName,
+          precipitation1h,
+          precipitation1hLabel: formatAmedasValue(entry, 'precipitation1h', 'mm/h') || '－',
+          precipitation24hLabel: formatAmedasValue(entry, 'precipitation24h', 'mm/24h') || '－',
+          tempLabel: formatAmedasValue(entry, 'temp', '℃') || null,
+          windLabel:
+            entry.wind && entry.wind[0] !== null
+              ? `${WIND_DIRECTION_NAMES[windDirectionIndex] || ''}の風 ${entry.wind[0]}m/s`
+              : null
         }
-        const station = table[code];
-        const entry = observations[code];
-        if (!entry) {
-          return;
-        }
-        const precipitation1h = entry.precipitation1h && entry.precipitation1h[0] !== null ? entry.precipitation1h[0] : 0;
-        const windDirectionIndex = entry.windDirection ? entry.windDirection[0] : null;
-        features.push({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [degMinToDecimal(station.lon), degMinToDecimal(station.lat)]
-          },
-          properties: {
-            name: station.kjName,
-            precipitation1h,
-            precipitation1hLabel: formatAmedasValue(entry, 'precipitation1h', 'mm/h') || '－',
-            precipitation24hLabel: formatAmedasValue(entry, 'precipitation24h', 'mm/24h') || '－',
-            tempLabel: formatAmedasValue(entry, 'temp', '℃') || null,
-            windLabel:
-              entry.wind && entry.wind[0] !== null
-                ? `${WIND_DIRECTION_NAMES[windDirectionIndex] || ''}の風 ${entry.wind[0]}m/s`
-                : null
-          }
-        });
       });
+    });
 
-      return { type: 'FeatureCollection', features };
-    } catch (error) {
-      return { type: 'FeatureCollection', features: [] };
-    }
+    return { type: 'FeatureCollection', features };
   }
 
   // 高解像度降水ナウキャスト（気象庁）— 状況図で初めての「ラスター」レイヤー
@@ -589,7 +592,7 @@
     return `${time}（${frame.forecast ? '予測' : '実況'}）`;
   }
 
-  async function fetchNowcastFrames() {
+  async function fetchNowcastFrames(force) {
     const urls = [NOWCAST_OBSERVED_TIMES_URL, NOWCAST_FORECAST_TIMES_URL].map((raw) =>
       SAS0.getSafeUrl(raw, { allowedProtocols: ['https:'], allowedHosts: ALLOWED_HOSTS })
     );
@@ -598,7 +601,7 @@
     }
     const [observed, forecast] = await Promise.all(
       urls.map((url) =>
-        fetch(url)
+        fetchFresh(url, force)
           .then((response) => response.json())
           .catch(() => [])
       )
@@ -659,8 +662,25 @@
     mapWrap.className = 'sas0-map-wrap';
     container.appendChild(mapWrap);
 
-    // 警報データを取得できなかった地域がある時だけ出す帯(D81)。地図の灰色
-    // が「平穏」ではなく「不明」を意味することを、色だけに頼らず文章で示す。
+    // 更新ボタンと鮮度表示(D82)。状況図の警報・地震・火山・アメダス・降水
+    // ナウキャストは自動では再取得せず、このボタンで取り直す。自動更新が
+    // 無い以上「いつの情報か」が見えないと古い状況を現在と取り違えるので、
+    // 警報の発表時刻・取得時刻・経過時間を常に隣に出す。
+    const toolbar = document.createElement('div');
+    toolbar.className = 'sas0-map-toolbar';
+    const refreshButton = document.createElement('button');
+    refreshButton.type = 'button';
+    refreshButton.className = 'sas0-map-refresh';
+    refreshButton.textContent = '更新';
+    const statusText = document.createElement('span');
+    statusText.className = 'sas0-map-status';
+    toolbar.appendChild(refreshButton);
+    toolbar.appendChild(statusText);
+    mapWrap.appendChild(toolbar);
+
+    // 取得できなかった警報の地域・レイヤーがある時だけ出す帯(D81・D82)。
+    // 地図の灰色や空のレイヤーが「平穏」ではなく「不明」を意味することを、
+    // 色や空白だけに頼らず文章で示す。
     const dataWarningBar = document.createElement('div');
     dataWarningBar.className = 'sas0-map-data-warning';
     dataWarningBar.setAttribute('role', 'status');
@@ -711,12 +731,10 @@
     style.sources.reference_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     style.sources.amedas_points = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
 
-    const nowcastFrames = await nowcastFramesPromise;
+    let nowcastFrames = await nowcastFramesPromise;
     // 「現在」＝実況の最後のコマ。予測コマがあればその手前が境目になる。
-    const nowcastNowIndex = Math.max(
-      0,
-      nowcastFrames.filter((frame) => !frame.forecast).length - 1
-    );
+    const findNowcastNowIndex = (frames) => Math.max(0, frames.filter((frame) => !frame.forecast).length - 1);
+    let nowcastNowIndex = findNowcastNowIndex(nowcastFrames);
     if (nowcastFrames.length) {
       style.sources.nowcast = {
         type: 'raster',
@@ -926,8 +944,11 @@
 
     // タイムバー。既定は「現在」（実況の最新コマ）で、左へ動かすと過去3時間、
     // 右へ動かすと+1時間の予測。D53の天気図スクラブと同じく、既定の表示は
-    // 従来と同じ「今」のままなので、この機能は純粋に追加のみ。
-    if (nowcastFrames.length > 1) {
+    // 従来と同じ「今」のままなので、この機能は純粋に追加のみ。更新ボタン
+    // (D82)でコマ一覧を取り直した時は、中身を作り直して「現在」に戻す。
+    function buildNowcastBar() {
+      nowcastBar.replaceChildren();
+      nowcastBar.classList.remove('is-forecast');
       nowcastBar.hidden = false;
 
       const title = document.createElement('span');
@@ -965,40 +986,160 @@
       nowcastBar.appendChild(label);
     }
 
-    let warningsByAreaCode = new Map();
-    let unknownAreaCodes = [];
+    if (nowcastFrames.length > 1) {
+      buildNowcastBar();
+    }
 
-    function applyWarningState(byAreaCode, failedOffices) {
-      warningsByAreaCode = byAreaCode;
-      unknownAreaCodes = failedOffices.flatMap((office) => office.areaCodes);
-      map.setPaintProperty('jma-warning-fill', 'fill-color', buildFillColorExpression(byAreaCode, unknownAreaCodes));
-      map.setPaintProperty('jma-warning-fill', 'fill-opacity', buildFillOpacityExpression(byAreaCode, unknownAreaCodes));
-      if (failedOffices.length > 0) {
-        dataWarningBar.textContent =
-          `警報・注意報を取得できなかった地域：${failedOffices.map((office) => office.name).join('、')}。` +
-          '灰色の地域は「警報なし」ではなく「不明」です。';
-        dataWarningBar.hidden = false;
-      } else {
-        dataWarningBar.hidden = true;
+    // 降水ナウキャストのコマ一覧を取り直し、「現在」のコマへ戻す。実況が1コマも
+    // 取れない・最初の読み込みでレイヤー自体が作られなかった場合は失敗として
+    // 投げる(後者は再読み込みが要る)。
+    async function refreshNowcast(force) {
+      const frames = await fetchNowcastFrames(force);
+      const source = map.getSource('nowcast');
+      if (!frames.some((frame) => !frame.forecast) || !source || typeof source.setTiles !== 'function') {
+        throw new Error('nowcast unavailable');
+      }
+      nowcastFrames = frames;
+      nowcastNowIndex = findNowcastNowIndex(frames);
+      source.setTiles([nowcastTileUrl(frames[nowcastNowIndex])]);
+      if (frames.length > 1) {
+        buildNowcastBar();
       }
     }
 
+    let warningsByAreaCode = new Map();
+    let unknownAreaCodes = [];
+    let failedWarningOffices = [];
+    let failedLayerNames = [];
+    let warningReportedAt = null;
+    let lastFetchedAt = null;
+    let refreshing = false;
+    // これを超えて取り直していない時は、状態表示を警告色にして更新を促す。
+    // 警報の発表間隔や、JMA側のフィードの更新間隔に比べて十分長く、手動更新
+    // の運用でも平常時には出ない長さ。
+    const STALE_AFTER_MS = 10 * 60 * 1000;
+
+    function renderNotices() {
+      const lines = [];
+      if (failedWarningOffices.length > 0) {
+        lines.push(
+          `警報・注意報を取得できなかった地域：${failedWarningOffices.map((office) => office.name).join('、')}。` +
+            '灰色の地域は「警報なし」ではなく「不明」です。'
+        );
+      }
+      if (failedLayerNames.length > 0) {
+        lines.push(
+          `取得できなかったレイヤー：${failedLayerNames.join('、')}。` +
+            '表示が空でも「なし」とは限りません（前回取得分が残っている場合があります）。'
+        );
+      }
+      dataWarningBar.replaceChildren(
+        ...lines.map((line) => {
+          const row = document.createElement('div');
+          row.textContent = line;
+          return row;
+        })
+      );
+      dataWarningBar.hidden = lines.length === 0;
+    }
+
+    function renderStatus() {
+      if (!lastFetchedAt) {
+        statusText.textContent = '取得中…';
+        return;
+      }
+      const clock = (date) => date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const parts = [];
+      if (warningReportedAt) {
+        const reported = new Date(warningReportedAt);
+        parts.push(
+          `警報 ${reported.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })} 発表`
+        );
+      }
+      parts.push(`取得 ${clock(new Date(lastFetchedAt))}`);
+      const ageMs = Date.now() - lastFetchedAt;
+      const stale = ageMs > STALE_AFTER_MS;
+      if (stale) {
+        parts.push(`取得から${Math.floor(ageMs / 60000)}分経過 — 「更新」で最新の状況に取り直せます`);
+      }
+      statusText.textContent = parts.join('　');
+      statusText.classList.toggle('is-stale', stale);
+    }
+
+    function applyWarningState(byAreaCode, failedOffices) {
+      warningsByAreaCode = byAreaCode;
+      failedWarningOffices = failedOffices;
+      unknownAreaCodes = failedOffices.flatMap((office) => office.areaCodes);
+      map.setPaintProperty('jma-warning-fill', 'fill-color', buildFillColorExpression(byAreaCode, unknownAreaCodes));
+      map.setPaintProperty('jma-warning-fill', 'fill-opacity', buildFillOpacityExpression(byAreaCode, unknownAreaCodes));
+    }
+
+    // 警報・地震・火山・アメダス・降水ナウキャストを取り直す(D82)。force=true
+    // の時はsas0の共有キャッシュ(fetchJsonCached)もブラウザのHTTPキャッシュも
+    // 迂回する。initial=true の最初の1回は、降水ナウキャストが既にスタイル構築
+    // 時に取得済みなので取り直さない。
+    async function refreshLive({ force, initial }) {
+      if (refreshing) {
+        return;
+      }
+      refreshing = true;
+      refreshButton.disabled = true;
+      refreshButton.textContent = '更新中…';
+
+      const failedLayers = [];
+      const updateLayer = (name, sourceId, promise) =>
+        promise
+          .then((geojson) => map.getSource(sourceId).setData(geojson))
+          .catch(() => {
+            failedLayers.push(name);
+          });
+
+      await Promise.all([
+        fetchWarningsByAreaCode(force)
+          .then(({ byAreaCode, failedOffices, reportedAt }) => {
+            warningReportedAt = reportedAt;
+            applyWarningState(byAreaCode, failedOffices);
+          })
+          // 取得処理そのものが例外で落ちた場合も、緑のまま放置せず全域を不明にする。
+          .catch(() => {
+            warningReportedAt = null;
+            applyWarningState(new Map(), HOKKAIDO_OFFICES);
+          }),
+        updateLayer('地震', 'quake_points', fetchQuakePoints(force)),
+        updateLayer('火山', 'volcano_points', fetchVolcanoPoints(force)),
+        updateLayer('アメダス', 'amedas_points', fetchAmedasPoints(force)),
+        initial
+          ? Promise.resolve().then(() => {
+              if (nowcastFrames.length === 0) {
+                failedLayers.push('降水ナウキャスト');
+              }
+            })
+          : refreshNowcast(force).catch(() => {
+              failedLayers.push('降水ナウキャスト');
+            })
+      ]);
+
+      failedLayerNames = failedLayers;
+      lastFetchedAt = Date.now();
+      renderNotices();
+      renderStatus();
+      refreshButton.disabled = false;
+      refreshButton.textContent = '更新';
+      refreshing = false;
+    }
+
+    refreshButton.addEventListener('click', () => {
+      refreshLive({ force: true, initial: false });
+    });
+    // 経過時間の表示を進める(取得そのものは行わない)。
+    const statusTimer = setInterval(renderStatus, 30 * 1000);
+    renderStatus();
+
     map.on('load', () => {
-      fetchWarningsByAreaCode()
-        .then(({ byAreaCode, failedOffices }) => applyWarningState(byAreaCode, failedOffices))
-        // 取得処理そのものが例外で落ちた場合も、緑のまま放置せず全域を不明にする。
-        .catch(() => applyWarningState(new Map(), HOKKAIDO_OFFICES));
-      fetchQuakePoints()
-        .then((geojson) => map.getSource('quake_points').setData(geojson))
-        .catch(() => {});
-      fetchVolcanoPoints()
-        .then((geojson) => map.getSource('volcano_points').setData(geojson))
-        .catch(() => {});
+      refreshLive({ force: false, initial: true });
+      // 電子基準点は位置情報(ほぼ静的)なので、更新ボタンの対象外(D82)。
       fetchReferencePoints()
         .then((geojson) => map.getSource('reference_points').setData(geojson))
-        .catch(() => {});
-      fetchAmedasPoints()
-        .then((geojson) => map.getSource('amedas_points').setData(geojson))
         .catch(() => {});
     });
 
@@ -1107,6 +1248,7 @@
     });
 
     return () => {
+      clearInterval(statusTimer);
       map.remove();
     };
   }

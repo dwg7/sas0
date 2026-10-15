@@ -125,6 +125,49 @@ body {
   color: #9dc0ea;
 }
 
+/* 状況図の更新ボタンと鮮度表示（D82）。古い状況を現在と取り違えないよう、
+   取得時刻と経過時間を常に隣に出す。 */
+.sas0-map-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  padding: 6px 16px;
+  border-bottom: 1px solid #243247;
+  background: #111a26;
+  font-size: 12px;
+}
+
+.sas0-map-refresh {
+  flex-shrink: 0;
+  padding: 4px 14px;
+  font-size: 13px;
+  color: #dce6f1;
+  background: #1a2432;
+  border: 1px solid #243247;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sas0-map-refresh:hover:not(:disabled) {
+  background: #243247;
+}
+
+.sas0-map-refresh:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.sas0-map-status {
+  min-width: 0;
+  color: #95a8be;
+}
+
+.sas0-map-status.is-stale {
+  color: #f0d9a0;
+}
+
 /* 警報データを取得できなかった地域がある時の帯（D81）。状況図では地図の上、
    警報・注意報では一覧の先頭に出す。灰色＝「不明」(平穏ではない)の注意書き。 */
 .sas0-map-data-warning,
