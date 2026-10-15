@@ -125,6 +125,27 @@ body {
   color: #9dc0ea;
 }
 
+/* 警報データを取得できなかった地域がある時の帯（D81）。状況図では地図の上、
+   警報・注意報では一覧の先頭に出す。灰色＝「不明」(平穏ではない)の注意書き。 */
+.sas0-map-data-warning,
+.sas0-data-warning {
+  flex-shrink: 0;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #f0d9a0;
+  background: #2e2615;
+  border-bottom: 1px solid #5a4a22;
+}
+
+.sas0-data-warning {
+  margin-bottom: 12px;
+  border: 1px solid #5a4a22;
+  border-radius: 8px;
+}
+
 .sas0-map-info {
   flex-shrink: 0;
   width: 100%;

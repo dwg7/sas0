@@ -8,7 +8,22 @@
   // DECISIONS.md D26 for why `code` here (class10) is one tier finer than
   // warnings.js's own office-level fetch, and joins 1:1 against
   // class10Items[].areaCode in the same office JSON warnings.js already uses.
-  const HOKKAIDO_OFFICES = ['011000', '012000', '013000', '014030', '014100', '015000', '016000', '017000'];
+  //
+  // areaCodesは各振興局に属するclass10の区域コード(ポリゴンの`code`と同じ
+  // もの)。取得に失敗した振興局のポリゴンを「平穏」ではなく「不明」で
+  // 塗るため(D81)、JMAのデータが一件も返ってこない状況でも引けるよう
+  // 静的に持つ。https://www.jma.go.jp/bosai/common/const/area.json の
+  // offices[*].children と一致することを確認済み。
+  const HOKKAIDO_OFFICES = [
+    { code: '011000', name: '宗谷地方', areaCodes: ['011000'] },
+    { code: '012000', name: '上川・留萌地方', areaCodes: ['012010', '012020'] },
+    { code: '013000', name: '網走・北見・紋別地方', areaCodes: ['013010', '013020', '013030'] },
+    { code: '014030', name: '十勝地方', areaCodes: ['014030'] },
+    { code: '014100', name: '釧路・根室地方', areaCodes: ['014010', '014020'] },
+    { code: '015000', name: '胆振・日高地方', areaCodes: ['015010', '015020'] },
+    { code: '016000', name: '石狩・空知・後志地方', areaCodes: ['016010', '016020', '016030'] },
+    { code: '017000', name: '渡島・檜山地方', areaCodes: ['017010', '017020'] }
+  ];
 
   // 警報・注意報(warnings.js)・更新情報(change-log.js)・北海道全体表示
   // (D77、警報・注意報内のtabularmap)と同じ8ファイルを読む。SAS0.fetchJsonCached
@@ -70,6 +85,14 @@
   const SEVERITY_OPACITY = { advisory: 0.35, warning: 0.42, special: 0.5 };
   const SEVERITY_RANK = { advisory: 1, warning: 2, special: 3 };
   const CALM_COLOR = '#5fae8c';
+  // 警報データを取得できなかった地域の色(D81)。「警報なし」の緑と取り違え
+  // ないための「不明」の色で、警報の黄〜赤・平穏の緑・アメダスの紫のどれ
+  // とも色相が重ならない灰。D50で、ページのUI枠線色と同じ暗い灰を「警報
+  // なし」に使うと「無効なコントロール」に見えてしまうと分かったが、ここで
+  // 灰が表すのはまさに「情報がない」ことなので、より明るい灰にし、地図上部
+  // の帯(sas0-map-data-warning)で意味を明示して使う。
+  const UNKNOWN_COLOR = '#9aa3b2';
+  const UNKNOWN_OPACITY = 0.55;
   // stars.optgeo.org's bvmap-dark basemap (used until D79) was actually a
   // light/white ground, and bvmap-starlight (the current one) is too (its
   // background-color is white/pale-grey, confirmed by inspection) — a pale
@@ -100,8 +123,8 @@
 
   async function fetchWarningsByAreaCode() {
     const results = await Promise.all(
-      HOKKAIDO_OFFICES.map((officeCode) => {
-        const url = SAS0.getSafeUrl(`https://www.jma.go.jp/bosai/warning/data/r8/${officeCode}.json`, {
+      HOKKAIDO_OFFICES.map((office) => {
+        const url = SAS0.getSafeUrl(`https://www.jma.go.jp/bosai/warning/data/r8/${office.code}.json`, {
           allowedProtocols: ['https:'],
           allowedHosts: ALLOWED_HOSTS
         });
@@ -116,8 +139,14 @@
     // (D76 — tabularmaps/doとの突き合わせで発覚。同じ修正をwarnings.js/
     // change-log.jsにも適用済み)。配列全体を走査し、同じareaCodeが複数の
     // シリーズにまたがって出てきた場合は警報を合算する。
-    results.forEach((reports) => {
+    // 取得できなかった(null・空配列)振興局は、警報が「ない」のではなく
+    // 「分からない」。byAreaCodeには何も入らないので、そのまま塗ると
+    // 平穏(緑)と区別がつかなくなる——呼び出し側で灰色にするため、失敗した
+    // 振興局を別に返す(D81)。
+    const failedOffices = [];
+    results.forEach((reports, i) => {
       if (!Array.isArray(reports) || reports.length === 0) {
+        failedOffices.push(HOKKAIDO_OFFICES[i]);
         return;
       }
       reports.forEach((report) => {
@@ -141,7 +170,7 @@
       });
     });
 
-    return byAreaCode;
+    return { byAreaCode, failedOffices };
   }
 
   function bestSeverity(activeWarnings) {
@@ -151,29 +180,35 @@
     }, null);
   }
 
-  function buildFillColorExpression(byAreaCode) {
+  function buildFillColorExpression(byAreaCode, unknownAreaCodes) {
     // MapLibre's 'match' expression requires at least one label/output pair
     // before the fallback (4 args minimum) — with zero active warnings
     // anywhere in Hokkaido, the loop below never runs and a bare fallback
     // color must be returned directly instead of an ['match', ...] wrapper.
-    if (byAreaCode.size === 0) {
+    if (byAreaCode.size === 0 && unknownAreaCodes.length === 0) {
       return CALM_COLOR;
     }
     const expr = ['match', ['get', 'code']];
     byAreaCode.forEach((activeWarnings, areaCode) => {
       expr.push(areaCode, SEVERITY_COLOR[bestSeverity(activeWarnings)]);
     });
+    unknownAreaCodes.forEach((areaCode) => {
+      expr.push(areaCode, UNKNOWN_COLOR);
+    });
     expr.push(CALM_COLOR);
     return expr;
   }
 
-  function buildFillOpacityExpression(byAreaCode) {
-    if (byAreaCode.size === 0) {
+  function buildFillOpacityExpression(byAreaCode, unknownAreaCodes) {
+    if (byAreaCode.size === 0 && unknownAreaCodes.length === 0) {
       return CALM_OPACITY;
     }
     const expr = ['match', ['get', 'code']];
     byAreaCode.forEach((activeWarnings, areaCode) => {
       expr.push(areaCode, SEVERITY_OPACITY[bestSeverity(activeWarnings)]);
+    });
+    unknownAreaCodes.forEach((areaCode) => {
+      expr.push(areaCode, UNKNOWN_OPACITY);
     });
     expr.push(CALM_OPACITY);
     return expr;
@@ -594,7 +629,7 @@
   // native re-implementation of that visual language, not an integration
   // with Open MCT's actual Inspector plugin (which is coupled to its object
   // selection model, not raw MapLibre hover events). See DECISIONS.md D29.
-  function renderInfoPanel(panel, { pointTitle, pointSubtitle, pointStatus, municipalityName, areaName, activeWarnings }) {
+  function renderInfoPanel(panel, { pointTitle, pointSubtitle, pointStatus, municipalityName, areaName, activeWarnings, warningUnknown }) {
     if (pointTitle) {
       const subLine = pointSubtitle ? `<div class="sas0-map-info-area">${escapeHtml(pointSubtitle)}</div>` : '';
       const statusLine = pointStatus ? `<div class="sas0-map-info-warning">${escapeHtml(pointStatus)}</div>` : '';
@@ -606,8 +641,9 @@
       return;
     }
     const titleText = municipalityName || areaName;
-    const warningText =
-      activeWarnings && activeWarnings.length > 0
+    const warningText = warningUnknown
+      ? '警報・注意報の情報を取得できませんでした（発表の有無は不明です）。'
+      : activeWarnings && activeWarnings.length > 0
         ? activeWarnings.map((warning) => warning.name).join('、')
         : '現在、発表されている警報・注意報はありません。';
     const areaLine =
@@ -622,6 +658,14 @@
     const mapWrap = document.createElement('div');
     mapWrap.className = 'sas0-map-wrap';
     container.appendChild(mapWrap);
+
+    // 警報データを取得できなかった地域がある時だけ出す帯(D81)。地図の灰色
+    // が「平穏」ではなく「不明」を意味することを、色だけに頼らず文章で示す。
+    const dataWarningBar = document.createElement('div');
+    dataWarningBar.className = 'sas0-map-data-warning';
+    dataWarningBar.setAttribute('role', 'status');
+    dataWarningBar.hidden = true;
+    mapWrap.appendChild(dataWarningBar);
 
     const mapDiv = document.createElement('div');
     mapDiv.className = 'sas0-map';
@@ -922,15 +966,28 @@
     }
 
     let warningsByAreaCode = new Map();
+    let unknownAreaCodes = [];
+
+    function applyWarningState(byAreaCode, failedOffices) {
+      warningsByAreaCode = byAreaCode;
+      unknownAreaCodes = failedOffices.flatMap((office) => office.areaCodes);
+      map.setPaintProperty('jma-warning-fill', 'fill-color', buildFillColorExpression(byAreaCode, unknownAreaCodes));
+      map.setPaintProperty('jma-warning-fill', 'fill-opacity', buildFillOpacityExpression(byAreaCode, unknownAreaCodes));
+      if (failedOffices.length > 0) {
+        dataWarningBar.textContent =
+          `警報・注意報を取得できなかった地域：${failedOffices.map((office) => office.name).join('、')}。` +
+          '灰色の地域は「警報なし」ではなく「不明」です。';
+        dataWarningBar.hidden = false;
+      } else {
+        dataWarningBar.hidden = true;
+      }
+    }
 
     map.on('load', () => {
       fetchWarningsByAreaCode()
-        .then((byAreaCode) => {
-          warningsByAreaCode = byAreaCode;
-          map.setPaintProperty('jma-warning-fill', 'fill-color', buildFillColorExpression(byAreaCode));
-          map.setPaintProperty('jma-warning-fill', 'fill-opacity', buildFillOpacityExpression(byAreaCode));
-        })
-        .catch(() => {});
+        .then(({ byAreaCode, failedOffices }) => applyWarningState(byAreaCode, failedOffices))
+        // 取得処理そのものが例外で落ちた場合も、緑のまま放置せず全域を不明にする。
+        .catch(() => applyWarningState(new Map(), HOKKAIDO_OFFICES));
       fetchQuakePoints()
         .then((geojson) => map.getSource('quake_points').setData(geojson))
         .catch(() => {});
@@ -1028,7 +1085,8 @@
       renderInfoPanel(infoPanel, {
         municipalityName: muniFeature ? muniFeature.properties.municipality : null,
         areaName: warnFeature ? warnFeature.properties.name : null,
-        activeWarnings: warnFeature ? warningsByAreaCode.get(warnFeature.properties.code) || [] : []
+        activeWarnings: warnFeature ? warningsByAreaCode.get(warnFeature.properties.code) || [] : [],
+        warningUnknown: Boolean(warnFeature) && unknownAreaCodes.includes(warnFeature.properties.code)
       });
     });
     mapDiv.addEventListener('mouseleave', () => renderInfoPanel(infoPanel, {}));

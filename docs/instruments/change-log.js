@@ -94,13 +94,15 @@
       })
     );
     const byOffice = {};
+    const failedOfficeCodes = [];
     results.forEach((reports, i) => {
       if (!Array.isArray(reports) || reports.length === 0) {
+        failedOfficeCodes.push(HOKKAIDO_OFFICES[i][0]);
         return;
       }
       byOffice[HOKKAIDO_OFFICES[i][0]] = extractActiveWarnings(reports);
     });
-    return byOffice;
+    return { byOffice, failedOfficeCodes };
   }
 
   // Duplicated from quake.js.
@@ -192,6 +194,13 @@
     // 警報・注意報
     const officeCodes = new Set([...Object.keys(prev.warnings || {}), ...Object.keys(current.warnings)]);
     officeCodes.forEach((code) => {
+      // 前回の状態にその振興局の項目がない = 前回は取得できず基準が取れて
+      // いない。今回の内容を「新たに発表」とは言えないので比較しない(D81)。
+      // 取得に成功して警報が0件だった振興局は空配列として保存されるので、
+      // 「項目がない」と「警報がなかった」は区別できる。
+      if (!prev.warnings || !(code in prev.warnings)) {
+        return;
+      }
       const prevWarnings = (prev.warnings && prev.warnings[code]) || [];
       const currentWarnings = current.warnings[code] || [];
       const prevKeys = new Set(prevWarnings.map(warningKey));
@@ -245,7 +254,7 @@
   }
 
   async function fetchCurrentState() {
-    const [warnings, quakes, volcano] = await Promise.all([
+    const [{ byOffice: warnings, failedOfficeCodes }, quakes, volcano] = await Promise.all([
       fetchWarningsByOffice(),
       fetchQuakes(),
       fetchVolcanoLevels()
@@ -258,7 +267,10 @@
       warnings,
       quakeIds: quakes.map((entry) => entry.eid),
       quakeDetails,
-      volcano
+      volcano,
+      // 保存する状態の一部ではない(runOnceで取り除く)。今回の取得に失敗した
+      // 振興局の一覧で、diffから外すために使う。
+      failedWarningOffices: failedOfficeCodes
     };
   }
 
@@ -325,9 +337,31 @@
     const prev = readJson(LAST_STATE_KEY, null);
     const now = Date.now();
 
+    // 取得に失敗した振興局は、警報が「なくなった」のではなく「見えなかった」
+    // だけ。そのまま比べると、失敗の回に「解除されました」、復旧の回に「新たに
+    // 発表されました」という存在しない変化を記録してしまう(D81)。前回の状態を
+    // そのまま引き継いで差分から外し、その旨を画面にも出す。
+    const failedOffices = current.failedWarningOffices || [];
+    delete current.failedWarningOffices;
+    if (prev) {
+      failedOffices.forEach((code) => {
+        if (prev.warnings && prev.warnings[code]) {
+          current.warnings[code] = prev.warnings[code];
+        }
+      });
+    }
+    const failureNote =
+      failedOffices.length > 0
+        ? `取得できなかった地方（${failedOffices.map(officeName).join('、')}）の警報・注意報は、今回は変化を判定していません。`
+        : null;
+
     if (!prev) {
       writeJson(LAST_STATE_KEY, current);
-      renderLog(container, readJson(ENTRIES_KEY, []), '前回訪問の記録がありません。現在の状況を基準として保存しました。');
+      renderLog(
+        container,
+        readJson(ENTRIES_KEY, []),
+        ['前回訪問の記録がありません。現在の状況を基準として保存しました。', failureNote].filter(Boolean).join('　')
+      );
       return;
     }
 
@@ -339,7 +373,7 @@
     writeJson(LAST_STATE_KEY, current);
     writeJson(ENTRIES_KEY, capped);
 
-    renderLog(container, capped, null);
+    renderLog(container, capped, failureNote);
   }
 
   SAS0.registerInstrument({

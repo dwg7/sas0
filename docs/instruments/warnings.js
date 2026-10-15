@@ -117,6 +117,22 @@
     container.innerHTML = '';
     let anyActive = false;
 
+    // 取得できなかった(null・空配列)地方は「警報なし」ではなく「不明」。
+    // 黙って読み飛ばすと、実際には警報が出ていても「ありません」と読めて
+    // しまう(D81)ので、一覧の先頭で明示する。
+    const failedNames = results
+      .map((reports, i) => (!Array.isArray(reports) || reports.length === 0 ? HOKKAIDO_OFFICES[i][1] : null))
+      .filter(Boolean);
+    if (failedNames.length > 0) {
+      const notice = document.createElement('p');
+      notice.className = 'sas0-data-warning';
+      notice.setAttribute('role', 'status');
+      notice.textContent =
+        `警報・注意報を取得できなかった地方：${failedNames.join('、')}。` +
+        'これらの地方は「発表なし」ではなく「不明」です。';
+      container.appendChild(notice);
+    }
+
     results.forEach((reports, i) => {
       if (!Array.isArray(reports) || reports.length === 0) {
         return;
@@ -151,7 +167,10 @@
     if (!anyActive) {
       const caption = document.createElement('p');
       caption.className = 'sas0-caption';
-      caption.textContent = '現在、北海道内で発表されている警報・注意報はありません。';
+      caption.textContent =
+        failedNames.length > 0
+          ? '取得できた地方では、現在発表されている警報・注意報はありません。'
+          : '現在、北海道内で発表されている警報・注意報はありません。';
       container.appendChild(caption);
     }
   }
