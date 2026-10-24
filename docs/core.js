@@ -45,6 +45,39 @@ window.SAS0 = (function () {
   // happens to re-render. See DECISIONS.md D77.
   const jsonFetchCache = new Map();
 
+  // Open MCT persists each resizable pane's width under this localStorage key
+  // (label lower-cased: 'browse' = the tree, 'inspect' = the Inspector; see
+  // PaneContainer.vue in the Open MCT source) and applies it when the pane
+  // mounts. Seeding 'browse' before start() gives first-time visitors a narrower
+  // tree (D83) without touching anyone who has already dragged it — their saved
+  // width is kept. Without a saved value the pane is content-sized and was
+  // taking 25–40% of a laptop screen.
+  const PANE_POSITIONS_KEY = 'mct-pane-positions';
+  const DEFAULT_TREE_WIDTH = '200px';
+
+  function applyLayoutDefaults() {
+    // Inspect panel collapsed by default (D83). Open MCT's pane component
+    // reads the `hideInspector` URL param when it mounts and collapses; setting
+    // it from the 'start' handler was too late (the param got dropped by the
+    // first route change and the pane never saw it), so it goes into the
+    // initial URL instead. Once collapsed the pane stays collapsed across
+    // navigation (the param drops off the URL, the state doesn't) and the user
+    // can expand it with the pane's own button — verified in a real browser.
+    if (!/[?&]hideInspector=/.test(location.hash)) {
+      const base = location.hash.startsWith('#/') ? location.hash : `#/browse/${NAMESPACE}:root`;
+      location.hash = `${base}${base.includes('?') ? '&' : '?'}hideInspector=true`;
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(PANE_POSITIONS_KEY) || '{}');
+      if (!saved.browse) {
+        saved.browse = DEFAULT_TREE_WIDTH;
+        localStorage.setItem(PANE_POSITIONS_KEY, JSON.stringify(saved));
+      }
+    } catch (error) {
+      // Storage blocked or corrupt JSON: just fall back to Open MCT's own default.
+    }
+  }
+
   function fetchJsonCached(url, options) {
     if (!url) {
       return Promise.reject(new Error('fetchJsonCached: empty url'));
@@ -299,6 +332,7 @@ window.SAS0 = (function () {
       openmct.router.setPath(`/browse/${NAMESPACE}:${key}`);
     },
     start() {
+      applyLayoutDefaults();
       openmct.on('start', () => {
         openmct.router.setPath(`/browse/${NAMESPACE}:root`);
       });

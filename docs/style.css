@@ -36,7 +36,7 @@ body {
   padding: 16px;
   overflow: auto;
   background: #0b1017;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .sas0-weather-image {
@@ -62,7 +62,7 @@ body {
 
 .sas0-weather-scrub-label {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: #95a8be;
   font-variant-numeric: tabular-nums;
 }
@@ -98,7 +98,7 @@ body {
 
 .sas0-map-nowcast-title {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: #95a8be;
 }
 
@@ -116,7 +116,7 @@ body {
   flex-shrink: 0;
   min-width: 8.5em;
   text-align: right;
-  font-size: 12px;
+  font-size: 13px;
   color: #d7e2ee;
   font-variant-numeric: tabular-nums;
 }
@@ -136,13 +136,13 @@ body {
   padding: 6px 16px;
   border-bottom: 1px solid #243247;
   background: #111a26;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .sas0-map-refresh {
   flex-shrink: 0;
   padding: 4px 14px;
-  font-size: 13px;
+  font-size: 14px;
   color: #dce6f1;
   background: #1a2432;
   border: 1px solid #243247;
@@ -176,7 +176,7 @@ body {
   margin: 0;
   box-sizing: border-box;
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   color: #f0d9a0;
   background: #2e2615;
@@ -201,25 +201,25 @@ body {
 }
 
 .sas0-map-info-placeholder {
-  font-size: 12px;
+  font-size: 13px;
   color: #95a8be;
   line-height: 1.6;
 }
 
 .sas0-map-info-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .sas0-map-info-area {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: #95a8be;
 }
 
 .sas0-map-info-warning {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -241,7 +241,7 @@ body {
 
 .sas0-caption {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   color: #95a8be;
 }
 
@@ -265,7 +265,7 @@ body {
 
 .sas0-warning-mode-button {
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: 14px;
   color: #dce6f1;
   background: #111a26;
   border: 1px solid #243247;
@@ -302,7 +302,7 @@ body {
 
 .sas0-warning-section h3 {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -362,7 +362,7 @@ body {
 
 .sas0-quake-trend-axis-label {
   fill: #95a8be;
-  font-size: 10px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -377,7 +377,7 @@ body {
   display: block;
   margin: 0 0 16px;
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: 14px;
   color: #dce6f1;
   background: #1a2432;
   border: 1px solid #243247;
@@ -402,7 +402,7 @@ body {
   gap: 10px;
   padding: 8px 0;
   border-bottom: 1px solid #1a2432;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .sas0-change-log-list li:last-child {
@@ -413,14 +413,14 @@ body {
   flex-shrink: 0;
   color: #95a8be;
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .sas0-change-log-category {
   flex-shrink: 0;
   padding: 1px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -441,7 +441,7 @@ body {
 
 .sas0-link-list-heading {
   margin: 20px 0 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #95a8be;
   letter-spacing: 0.02em;
@@ -478,20 +478,20 @@ body {
 }
 
 .sas0-link-row-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .sas0-link-row-desc {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 13px;
   color: #95a8be;
   line-height: 1.5;
 }
 
 .sas0-link-row-action {
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #7ba7e0;
   text-decoration: none;
@@ -545,7 +545,7 @@ body {
 .sas0-tour-interval-input {
   width: 70px;
   padding: 4px 8px;
-  font-size: 13px;
+  font-size: 14px;
   color: #dce6f1;
   background: #111a26;
   border: 1px solid #243247;
@@ -554,7 +554,7 @@ body {
 
 .sas0-tour-start-button {
   padding: 8px 18px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #0d1117;
   background: #5fae8c;
@@ -594,7 +594,7 @@ body {
   background: rgba(13, 17, 23, 0.85);
   border: 1px solid #243247;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: #dce6f1;
 }
 
@@ -604,7 +604,7 @@ body {
 
 .sas0-tour-overlay-stop {
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: 13px;
   color: #dce6f1;
   background: #1a2432;
   border: 1px solid #243247;
@@ -614,4 +614,18 @@ body {
 
 .sas0-tour-overlay-stop:hover {
   background: #243247;
+}
+
+/* 読みやすさ（D83）。Open MCT自身のクロームは基準が12px固定で、ツリー項目は
+   個別に12pxを指定している。sas0側の文字（上のfont-size指定）を+1pxしたのに
+   合わせて、ツリー・ヘッダー・Inspectorなどもそろえる。行間も少し広げる。 */
+.l-shell {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.l-shell .c-tree__item,
+.l-shell .l-pane__label,
+.l-shell .c-object-label {
+  font-size: 13px;
 }
